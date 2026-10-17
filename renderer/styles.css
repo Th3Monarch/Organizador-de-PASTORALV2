@@ -4884,6 +4884,11 @@ body.theme-dark .pill-vibrant {
   background: #94a3b8;
 }
 
+.dot-error {
+  background: #ef4444;
+  box-shadow: 0 0 6px rgba(239, 68, 68, 0.7);
+}
+
 @keyframes pulseSync {
   0% { transform: scale(0.9); opacity: 0.7; }
   50% { transform: scale(1.2); opacity: 1; }
@@ -5008,4 +5013,10 @@ body.theme-dark .pill-vibrant {
   background: rgba(148, 163, 184, 0.15);
   color: #94a3b8;
   border: 1px solid rgba(148, 163, 184, 0.3);
+}
+
+.sync-status-badge.error {
+  background: rgba(239, 68, 68, 0.15);
+  color: #ef4444;
+  border: 1px solid rgba(239, 68, 68, 0.3);
 }

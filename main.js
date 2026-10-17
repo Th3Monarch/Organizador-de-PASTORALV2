@@ -62,7 +62,21 @@ function startLocalServer() {
       });
     });
 
-    localServer.listen(0, '127.0.0.1', () => {
+    const PREFERRED_PORT = 49173;
+    let resolved = false;
+
+    localServer.on('error', (err) => {
+      if (!resolved && err.code === 'EADDRINUSE') {
+        localServer.listen(0, '127.0.0.1', () => {
+          resolved = true;
+          localServerPort = localServer.address().port;
+          resolve(localServerPort);
+        });
+      }
+    });
+
+    localServer.listen(PREFERRED_PORT, '127.0.0.1', () => {
+      resolved = true;
       localServerPort = localServer.address().port;
       resolve(localServerPort);
     });

@@ -37,7 +37,8 @@
       this.db = null;
       this.currentUser = null;
       this.unsubscribeSnapshot = null;
-      this.syncStatus = 'disconnected'; // 'disconnected' | 'synced' | 'syncing' | 'offline'
+      this.syncStatus = 'disconnected'; // 'disconnected' | 'synced' | 'syncing' | 'offline' | 'error'
+      this.lastError = null;
       this.statusListeners = new Set();
       this.dataUpdateListeners = new Set();
       this.saveTimeout = null;
@@ -250,6 +251,7 @@
         const hasPendingWrites = docSnapshot.metadata.hasPendingWrites;
         const fromCache = docSnapshot.metadata.fromCache;
 
+        this.lastError = null;
         if (hasPendingWrites) {
           this._updateStatus('syncing');
         } else if (!this.isOnline) {
@@ -271,66 +273,112 @@
           console.log('[Firebase Sync] Creando documento inicial en la nube para el usuario...');
           if (window.pastoral && typeof window.pastoral.getData === 'function') {
             window.pastoral.getData().then(localState => {
-              if (localState) this.pushState(localState);
+              if (localState) this.pushState(localState, true);
             });
           }
         }
       }, (error) => {
         console.warn('[Firebase Sync] Error en listener de Firestore:', error);
-        if (!this.isOnline) {
+        if (error && error.code === 'permission-denied') {
+          this.lastError = 'Permiso denegado: debes configurar las Reglas de Firestore en Firebase Console.';
+          this._updateStatus('error');
+          if (typeof window.showToast === 'function') {
+            window.showToast('⚠️ Permiso denegado en Firebase. Revisa las Reglas de Firestore en la consola.', 'error');
+          }
+        } else if (!this.isOnline) {
           this._updateStatus('offline');
+        } else {
+          this.lastError = error ? (error.message || error.code) : 'Error de sincronización';
+          this._updateStatus('error');
         }
       });
     }
 
     /**
-     * Sube el estado actual a la nube con debouncing automático
+     * Sube el estado actual a la nube con debouncing automático o inmediato
      */
-    pushState(state) {
-      if (!this.db || !this.currentUser) return;
+    pushState(state, immediate = false) {
+      if (!this.db || !this.currentUser) return Promise.resolve(false);
 
-      // Debounce de 1.2 segundos para agrupar escrituras rápidas
       if (this.saveTimeout) {
         clearTimeout(this.saveTimeout);
+        this.saveTimeout = null;
       }
 
       this._updateStatus(this.isOnline ? 'syncing' : 'offline');
 
-      this.saveTimeout = setTimeout(async () => {
+      const sanitizeForFirestore = (obj) => {
+        if (obj === null || obj === undefined) return null;
+        if (typeof obj !== 'object') return obj;
+        if (Array.isArray(obj)) return obj.map(sanitizeForFirestore);
+        const clean = {};
+        for (const key of Object.keys(obj)) {
+          const val = obj[key];
+          if (val !== undefined && typeof val !== 'function') {
+            clean[key] = sanitizeForFirestore(val);
+          }
+        }
+        return clean;
+      };
+
+      const doPush = async () => {
         try {
           const docRef = this.db.collection('users').doc(this.currentUser.uid).collection('pastoralData').doc('mainState');
 
-          // Limpiar datos que no requieren sincronizarse (ej: objetos no serializables)
-          const stateToSync = {
+          const stateToSync = sanitizeForFirestore({
             notes: state.notes || [],
             events: state.events || [],
             tasks: state.tasks || [],
             groups: state.groups || [],
-            people: state.people || state.persons || [],
+            persons: state.persons || state.people || [],
+            people: state.persons || state.people || [],
             songs: state.songs || [],
             liturgicalScripts: state.liturgicalScripts || [],
             settings: state.settings || {},
             customSongs: state.customSongs || [],
             customTemplates: state.customTemplates || []
-          };
+          });
 
           await docRef.set({
             state: stateToSync,
             updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
             lastDevice: navigator.userAgent.slice(0, 80),
-            version: '2.5.3'
+            version: '2.5.5'
           }, { merge: true });
 
+          this.lastError = null;
           if (this.isOnline) {
             this._updateStatus('synced');
           } else {
             this._updateStatus('offline');
           }
+          return true;
         } catch (err) {
           console.error('[Firebase Sync] Error guardando en Firestore:', err);
-          this._updateStatus(this.isOnline ? 'synced' : 'offline');
+          if (err && err.code === 'permission-denied') {
+            this.lastError = 'Permiso denegado: debes configurar las Reglas de Firestore en Firebase Console.';
+            this._updateStatus('error');
+            if (typeof window.showToast === 'function') {
+              window.showToast('⚠️ Error de permisos en Firebase. Revisa las Reglas de Firestore en la consola.', 'error');
+            }
+          } else {
+            this.lastError = err ? (err.message || err.code) : 'Error al guardar';
+            this._updateStatus(this.isOnline ? 'synced' : 'offline');
+          }
+          return false;
         }
-      }, 1200);
+      };
+
+      if (immediate) {
+        return doPush();
+      } else {
+        return new Promise((resolve) => {
+          this.saveTimeout = setTimeout(async () => {
+            const ok = await doPush();
+            resolve(ok);
+          }, 1000);
+        });
+      }
     }
 
     /**
@@ -340,21 +388,29 @@
       if (!remoteState) return localState;
       if (!localState) return remoteState;
 
+      const getTimestamp = (item) => {
+        if (!item) return 0;
+        const val = item.updatedAt || item.createdAt || item.date;
+        if (!val) return 0;
+        const t = new Date(val).getTime();
+        return isNaN(t) ? 0 : t;
+      };
+
       const mergeById = (localArr = [], remoteArr = []) => {
         const map = new Map();
         // Cargar remotos primero
-        remoteArr.forEach(item => {
+        (Array.isArray(remoteArr) ? remoteArr : []).forEach(item => {
           if (item && item.id) map.set(item.id, item);
         });
-        // Fusión con locales considerando updatedAt
-        localArr.forEach(localItem => {
+        // Fusión con locales considerando el timestamp más reciente
+        (Array.isArray(localArr) ? localArr : []).forEach(localItem => {
           if (!localItem || !localItem.id) return;
           const remoteItem = map.get(localItem.id);
           if (!remoteItem) {
             map.set(localItem.id, localItem);
           } else {
-            const localDate = new Date(localItem.updatedAt || localItem.date || 0).getTime();
-            const remoteDate = new Date(remoteItem.updatedAt || remoteItem.date || 0).getTime();
+            const localDate = getTimestamp(localItem);
+            const remoteDate = getTimestamp(remoteItem);
             if (localDate >= remoteDate) {
               map.set(localItem.id, localItem);
             }
@@ -369,9 +425,12 @@
         events: mergeById(localState.events, remoteState.events),
         tasks: mergeById(localState.tasks, remoteState.tasks),
         groups: mergeById(localState.groups, remoteState.groups),
-        people: mergeById(localState.people || localState.persons, remoteState.people || remoteState.persons),
+        persons: mergeById(localState.persons || localState.people, remoteState.persons || remoteState.people),
+        people: mergeById(localState.persons || localState.people, remoteState.persons || remoteState.people),
         songs: mergeById(localState.songs, remoteState.songs),
         liturgicalScripts: mergeById(localState.liturgicalScripts, remoteState.liturgicalScripts),
+        customSongs: mergeById(localState.customSongs, remoteState.customSongs),
+        customTemplates: mergeById(localState.customTemplates, remoteState.customTemplates),
         settings: {
           ...(remoteState.settings || {}),
           ...(localState.settings || {})
@@ -382,7 +441,7 @@
     _updateStatus(status) {
       this.syncStatus = status;
       this.statusListeners.forEach(fn => {
-        try { fn(status, this.currentUser); } catch (_) {}
+        try { fn(status, this.currentUser, this.lastError); } catch (_) {}
       });
     }
 
@@ -394,7 +453,7 @@
 
     onStatusChange(callback) {
       this.statusListeners.add(callback);
-      callback(this.syncStatus, this.currentUser);
+      callback(this.syncStatus, this.currentUser, this.lastError);
       return () => this.statusListeners.delete(callback);
     }
 

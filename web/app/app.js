@@ -3813,6 +3813,7 @@ Encargado de Pastoral                Representante de Profesores`,
     const task = (state.tasks || []).find(t => t.id === id);
     if (task) {
       task.done = !task.done;
+      task.updatedAt = new Date().toISOString();
       persistData();
       renderTasks();
       renderDashboard();
@@ -3883,7 +3884,14 @@ Encargado de Pastoral                Representante de Profesores`,
         if (isEdit) {
           const idx = state.tasks.findIndex(t => t.id === task.id);
           if (idx !== -1) {
-            state.tasks[idx] = { ...state.tasks[idx], title, due, priority, notes };
+            state.tasks[idx] = { 
+              ...state.tasks[idx], 
+              title, 
+              due, 
+              priority, 
+              notes,
+              updatedAt: new Date().toISOString()
+            };
           }
         } else {
           state.tasks.unshift({
@@ -3893,7 +3901,8 @@ Encargado de Pastoral                Representante de Profesores`,
             priority,
             notes,
             done: false,
-            createdAt: new Date().toISOString()
+            createdAt: new Date().toISOString(),
+            updatedAt: new Date().toISOString()
           });
         }
 
@@ -7237,21 +7246,23 @@ Por favor incluye: Monición de entrada, sugerencia de lecturas y Evangelio, 5 p
     }
   }
 
-  function updateCloudSyncUI(status, user) {
+  function updateCloudSyncUI(status, user, lastError) {
     const isConnected = !!user;
 
     const statusTexts = {
       synced: 'Sincronizado',
       syncing: 'Sincronizando...',
       offline: 'Modo sin conexión',
-      disconnected: 'Modo local'
+      disconnected: 'Modo local',
+      error: 'Error de permisos'
     };
 
     const statusBadges = {
       synced: '🟢 En línea y Sincronizado',
       syncing: '🔵 Sincronizando datos...',
       offline: '🟡 Sin conexión (guardando local)',
-      disconnected: '⚪ Modo local (sin cuenta)'
+      disconnected: '⚪ Modo local (sin cuenta)',
+      error: '🔴 Error en Firebase'
     };
 
     const statusClass = `dot-${status}`;
@@ -7300,7 +7311,13 @@ Por favor incluye: Monición de entrada, sugerencia de lecturas y Evangelio, 5 p
     }
     const settingsEmail = document.getElementById('settings-cloud-user-email');
     if (settingsEmail) {
-      settingsEmail.textContent = isConnected ? user.email : 'Inicia sesión con Google para sincronizar tus dispositivos';
+      if (status === 'error' && lastError) {
+        settingsEmail.textContent = '⚠️ ' + lastError;
+        settingsEmail.style.color = 'var(--danger)';
+      } else {
+        settingsEmail.textContent = isConnected ? user.email : 'Inicia sesión con Google para sincronizar tus dispositivos';
+        settingsEmail.style.color = '';
+      }
     }
     const settingsAvatar = document.getElementById('settings-cloud-avatar');
     const settingsPlaceholder = document.getElementById('settings-cloud-avatar-placeholder');
@@ -7335,7 +7352,13 @@ Por favor incluye: Monición de entrada, sugerencia de lecturas y Evangelio, 5 p
     }
     const modalEmail = document.getElementById('modal-cloud-user-email');
     if (modalEmail) {
-      modalEmail.textContent = isConnected ? user.email : 'Sin cuenta conectada';
+      if (status === 'error' && lastError) {
+        modalEmail.textContent = '⚠️ ' + lastError;
+        modalEmail.style.color = 'var(--danger)';
+      } else {
+        modalEmail.textContent = isConnected ? user.email : 'Sin cuenta conectada';
+        modalEmail.style.color = '';
+      }
     }
     const modalAvatar = document.getElementById('modal-cloud-avatar');
     const modalPlaceholder = document.getElementById('modal-cloud-avatar-placeholder');
@@ -7354,6 +7377,9 @@ Por favor incluye: Monición de entrada, sugerencia de lecturas y Evangelio, 5 p
     const modalConnected = document.getElementById('modal-cloud-connected-actions');
     if (modalUnconnected) modalUnconnected.style.display = isConnected ? 'none' : 'block';
     if (modalConnected) modalConnected.style.display = isConnected ? 'block' : 'none';
+
+    const modalRulesHelp = document.getElementById('modal-cloud-rules-help');
+    if (modalRulesHelp) modalRulesHelp.style.display = (status === 'error') ? 'block' : 'none';
   }
 
   function setupCloudSync() {
@@ -7409,9 +7435,14 @@ Por favor incluye: Monición de entrada, sugerencia de lecturas y Evangelio, 5 p
     document.getElementById('modal-btn-logout')?.addEventListener('click', handleGoogleLogout);
 
     // Forzar sincronización ahora
-    const handleForceSync = () => {
+    const handleForceSync = async () => {
       showToast('Sincronizando datos con la nube...', 'info');
-      window.pastoralFirebase.pushState(state);
+      const ok = await window.pastoralFirebase.pushState(state, true);
+      if (ok) {
+        showToast('¡Datos sincronizados exitosamente con la nube! ☁️✅', 'success');
+      } else if (window.pastoralFirebase.lastError) {
+        showToast(window.pastoralFirebase.lastError, 'error');
+      }
     };
 
     document.getElementById('btn-force-cloud-sync')?.addEventListener('click', handleForceSync);
@@ -7477,8 +7508,8 @@ Por favor incluye: Monición de entrada, sugerencia de lecturas y Evangelio, 5 p
     });
 
     // Actualizar UI según el estado de sincronización y usuario
-    window.pastoralFirebase.onStatusChange((status, user) => {
-      updateCloudSyncUI(status, user);
+    window.pastoralFirebase.onStatusChange((status, user, lastError) => {
+      updateCloudSyncUI(status, user, lastError);
     });
 
     // Escuchar actualizaciones remotas desde otros dispositivos
