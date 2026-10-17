@@ -10,6 +10,7 @@ document.addEventListener('DOMContentLoaded', () => {
   initPrayerGeneratorDemo();
   initPaletteSwitcher();
   initThemeToggle();
+  initMobileMenu();
 });
 
 // ========================================================
@@ -547,5 +548,25 @@ function initThemeToggle() {
       if (scene) scene.fog.color.set(0x090d16);
       if (ambientLight) ambientLight.intensity = 0.6;
     }
+  });
+}
+
+// ========================================================
+// 7. MENÚ MÓVIL HAMBURGUESA
+// ========================================================
+
+function initMobileMenu() {
+  const toggleBtn = document.getElementById('mobile-menu-toggle');
+  const navLinks = document.getElementById('nav-links');
+  if (!toggleBtn || !navLinks) return;
+
+  toggleBtn.addEventListener('click', () => {
+    navLinks.classList.toggle('mobile-open');
+  });
+
+  navLinks.querySelectorAll('a').forEach(link => {
+    link.addEventListener('click', () => {
+      navLinks.classList.remove('mobile-open');
+    });
   });
 }

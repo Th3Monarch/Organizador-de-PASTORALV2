@@ -95,7 +95,7 @@ body {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 16px 24px;
+  padding: 12px 20px;
   margin-top: 14px;
   background: var(--bg-card);
   backdrop-filter: blur(16px);
@@ -106,27 +106,31 @@ body {
   position: sticky;
   top: 14px;
   z-index: 100;
+  gap: 14px;
   transition: var(--transition);
 }
 
 .nav-brand {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 10px;
   text-decoration: none;
   color: inherit;
+  flex-shrink: 0;
 }
 
 .brand-logo-glow {
-  width: 42px;
-  height: 42px;
+  width: 36px;
+  height: 36px;
+  min-width: 36px;
   border-radius: var(--radius-md);
   background: radial-gradient(circle, var(--primary-light) 0%, transparent 70%);
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 0 15px var(--primary-glow);
+  box-shadow: 0 0 12px var(--primary-glow);
   transition: transform var(--transition);
+  flex-shrink: 0;
 }
 
 .nav-brand:hover .brand-logo-glow {
@@ -137,37 +141,43 @@ body {
   display: flex;
   align-items: center;
   gap: 8px;
+  flex-shrink: 0;
 }
 
 .brand-text {
   font-family: var(--font-heading);
-  font-size: 1.15rem;
+  font-size: 1.1rem;
   font-weight: 800;
   letter-spacing: -0.02em;
+  white-space: nowrap;
 }
 
 .brand-badge-version {
   font-family: var(--font-mono);
-  font-size: 0.72rem;
+  font-size: 0.7rem;
   font-weight: 700;
-  padding: 2px 8px;
+  padding: 2px 7px;
   background: var(--primary-light);
   color: var(--primary);
   border-radius: var(--radius-full);
   border: 1px solid var(--border-glow);
+  white-space: nowrap;
+  flex-shrink: 0;
 }
 
 .nav-links {
   display: flex;
   align-items: center;
-  gap: 22px;
+  gap: 18px;
+  flex-shrink: 1;
 }
 
 .nav-links a {
   color: var(--text-secondary);
   text-decoration: none;
-  font-size: 0.92rem;
+  font-size: 0.88rem;
   font-weight: 600;
+  white-space: nowrap;
   transition: color 0.2s;
   position: relative;
 }
@@ -194,23 +204,25 @@ body {
 .nav-actions {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 10px;
+  flex-shrink: 0;
 }
 
 /* Selector rápido de paletas en navbar */
 .theme-palette-quick-picker {
   display: flex;
   align-items: center;
-  gap: 6px;
-  padding: 4px 8px;
+  gap: 5px;
+  padding: 3px 8px;
   background: var(--bg-surface-alt);
   border-radius: var(--radius-full);
   border: 1px solid var(--border);
+  flex-shrink: 0;
 }
 
 .palette-dot-btn {
-  width: 16px;
-  height: 16px;
+  width: 14px;
+  height: 14px;
   border-radius: 50%;
   border: 2px solid transparent;
   cursor: pointer;
@@ -228,8 +240,8 @@ body {
 }
 
 .theme-toggle-btn {
-  width: 38px;
-  height: 38px;
+  width: 34px;
+  height: 34px;
   border-radius: 50%;
   background: var(--bg-surface-alt);
   border: 1px solid var(--border);
@@ -237,8 +249,9 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 1.1rem;
+  font-size: 1rem;
   transition: var(--transition);
+  flex-shrink: 0;
 }
 
 .theme-toggle-btn:hover {
@@ -250,8 +263,8 @@ body {
   background: var(--primary);
   color: #0f172a !important;
   font-weight: 800;
-  font-size: 0.88rem;
-  padding: 8px 18px;
+  font-size: 0.84rem;
+  padding: 8px 16px;
   border-radius: var(--radius-full);
   text-decoration: none;
   display: inline-flex;
@@ -259,12 +272,38 @@ body {
   gap: 6px;
   box-shadow: 0 4px 14px var(--primary-glow);
   transition: var(--transition);
+  white-space: nowrap;
+  flex-shrink: 0;
 }
 
 .btn-nav-cta:hover {
   background: var(--primary-hover);
   transform: translateY(-2px);
   box-shadow: 0 6px 20px var(--primary-glow);
+}
+
+/* Botón Hamburguesa para Móvil */
+.mobile-menu-toggle {
+  display: none;
+  flex-direction: column;
+  justify-content: center;
+  gap: 4px;
+  width: 34px;
+  height: 34px;
+  background: var(--bg-surface-alt);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 7px;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.mobile-menu-toggle span {
+  display: block;
+  height: 2px;
+  background: var(--text-primary);
+  border-radius: 2px;
+  transition: var(--transition);
 }
 
 /* ========================================================
@@ -1651,11 +1690,56 @@ body.theme-light .gradient-text {
 /* ========================================================
    RESPONSIVE DESIGN (MÓVILES Y TABLETS)
    ======================================================== */
+@media (max-width: 1080px) {
+  .nav-links {
+    gap: 12px;
+  }
+  .nav-links a {
+    font-size: 0.82rem;
+  }
+  .brand-badge-version {
+    display: none;
+  }
+}
+
 @media (max-width: 900px) {
+  .mobile-menu-toggle {
+    display: flex;
+  }
+  .theme-palette-quick-picker {
+    display: none;
+  }
+  .nav-links {
+    display: none;
+    position: absolute;
+    top: calc(100% + 8px);
+    left: 0;
+    right: 0;
+    background: var(--bg-card);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 16px 20px;
+    flex-direction: column;
+    gap: 12px;
+    box-shadow: var(--shadow-card);
+    z-index: 110;
+  }
+  .nav-links.mobile-open {
+    display: flex;
+  }
+  .nav-links a {
+    font-size: 0.95rem;
+    padding: 6px 10px;
+    border-radius: var(--radius-sm);
+  }
+  .nav-links a:hover {
+    background: var(--bg-surface-alt);
+  }
   .hero-title { font-size: 2.8rem; }
   .spiritual-card { grid-template-columns: 1fr; padding: 32px; gap: 32px; }
   .pillars-row { grid-template-columns: 1fr; }
-  .nav-links { display: none; }
   .mockup-tab-contents { padding: 18px; }
 }
 
@@ -1668,4 +1752,6 @@ body.theme-light .gradient-text {
   .cta-card h2 { font-size: 2rem; }
   .hero-trust-bar { flex-direction: column; align-items: flex-start; }
   .trust-divider { display: none; }
+  .brand-text { font-size: 0.95rem; }
+  .btn-nav-cta { padding: 7px 12px; font-size: 0.8rem; }
 }

@@ -32,9 +32,9 @@
     
     <!-- Barra de Navegación Sticky Glassmorphic -->
     <header class="navbar" id="navbar">
-      <div class="nav-brand">
+      <a href="#" class="nav-brand">
         <div class="brand-logo-glow">
-          <svg viewBox="0 0 24 24" width="30" height="30" fill="none">
+          <svg viewBox="0 0 24 24" width="26" height="26" fill="none">
             <path d="M12 2L13.8 5.8L18 7.2L14.2 9L12 13L9.8 9L6 7.2L10.2 5.8L12 2Z" fill="var(--primary)"/>
             <path d="M11 9H13V22H11V9Z" fill="#f8fafc"/>
             <path d="M5 13H19V15H5V13Z" fill="#f8fafc"/>
@@ -42,37 +42,44 @@
         </div>
         <div class="brand-text-wrap">
           <span class="brand-text">Organizador Pastoral</span>
-          <span class="brand-badge-version">v2.1.0</span>
+          <span class="brand-badge-version">v2.1</span>
         </div>
-      </div>
+      </a>
 
-      <nav class="nav-links">
+      <nav class="nav-links" id="nav-links">
         <a href="#features">Módulos</a>
-        <a href="#showcase">Demo en Vivo</a>
-        <a href="#spiritual">Espiritualidad</a>
-        <a href="#ai">Asistente IA</a>
-        <a href="#customization">Personalización</a>
-        <a href="#faq">Preguntas</a>
+        <a href="#showcase">Demo</a>
+        <a href="#spiritual">Carisma</a>
+        <a href="#ai">IA</a>
+        <a href="#customization">Temas</a>
+        <a href="#faq">FAQ</a>
       </nav>
 
       <div class="nav-actions">
         <!-- Selector rápido de paleta en la web -->
-        <div class="theme-palette-quick-picker" title="Cambiar tema de color de la web">
-          <button class="palette-dot-btn active" data-color="#f59e0b" style="background:#f59e0b;" title="Ámbar Dominicano"></button>
-          <button class="palette-dot-btn" data-color="#0ea5e9" style="background:#0ea5e9;" title="Azul Mariano"></button>
-          <button class="palette-dot-btn" data-color="#ef4444" style="background:#ef4444;" title="Rojo Pentecostés"></button>
-          <button class="palette-dot-btn" data-color="#10b981" style="background:#10b981;" title="Verde Esperanza"></button>
-          <button class="palette-dot-btn" data-color="#8b5cf6" style="background:#8b5cf6;" title="Morado Cuaresmal"></button>
+        <div class="theme-palette-quick-picker" title="Cambiar color del tema">
+          <button class="palette-dot-btn active" data-color="#f59e0b" style="background:#f59e0b;" title="Ámbar"></button>
+          <button class="palette-dot-btn" data-color="#0ea5e9" style="background:#0ea5e9;" title="Azul"></button>
+          <button class="palette-dot-btn" data-color="#ef4444" style="background:#ef4444;" title="Rojo"></button>
+          <button class="palette-dot-btn" data-color="#10b981" style="background:#10b981;" title="Verde"></button>
+          <button class="palette-dot-btn" data-color="#8b5cf6" style="background:#8b5cf6;" title="Morado"></button>
         </div>
 
-        <button class="theme-toggle-btn" id="web-theme-toggle" title="Alternar Modo Claro / Oscuro">
+        <button class="theme-toggle-btn" id="web-theme-toggle" title="Modo Claro / Oscuro">
           <span class="theme-toggle-icon">☀️</span>
         </button>
 
         <a href="#download" class="btn btn-nav-cta">
-          <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor"><path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/></svg>
+          <svg viewBox="0 0 24 24" width="15" height="15" fill="currentColor"><path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/></svg>
           <span>Descargar</span>
         </a>
+
+        <!-- Botón Hamburguesa para Móvil -->
+        <button class="mobile-menu-toggle" id="mobile-menu-toggle" aria-label="Abrir menú">
+          <span></span>
+          <span></span>
+          <span></span>
+        </button>
       </div>
     </header>
 
