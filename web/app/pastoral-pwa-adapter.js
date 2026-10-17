@@ -315,9 +315,13 @@
       return seed;
     },
 
-    async saveData(data) {
+    async saveData(data, shouldPushToCloud = true) {
       try {
         localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+        // Sincronizar en segundo plano con Firebase si está autenticado
+        if (shouldPushToCloud && window.pastoralFirebase && typeof window.pastoralFirebase.pushState === 'function') {
+          window.pastoralFirebase.pushState(data);
+        }
         return { success: true };
       } catch (err) {
         console.error('[PWA Adapter] Error guardando datos:', err);
@@ -923,6 +927,10 @@
         dataUpdatedListeners.add(callback);
         return () => dataUpdatedListeners.delete(callback);
       }
+    },
+
+    get cloud() {
+      return window.pastoralFirebase || null;
     }
   };
 

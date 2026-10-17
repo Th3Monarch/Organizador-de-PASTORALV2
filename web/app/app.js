@@ -7219,7 +7219,285 @@ Por favor incluye: Monición de entrada, sugerencia de lecturas y Evangelio, 5 p
     }
   }
 
+  // ========================================================
+  // CONTROLADOR DE SINCRONIZACIÓN EN LA NUBE & GOOGLE AUTH
+  // ========================================================
+
+  function renderCurrentView() {
+    switch (currentView) {
+      case 'dashboard': renderDashboard(); break;
+      case 'notes': renderNotes(); break;
+      case 'events': renderCalendar(); break;
+      case 'tasks': renderTasks(); break;
+      case 'community': renderCommunity(); break;
+      case 'liturgical-scripts': renderLiturgicalScriptsView(); break;
+      case 'songbook': renderSongbookView(); break;
+      case 'ai-chat': renderAiChatView(); break;
+      case 'settings': renderSettingsView(); break;
+    }
+  }
+
+  function updateCloudSyncUI(status, user) {
+    const isConnected = !!user;
+
+    const statusTexts = {
+      synced: 'Sincronizado',
+      syncing: 'Sincronizando...',
+      offline: 'Modo sin conexión',
+      disconnected: 'Modo local'
+    };
+
+    const statusBadges = {
+      synced: '🟢 En línea y Sincronizado',
+      syncing: '🔵 Sincronizando datos...',
+      offline: '🟡 Sin conexión (guardando local)',
+      disconnected: '⚪ Modo local (sin cuenta)'
+    };
+
+    const statusClass = `dot-${status}`;
+
+    // 1. Sidebar Widget
+    const sidebarDot = document.getElementById('sidebar-cloud-dot');
+    if (sidebarDot) {
+      sidebarDot.className = `cloud-status-indicator-dot ${statusClass}`;
+    }
+    const sidebarName = document.getElementById('sidebar-cloud-name');
+    if (sidebarName) {
+      sidebarName.textContent = isConnected ? (user.displayName || user.email.split('@')[0]) : 'Modo Local';
+    }
+    const sidebarStatus = document.getElementById('sidebar-cloud-status');
+    if (sidebarStatus) {
+      sidebarStatus.textContent = isConnected ? (statusTexts[status] || 'Conectado') : 'Toca para conectar';
+    }
+    const sidebarAvatar = document.getElementById('sidebar-cloud-avatar');
+    const sidebarPlaceholder = document.getElementById('sidebar-cloud-placeholder');
+    if (sidebarAvatar && sidebarPlaceholder) {
+      if (isConnected && user.photoURL) {
+        sidebarAvatar.src = user.photoURL;
+        sidebarAvatar.style.display = 'block';
+        sidebarPlaceholder.style.display = 'none';
+      } else {
+        sidebarAvatar.style.display = 'none';
+        sidebarPlaceholder.style.display = 'flex';
+      }
+    }
+
+    // 2. Top bar móvil
+    const mobileDot = document.getElementById('mobile-cloud-dot');
+    if (mobileDot) {
+      mobileDot.className = `cloud-sync-dot ${statusClass}`;
+    }
+
+    // 3. Ajustes
+    const settingsBadge = document.getElementById('settings-sync-badge');
+    if (settingsBadge) {
+      settingsBadge.textContent = statusBadges[status] || statusBadges.disconnected;
+      settingsBadge.className = `sync-status-badge ${status}`;
+    }
+    const settingsName = document.getElementById('settings-cloud-user-name');
+    if (settingsName) {
+      settingsName.textContent = isConnected ? (user.displayName || 'Usuario de Google') : 'Modo Local (Sin Cuenta)';
+    }
+    const settingsEmail = document.getElementById('settings-cloud-user-email');
+    if (settingsEmail) {
+      settingsEmail.textContent = isConnected ? user.email : 'Inicia sesión con Google para sincronizar tus dispositivos';
+    }
+    const settingsAvatar = document.getElementById('settings-cloud-avatar');
+    const settingsPlaceholder = document.getElementById('settings-cloud-avatar-placeholder');
+    if (settingsAvatar && settingsPlaceholder) {
+      if (isConnected && user.photoURL) {
+        settingsAvatar.src = user.photoURL;
+        settingsAvatar.style.display = 'block';
+        settingsPlaceholder.style.display = 'none';
+      } else {
+        settingsAvatar.style.display = 'none';
+        settingsPlaceholder.style.display = 'flex';
+      }
+    }
+
+    const btnGoogleLogin = document.getElementById('btn-google-login');
+    const btnForceSync = document.getElementById('btn-force-cloud-sync');
+    const btnGoogleLogout = document.getElementById('btn-google-logout');
+
+    if (btnGoogleLogin) btnGoogleLogin.style.display = isConnected ? 'none' : 'inline-flex';
+    if (btnForceSync) btnForceSync.style.display = isConnected ? 'inline-flex' : 'none';
+    if (btnGoogleLogout) btnGoogleLogout.style.display = isConnected ? 'inline-flex' : 'none';
+
+    // 4. Modal
+    const modalBadge = document.getElementById('modal-sync-badge');
+    if (modalBadge) {
+      modalBadge.textContent = statusBadges[status] || statusBadges.disconnected;
+      modalBadge.className = `sync-status-badge ${status}`;
+    }
+    const modalName = document.getElementById('modal-cloud-user-name');
+    if (modalName) {
+      modalName.textContent = isConnected ? (user.displayName || 'Usuario de Google') : 'Modo Local';
+    }
+    const modalEmail = document.getElementById('modal-cloud-user-email');
+    if (modalEmail) {
+      modalEmail.textContent = isConnected ? user.email : 'Sin cuenta conectada';
+    }
+    const modalAvatar = document.getElementById('modal-cloud-avatar');
+    const modalPlaceholder = document.getElementById('modal-cloud-avatar-placeholder');
+    if (modalAvatar && modalPlaceholder) {
+      if (isConnected && user.photoURL) {
+        modalAvatar.src = user.photoURL;
+        modalAvatar.style.display = 'block';
+        modalPlaceholder.style.display = 'none';
+      } else {
+        modalAvatar.style.display = 'none';
+        modalPlaceholder.style.display = 'flex';
+      }
+    }
+
+    const modalUnconnected = document.getElementById('modal-cloud-unconnected-actions');
+    const modalConnected = document.getElementById('modal-cloud-connected-actions');
+    if (modalUnconnected) modalUnconnected.style.display = isConnected ? 'none' : 'block';
+    if (modalConnected) modalConnected.style.display = isConnected ? 'block' : 'none';
+  }
+
+  function setupCloudSync() {
+    if (!window.pastoralFirebase) return;
+
+    const modal = document.getElementById('cloud-sync-modal');
+    const openModal = () => { if (modal) modal.style.display = 'flex'; };
+    const closeModal = () => { if (modal) modal.style.display = 'none'; };
+
+    // Listeners para abrir modal
+    document.getElementById('sidebar-cloud-widget')?.addEventListener('click', openModal);
+    document.getElementById('mobile-cloud-sync-btn')?.addEventListener('click', openModal);
+
+    // Cerrar modal
+    document.getElementById('cloud-sync-modal-close-btn')?.addEventListener('click', closeModal);
+    document.getElementById('cloud-sync-modal-ok-btn')?.addEventListener('click', closeModal);
+    document.getElementById('modal-link-to-settings')?.addEventListener('click', (e) => {
+      e.preventDefault();
+      closeModal();
+      switchView('settings');
+      const details = document.getElementById('firebase-config-details');
+      if (details) details.open = true;
+      document.getElementById('card-cloud-sync-settings')?.scrollIntoView({ behavior: 'smooth' });
+    });
+
+    // Iniciar sesión con Google (en ajustes o modal)
+    const handleGoogleLogin = async () => {
+      try {
+        showToast('Abriendo inicio de sesión con Google...', 'info');
+        await window.pastoralFirebase.signInWithGoogle();
+        showToast('¡Sesión con Google iniciada!', 'success');
+        closeModal();
+      } catch (err) {
+        console.warn('Error en Google Sign-In:', err);
+        showToast('Aviso: ' + (err.message || 'No se pudo iniciar sesión con Google'), 'warning');
+      }
+    };
+
+    document.getElementById('btn-google-login')?.addEventListener('click', handleGoogleLogin);
+    document.getElementById('modal-btn-google-login')?.addEventListener('click', handleGoogleLogin);
+
+    // Cerrar sesión
+    const handleGoogleLogout = async () => {
+      try {
+        await window.pastoralFirebase.signOut();
+        showToast('Sesión cerrada. Los datos se mantendrán en este dispositivo en modo local.', 'info');
+      } catch (err) {
+        showToast('Error al cerrar sesión: ' + err.message, 'error');
+      }
+    };
+
+    document.getElementById('btn-google-logout')?.addEventListener('click', handleGoogleLogout);
+    document.getElementById('modal-btn-logout')?.addEventListener('click', handleGoogleLogout);
+
+    // Forzar sincronización ahora
+    const handleForceSync = () => {
+      showToast('Sincronizando datos con la nube...', 'info');
+      window.pastoralFirebase.pushState(state);
+    };
+
+    document.getElementById('btn-force-cloud-sync')?.addEventListener('click', handleForceSync);
+    document.getElementById('modal-btn-force-sync')?.addEventListener('click', handleForceSync);
+
+    // Cargar configuración existente en el textarea de Ajustes
+    const configTextarea = document.getElementById('settings-firebase-config-json');
+    const existingConfig = window.pastoralFirebase.getConfig();
+    if (configTextarea && existingConfig) {
+      configTextarea.value = JSON.stringify(existingConfig, null, 2);
+    }
+
+    // Guardar configuración de Firebase desde Ajustes
+    document.getElementById('btn-save-firebase-config')?.addEventListener('click', async () => {
+      const rawVal = configTextarea?.value.trim() || '';
+      const statusMsg = document.getElementById('firebase-config-status-msg');
+      if (!rawVal) {
+        showToast('Pega el objeto JSON de configuración de Firebase.', 'warning');
+        return;
+      }
+      try {
+        let configObj;
+        if (rawVal.includes('{')) {
+          const jsonMatch = rawVal.match(/\{[\s\S]*\}/);
+          if (jsonMatch) {
+            const sanitized = jsonMatch[0]
+              .replace(/(['"])?([a-zA-Z0-9_]+)(['"])?:/g, '"$2":')
+              .replace(/'/g, '"')
+              .replace(/,\s*}/g, '}');
+            try {
+              configObj = JSON.parse(sanitized);
+            } catch (_) {
+              configObj = (new Function(`return ${jsonMatch[0]}`))();
+            }
+          }
+        }
+        if (!configObj || !configObj.apiKey) {
+          throw new Error('No se detectó un apiKey válido en la configuración.');
+        }
+        await window.pastoralFirebase.saveConfig(configObj);
+        showToast('Configuración de Firebase guardada e iniciada con éxito.', 'success');
+        if (statusMsg) {
+          statusMsg.textContent = '✅ Conectado a Firebase';
+          statusMsg.style.color = 'var(--success)';
+        }
+      } catch (err) {
+        console.error('Error guardando configuración Firebase:', err);
+        showToast('Error en configuración: ' + err.message, 'error');
+        if (statusMsg) {
+          statusMsg.textContent = '❌ ' + err.message;
+          statusMsg.style.color = 'var(--danger)';
+        }
+      }
+    });
+
+    // Limpiar configuración de Firebase
+    document.getElementById('btn-clear-firebase-config')?.addEventListener('click', async () => {
+      if (confirm('¿Deseas desvincular el proyecto de Firebase? La app continuará en modo local.')) {
+        await window.pastoralFirebase.removeConfig();
+        if (configTextarea) configTextarea.value = '';
+        showToast('Configuración de Firebase desvinculada', 'info');
+      }
+    });
+
+    // Actualizar UI según el estado de sincronización y usuario
+    window.pastoralFirebase.onStatusChange((status, user) => {
+      updateCloudSyncUI(status, user);
+    });
+
+    // Escuchar actualizaciones remotas desde otros dispositivos
+    window.pastoralFirebase.onDataUpdate((remoteState) => {
+      console.log('[Cloud Sync] Recibida actualización remota desde otro dispositivo.');
+      const merged = window.pastoralFirebase.mergeStates(state, remoteState);
+      state = { ...state, ...merged };
+      window.pastoral.saveData(state, false);
+      renderCurrentView();
+      updateTasksBadge();
+      showToast('Datos sincronizados desde tu otro dispositivo 📲💻', 'success');
+    });
+
+    // Inicializar Firebase
+    window.pastoralFirebase.initialize();
+  }
+
   initPwaInstallBanner();
+  setupCloudSync();
 
   // Arrancar la aplicación
   await initApp();

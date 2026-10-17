@@ -2,17 +2,18 @@
  * sw.js - Service Worker para Organizador de Pastoral 2.0 (PWA en iOS y Web)
  */
 
-const CACHE_NAME = 'pastoral-pwa-v2.5.3';
+const CACHE_NAME = 'pastoral-pwa-v2.5.4';
 const ASSETS_TO_CACHE = [
   './',
   './index.html',
-  './styles.css?v=2.5.3',
-  './app.js?v=2.5.3',
-  './pastoral-pwa-adapter.js?v=2.5.3',
-  './markdown.js?v=2.5.3',
-  './liturgical.js?v=2.5.3',
-  './song-data.js?v=2.5.3',
-  './liturgical-templates.js?v=2.5.3',
+  './styles.css?v=2.5.4',
+  './app.js?v=2.5.4',
+  './pastoral-firebase.js?v=2.5.4',
+  './pastoral-pwa-adapter.js?v=2.5.4',
+  './markdown.js?v=2.5.4',
+  './liturgical.js?v=2.5.4',
+  './song-data.js?v=2.5.4',
+  './liturgical-templates.js?v=2.5.4',
   './manifest.webmanifest',
   './icons/icon-192.png',
   './icons/icon-512.png',
@@ -46,8 +47,8 @@ self.addEventListener('activate', (event) => {
 self.addEventListener('fetch', (event) => {
   const url = event.request.url;
 
-  // No interceptar peticiones a la API de Gemini, OpenRouter ni GitHub
-  if (url.includes('googleapis.com') || url.includes('openrouter.ai') || url.includes('api.github.com')) {
+  // No interceptar peticiones a la API de Gemini, OpenRouter, GitHub ni Firebase / Google APIs
+  if (url.includes('googleapis.com') || url.includes('openrouter.ai') || url.includes('api.github.com') || url.includes('firebaseio.com') || url.includes('gstatic.com') || url.includes('google.com')) {
     return;
   }
 
