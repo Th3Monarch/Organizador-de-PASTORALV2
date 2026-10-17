@@ -90,6 +90,7 @@ const backupsDir = path.join(userDataPath, 'backups');
 
 // Estructura por defecto según la especificación
 const DEFAULT_DATA = {
+  deletedIds: {},
   notes: [],
   events: [],
   tasks: [],

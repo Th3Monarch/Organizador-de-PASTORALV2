@@ -7,6 +7,7 @@
 document.addEventListener('DOMContentLoaded', async () => {
   // Estado local sincronizado con la persistencia
   let state = {
+    deletedIds: {},
     notes: [],
     events: [],
     tasks: [],
@@ -152,6 +153,14 @@ document.addEventListener('DOMContentLoaded', async () => {
     } else {
       badge.style.display = 'none';
     }
+  }
+
+  function markDeleted(id) {
+    if (!id) return;
+    if (!state.deletedIds || typeof state.deletedIds !== 'object') {
+      state.deletedIds = {};
+    }
+    state.deletedIds[String(id)] = Date.now();
   }
 
   async function persistData() {
@@ -1634,8 +1643,12 @@ document.addEventListener('DOMContentLoaded', async () => {
           confirmText: 'Eliminar',
           confirmBtnClass: 'btn-danger',
           onConfirm: () => {
+            markDeleted(id);
             state.notes = state.notes.filter(n => String(n.id) !== String(id));
             persistData();
+            if (window.pastoralFirebase && typeof window.pastoralFirebase.pushState === 'function') {
+              window.pastoralFirebase.pushState(state, true);
+            }
             renderNotes();
             renderDashboard();
             showToast('Nota eliminada con éxito', 'info');
@@ -1964,8 +1977,12 @@ Encargado de Pastoral                Representante de Profesores`,
       confirmText: 'Eliminar',
       confirmBtnClass: 'btn-danger',
       onConfirm: () => {
+        markDeleted(id);
         state.notes = state.notes.filter(n => String(n.id) !== String(id));
         persistData();
+        if (window.pastoralFirebase && typeof window.pastoralFirebase.pushState === 'function') {
+          window.pastoralFirebase.pushState(state, true);
+        }
         renderNotes();
         renderDashboard();
         showToast('Nota eliminada con éxito', 'info');
@@ -2734,8 +2751,12 @@ Encargado de Pastoral                Representante de Profesores`,
           confirmText: 'Eliminar',
           confirmBtnClass: 'btn-danger',
           onConfirm: () => {
+            markDeleted(id);
             state.events = state.events.filter(x => x.id !== id);
             persistData();
+            if (window.pastoralFirebase && typeof window.pastoralFirebase.pushState === 'function') {
+              window.pastoralFirebase.pushState(state, true);
+            }
             renderCalendar();
             renderDashboard();
             showToast('Evento eliminado', 'info');
@@ -2938,8 +2959,12 @@ Encargado de Pastoral                Representante de Profesores`,
             confirmText: 'Eliminar',
             confirmBtnClass: 'btn-danger',
             onConfirm: () => {
+              markDeleted(id);
               state.events = state.events.filter(x => x.id !== id);
               persistData();
+              if (window.pastoralFirebase && typeof window.pastoralFirebase.pushState === 'function') {
+                window.pastoralFirebase.pushState(state, true);
+              }
               renderCalendar();
               renderDashboard();
               drawer.style.display = 'none';
@@ -3665,8 +3690,12 @@ Encargado de Pastoral                Representante de Profesores`,
           confirmText: 'Eliminar',
           confirmBtnClass: 'btn-danger',
           onConfirm: () => {
+            markDeleted(id);
             state.tasks = state.tasks.filter(t => t.id !== id);
             persistData();
+            if (window.pastoralFirebase && typeof window.pastoralFirebase.pushState === 'function') {
+              window.pastoralFirebase.pushState(state, true);
+            }
             renderTasks();
             renderDashboard();
             updateTasksBadge();
@@ -3872,8 +3901,12 @@ Encargado de Pastoral                Representante de Profesores`,
           confirmText: 'Eliminar',
           confirmBtnClass: 'btn-danger',
           onConfirm: () => {
+            markDeleted(id);
             state.groups = state.groups.filter(x => x.id !== id);
             persistData();
+            if (window.pastoralFirebase && typeof window.pastoralFirebase.pushState === 'function') {
+              window.pastoralFirebase.pushState(state, true);
+            }
             renderCommunity();
             renderDashboard();
             showToast('Grupo eliminado', 'info');
@@ -3941,8 +3974,12 @@ Encargado de Pastoral                Representante de Profesores`,
           confirmText: 'Eliminar',
           confirmBtnClass: 'btn-danger',
           onConfirm: () => {
+            markDeleted(id);
             state.persons = state.persons.filter(x => x.id !== id);
             persistData();
+            if (window.pastoralFirebase && typeof window.pastoralFirebase.pushState === 'function') {
+              window.pastoralFirebase.pushState(state, true);
+            }
             renderCommunity();
             renderDashboard();
             showToast('Registro eliminado', 'info');

@@ -326,6 +326,7 @@
           const docRef = this.db.collection('users').doc(this.currentUser.uid).collection('pastoralData').doc('mainState');
 
           const stateToSync = sanitizeForFirestore({
+            deletedIds: state.deletedIds || {},
             notes: state.notes || [],
             events: state.events || [],
             tasks: state.tasks || [],
@@ -396,23 +397,31 @@
         return isNaN(t) ? 0 : t;
       };
 
+      // Fusión de tumbas de borrado (Tombstones) para evitar resurrección de elementos eliminados
+      const allDeleted = {
+        ...(localState.deletedIds || {}),
+        ...(remoteState.deletedIds || {})
+      };
+
       const mergeById = (localArr = [], remoteArr = []) => {
         const map = new Map();
-        // Cargar remotos primero
+        // Cargar remotos primero (excluyendo cualquier ítem eliminado)
         (Array.isArray(remoteArr) ? remoteArr : []).forEach(item => {
-          if (item && item.id) map.set(item.id, item);
+          if (item && item.id && !allDeleted[String(item.id)]) {
+            map.set(String(item.id), item);
+          }
         });
-        // Fusión con locales considerando el timestamp más reciente
+        // Fusión con locales considerando el timestamp más reciente (excluyendo eliminados)
         (Array.isArray(localArr) ? localArr : []).forEach(localItem => {
-          if (!localItem || !localItem.id) return;
-          const remoteItem = map.get(localItem.id);
+          if (!localItem || !localItem.id || allDeleted[String(localItem.id)]) return;
+          const remoteItem = map.get(String(localItem.id));
           if (!remoteItem) {
-            map.set(localItem.id, localItem);
+            map.set(String(localItem.id), localItem);
           } else {
             const localDate = getTimestamp(localItem);
             const remoteDate = getTimestamp(remoteItem);
             if (localDate >= remoteDate) {
-              map.set(localItem.id, localItem);
+              map.set(String(localItem.id), localItem);
             }
           }
         });
@@ -421,6 +430,7 @@
 
       return {
         ...localState,
+        deletedIds: allDeleted,
         notes: mergeById(localState.notes, remoteState.notes),
         events: mergeById(localState.events, remoteState.events),
         tasks: mergeById(localState.tasks, remoteState.tasks),

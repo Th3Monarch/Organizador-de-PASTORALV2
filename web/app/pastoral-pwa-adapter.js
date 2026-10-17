@@ -25,6 +25,7 @@
 
   // Datos iniciales de demostración si el usuario entra por primera vez
   const INITIAL_SEED_DATA = {
+    deletedIds: {},
     notes: [
       {
         id: 'note-seed-1',
