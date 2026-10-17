@@ -8,15 +8,66 @@
 const { app, BrowserWindow, ipcMain, dialog, shell, Notification, Menu, MenuItem } = require('electron');
 const path = require('path');
 const fs = require('fs');
+const http = require('http');
 const cloudManager = require('./cloud-manager');
 const saintManager = require('./saint-manager');
 const readingManager = require('./reading-manager');
 const songData = require('./song-data');
 const liturgicalTemplates = require('./liturgical-templates');
 
-// Estado de la ventana y controlador de IA
+// Estado de la ventana y servidor local
 let mainWindow = null;
 let currentChatAbortController = null;
+let localServer = null;
+let localServerPort = null;
+
+/**
+ * Servidor HTTP loopback ultraligero para que Firebase Auth opere bajo http://localhost
+ * en vez de file:// (lo que resuelve auth/operation-not-supported-in-this-environment).
+ */
+function startLocalServer() {
+  if (localServerPort) return Promise.resolve(localServerPort);
+
+  const mimeTypes = {
+    '.html': 'text/html; charset=utf-8',
+    '.js': 'text/javascript; charset=utf-8',
+    '.css': 'text/css; charset=utf-8',
+    '.json': 'application/json; charset=utf-8',
+    '.png': 'image/png',
+    '.jpg': 'image/jpeg',
+    '.jpeg': 'image/jpeg',
+    '.svg': 'image/svg+xml',
+    '.ico': 'image/x-icon'
+  };
+
+  return new Promise((resolve) => {
+    localServer = http.createServer((req, res) => {
+      let cleanUrl = req.url.split('?')[0];
+      if (cleanUrl === '/' || cleanUrl === '') cleanUrl = '/index.html';
+      const safePath = path.normalize(cleanUrl).replace(/^(\.\.[\/\\])+/, '');
+      const filePath = path.join(__dirname, 'renderer', safePath);
+
+      fs.readFile(filePath, (err, data) => {
+        if (err) {
+          res.writeHead(404, { 'Content-Type': 'text/plain' });
+          res.end('Not Found');
+          return;
+        }
+        const ext = path.extname(filePath).toLowerCase();
+        res.writeHead(200, {
+          'Content-Type': mimeTypes[ext] || 'application/octet-stream',
+          'Access-Control-Allow-Origin': '*'
+        });
+        res.end(data);
+      });
+    });
+
+    localServer.listen(0, '127.0.0.1', () => {
+      localServerPort = localServer.address().port;
+      resolve(localServerPort);
+    });
+  });
+}
 
 // Rutas de almacenamiento
 const userDataPath = app.getPath('userData');
@@ -198,7 +249,9 @@ function cleanOldBackups() {
 /**
  * Crea la ventana principal de la aplicación.
  */
-function createWindow() {
+async function createWindow() {
+  const port = await startLocalServer();
+
   mainWindow = new BrowserWindow({
     width: 1280,
     height: 840,
@@ -216,7 +269,7 @@ function createWindow() {
     }
   });
 
-  mainWindow.loadFile(path.join(__dirname, 'renderer', 'index.html'));
+  mainWindow.loadURL(`http://localhost:${port}/index.html`);
 
   // Permitir ventana emergente de autenticación de Google y Firebase con User-Agent estándar
   mainWindow.webContents.setWindowOpenHandler(({ url }) => {
