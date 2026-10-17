@@ -22,6 +22,39 @@
     "utilities"
   ],
   "prefer_related_applications": false,
+  "related_applications": [],
+  "launch_handler": {
+    "client_mode": "focus-existing"
+  },
+  "share_target": {
+    "action": "./",
+    "method": "GET",
+    "params": {
+      "title": "title",
+      "text": "text",
+      "url": "url"
+    }
+  },
+  "protocol_handlers": [
+    {
+      "protocol": "web+pastoral",
+      "url": "./?link=%s"
+    }
+  ],
+  "file_handlers": [
+    {
+      "action": "./",
+      "name": "Pastoral Data",
+      "accept": {
+        "application/json": [
+          ".json"
+        ],
+        "text/plain": [
+          ".txt"
+        ]
+      }
+    }
+  ],
   "icons": [
     {
       "src": "icons/icon-192.png",
