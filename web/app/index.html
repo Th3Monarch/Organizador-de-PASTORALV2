@@ -22,7 +22,7 @@
   <link rel="icon" type="image/png" sizes="512x512" href="icons/icon-512.png">
   <link rel="shortcut icon" href="icons/icon-192.png">
 
-  <link rel="stylesheet" href="styles.css?v=2.4.0">
+  <link rel="stylesheet" href="styles.css?v=2.5.0">
 </head>
 <body class="theme-light">
   <!-- Layout Principal de la Aplicación -->
@@ -557,6 +557,7 @@
               <button class="segmented-btn" id="btn-cal-view-agenda" data-mode="agenda" title="Vista de Agenda y Próximos Eventos">📋 Agenda</button>
             </div>
             <div class="search-input-wrap">
+              <svg viewBox="0 0 24 24" width="16" height="16"><path d="M15.5 14h-.79l-.28-.27A6.471 6.471 0 0 0 16 9.5 6.5 6.5 0 1 0 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/></svg>
               <input type="text" id="events-search-input" placeholder="Buscar evento o lugar...">
             </div>
           </div>
@@ -594,6 +595,9 @@
         <div class="cal-agenda-container" id="cal-agenda-container" style="display:none;">
           <!-- Eventos generados dinámicamente -->
         </div>
+
+        <!-- Backdrop para el Drawer de Día -->
+        <div class="cal-drawer-backdrop" id="cal-drawer-backdrop" style="display:none;"></div>
 
         <!-- Panel Lateral de Detalles de Día Seleccionado -->
         <div class="cal-day-detail-drawer" id="cal-day-drawer" style="display:none;">
@@ -1957,11 +1961,11 @@
   </nav>
 
   <!-- Scripts: Datos Litúrgicos, Adaptador PWA iOS, Renderizador Markdown y Lógica de la Aplicación -->
-  <script src="song-data.js?v=2.4.0"></script>
-  <script src="liturgical-templates.js?v=2.4.0"></script>
-  <script src="liturgical.js?v=2.4.0"></script>
-  <script src="markdown.js?v=2.4.0"></script>
-  <script src="pastoral-pwa-adapter.js?v=2.4.0"></script>
-  <script src="app.js?v=2.4.0"></script>
+  <script src="song-data.js?v=2.5.0"></script>
+  <script src="liturgical-templates.js?v=2.5.0"></script>
+  <script src="liturgical.js?v=2.5.0"></script>
+  <script src="markdown.js?v=2.5.0"></script>
+  <script src="pastoral-pwa-adapter.js?v=2.5.0"></script>
+  <script src="app.js?v=2.5.0"></script>
 </body>
 </html>

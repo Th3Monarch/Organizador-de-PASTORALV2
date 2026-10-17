@@ -2479,6 +2479,7 @@ Encargado de Pastoral                Representante de Profesores`,
   });
 
   function setCalendarViewMode(mode) {
+    if (typeof closeDayDetailDrawer === 'function') closeDayDetailDrawer();
     calendarViewMode = mode;
     document.getElementById('btn-cal-view-month')?.classList.toggle('active', mode === 'month');
     document.getElementById('btn-cal-view-agenda')?.classList.toggle('active', mode === 'agenda');
@@ -2892,14 +2893,33 @@ Encargado de Pastoral                Representante de Profesores`,
   }
 
   // Drawer de Detalles de Día
+  function closeDayDetailDrawer() {
+    const drawer = document.getElementById('cal-day-drawer');
+    const backdrop = document.getElementById('cal-drawer-backdrop');
+    if (drawer) drawer.style.display = 'none';
+    if (backdrop) backdrop.style.display = 'none';
+    document.querySelectorAll('.cal-day-cell.selected').forEach(c => c.classList.remove('selected'));
+  }
+
   function openDayDetailDrawer(dateStr, events, litInfo) {
     const drawer = document.getElementById('cal-day-drawer');
+    const backdrop = document.getElementById('cal-drawer-backdrop');
     const titleElem = document.getElementById('drawer-date-title');
     const listElem = document.getElementById('drawer-events-list');
     if (!drawer || !titleElem || !listElem) return;
 
     drawer.style.display = 'flex';
-    titleElem.textContent = `${dateStr} - ${litInfo.celebration}`;
+    if (backdrop) backdrop.style.display = 'block';
+
+    let prettyDate = dateStr;
+    try {
+      const [y, m, d] = dateStr.split('-').map(Number);
+      const dObj = new Date(y, m - 1, d);
+      prettyDate = dObj.toLocaleDateString('es-ES', { weekday: 'short', day: 'numeric', month: 'short' });
+      prettyDate = prettyDate.charAt(0).toUpperCase() + prettyDate.slice(1);
+    } catch (e) {}
+
+    titleElem.textContent = `${prettyDate} · ${litInfo.celebration}`;
 
     if (events.length === 0) {
       listElem.innerHTML = `
@@ -3018,7 +3038,7 @@ Encargado de Pastoral                Representante de Profesores`,
               persistData();
               renderCalendar();
               renderDashboard();
-              drawer.style.display = 'none';
+              closeDayDetailDrawer();
               showToast('Evento eliminado', 'info');
             }
           });
@@ -3031,12 +3051,12 @@ Encargado de Pastoral                Representante de Profesores`,
     };
   }
 
-  document.getElementById('drawer-close-btn')?.addEventListener('click', () => {
-    document.getElementById('cal-day-drawer').style.display = 'none';
-  });
+  document.getElementById('drawer-close-btn')?.addEventListener('click', closeDayDetailDrawer);
+  document.getElementById('cal-drawer-backdrop')?.addEventListener('click', closeDayDetailDrawer);
 
   // Controles de mes anterior/siguiente/hoy
   document.getElementById('cal-prev-btn')?.addEventListener('click', () => {
+    closeDayDetailDrawer();
     calendarMonth--;
     if (calendarMonth < 0) {
       calendarMonth = 11;
@@ -3046,6 +3066,7 @@ Encargado de Pastoral                Representante de Profesores`,
   });
 
   document.getElementById('cal-next-btn')?.addEventListener('click', () => {
+    closeDayDetailDrawer();
     calendarMonth++;
     if (calendarMonth > 11) {
       calendarMonth = 0;
@@ -3055,6 +3076,7 @@ Encargado de Pastoral                Representante de Profesores`,
   });
 
   document.getElementById('cal-today-btn')?.addEventListener('click', () => {
+    closeDayDetailDrawer();
     const now = new Date();
     calendarYear = now.getFullYear();
     calendarMonth = now.getMonth();
@@ -6711,8 +6733,13 @@ Por favor incluye: Monición de entrada, sugerencia de lecturas y Evangelio, 5 p
       } else {
         openOmnisearch();
       }
-    } else if (e.key === 'Escape' && omnisearchModal.style.display === 'flex') {
-      closeOmnisearch();
+    } else if (e.key === 'Escape') {
+      if (omnisearchModal.style.display === 'flex') {
+        closeOmnisearch();
+      }
+      if (typeof closeDayDetailDrawer === 'function') {
+        closeDayDetailDrawer();
+      }
     }
   });
 
