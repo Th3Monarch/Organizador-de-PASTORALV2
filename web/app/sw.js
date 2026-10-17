@@ -2,17 +2,17 @@
  * sw.js - Service Worker para Organizador de Pastoral 2.0 (PWA en iOS y Web)
  */
 
-const CACHE_NAME = 'pastoral-pwa-v2.1.0';
+const CACHE_NAME = 'pastoral-pwa-v2.2.0';
 const ASSETS_TO_CACHE = [
   './',
   './index.html',
-  './styles.css',
-  './app.js',
-  './pastoral-pwa-adapter.js',
-  './markdown.js',
-  './liturgical.js',
-  './song-data.js',
-  './liturgical-templates.js',
+  './styles.css?v=2.2.0',
+  './app.js?v=2.2.0',
+  './pastoral-pwa-adapter.js?v=2.2.0',
+  './markdown.js?v=2.2.0',
+  './liturgical.js?v=2.2.0',
+  './song-data.js?v=2.2.0',
+  './liturgical-templates.js?v=2.2.0',
   './manifest.webmanifest',
   './icons/icon-192.png',
   './icons/icon-512.png',
@@ -44,29 +44,33 @@ self.addEventListener('activate', (event) => {
 self.addEventListener('fetch', (event) => {
   const url = event.request.url;
 
-  // No interceptar peticiones a la API de Gemini ni OpenRouter
-  if (url.includes('googleapis.com') || url.includes('openrouter.ai')) {
+  // No interceptar peticiones a la API de Gemini, OpenRouter ni GitHub
+  if (url.includes('googleapis.com') || url.includes('openrouter.ai') || url.includes('api.github.com')) {
     return;
   }
 
+  // Estrategia Network-First: Siempre obtiene la versión más fresca cuando hay internet.
+  // Si el usuario está offline, recurre de inmediato a la copia en caché.
   event.respondWith(
-    caches.match(event.request).then((response) => {
-      if (response) {
-        // En segundo plano busca si hay actualización
-        fetch(event.request).then((networkResponse) => {
-          if (networkResponse && networkResponse.status === 200) {
-            caches.open(CACHE_NAME).then((cache) => cache.put(event.request, networkResponse));
-          }
-        }).catch(() => {});
-        return response;
-      }
-
-      return fetch(event.request).catch(() => {
-        // Fallback para navegación offline
-        if (event.request.mode === 'navigate') {
-          return caches.match('./index.html');
+    fetch(event.request)
+      .then((networkResponse) => {
+        if (networkResponse && networkResponse.status === 200) {
+          const responseToCache = networkResponse.clone();
+          caches.open(CACHE_NAME).then((cache) => {
+            cache.put(event.request, responseToCache);
+          });
         }
-      });
-    })
+        return networkResponse;
+      })
+      .catch(() => {
+        return caches.match(event.request).then((cachedResponse) => {
+          if (cachedResponse) {
+            return cachedResponse;
+          }
+          if (event.request.mode === 'navigate') {
+            return caches.match('./index.html');
+          }
+        });
+      })
   );
 });

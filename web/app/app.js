@@ -674,6 +674,29 @@ document.addEventListener('DOMContentLoaded', async () => {
     mobilePaletteBtn.addEventListener('click', () => desktopPaletteBtn.click());
   }
 
+  // Botón de recarga y sincronización rápida en barra superior móvil
+  const mobileRefreshBtn = document.getElementById('mobile-refresh-btn');
+  if (mobileRefreshBtn) {
+    mobileRefreshBtn.addEventListener('click', async () => {
+      showToast('Actualizando aplicación...', 'info');
+      try {
+        if ('caches' in window) {
+          const keys = await caches.keys();
+          await Promise.all(keys.map(k => caches.delete(k)));
+        }
+        if ('serviceWorker' in navigator) {
+          const registrations = await navigator.serviceWorker.getRegistrations();
+          for (let reg of registrations) {
+            await reg.unregister();
+          }
+        }
+      } catch (_) {}
+      setTimeout(() => {
+        window.location.reload(true);
+      }, 350);
+    });
+  }
+
   // Tarjetas clickeables del dashboard
   document.querySelectorAll('.stat-card').forEach(card => {
     card.addEventListener('click', () => {
