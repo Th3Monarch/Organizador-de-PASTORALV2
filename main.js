@@ -218,6 +218,25 @@ function createWindow() {
 
   mainWindow.loadFile(path.join(__dirname, 'renderer', 'index.html'));
 
+  // Permitir ventana emergente de autenticación de Google y Firebase con User-Agent estándar
+  mainWindow.webContents.setWindowOpenHandler(({ url }) => {
+    if (url.includes('accounts.google.com') || url.includes('firebaseapp.com')) {
+      return {
+        action: 'allow',
+        overrideBrowserWindowOptions: {
+          userAgent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36',
+          webPreferences: {
+            nodeIntegration: false,
+            contextIsolation: true,
+            sandbox: false
+          }
+        }
+      };
+    }
+    shell.openExternal(url);
+    return { action: 'deny' };
+  });
+
   // Menú contextual nativo para copiar/cortar/pegar en selecciones y campos editables
   mainWindow.webContents.on('context-menu', (event, params) => {
     const menu = new Menu();
