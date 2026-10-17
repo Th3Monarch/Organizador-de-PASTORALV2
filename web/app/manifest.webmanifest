@@ -1,14 +1,27 @@
 {
   "name": "Organizador de Pastoral 2.0",
   "short_name": "Pastoral",
+  "id": "./?source=pwa",
   "description": "Organizador pastoral católico escolar con liturgia, cantoral, guiones de misa e IA integrada.",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",
+  "display_override": [
+    "standalone",
+    "window-controls-overlay"
+  ],
   "orientation": "any",
   "background_color": "#090d16",
   "theme_color": "#f59e0b",
   "lang": "es",
+  "dir": "ltr",
+  "categories": [
+    "education",
+    "lifestyle",
+    "productivity",
+    "utilities"
+  ],
+  "prefer_related_applications": false,
   "icons": [
     {
       "src": "icons/icon-192.png",
@@ -26,6 +39,60 @@
       "src": "icons/apple-touch-icon.png",
       "sizes": "180x180",
       "type": "image/png"
+    }
+  ],
+  "screenshots": [
+    {
+      "src": "icons/screenshot-desktop.png",
+      "sizes": "1280x720",
+      "type": "image/png",
+      "form_factor": "wide",
+      "label": "Pantalla Principal del Organizador de Pastoral"
+    },
+    {
+      "src": "icons/screenshot-mobile.png",
+      "sizes": "750x1334",
+      "type": "image/png",
+      "form_factor": "narrow",
+      "label": "Vista móvil de Calendario y Liturgia"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Calendario Pastoral",
+      "short_name": "Calendario",
+      "description": "Ver eventos y planificación litúrgica",
+      "url": "./#events",
+      "icons": [
+        {
+          "src": "icons/icon-192.png",
+          "sizes": "192x192"
+        }
+      ]
+    },
+    {
+      "name": "Cancionero con Acordes",
+      "short_name": "Cancionero",
+      "description": "Buscar cantos litúrgicos y transportar acordes",
+      "url": "./#songs",
+      "icons": [
+        {
+          "src": "icons/icon-192.png",
+          "sizes": "192x192"
+        }
+      ]
+    },
+    {
+      "name": "Asistente IA",
+      "short_name": "Asistente IA",
+      "description": "Consultas pastorales y guiones con IA",
+      "url": "./#ai",
+      "icons": [
+        {
+          "src": "icons/icon-192.png",
+          "sizes": "192x192"
+        }
+      ]
     }
   ]
 }

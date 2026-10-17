@@ -2,21 +2,23 @@
  * sw.js - Service Worker para Organizador de Pastoral 2.0 (PWA en iOS y Web)
  */
 
-const CACHE_NAME = 'pastoral-pwa-v2.5.2';
+const CACHE_NAME = 'pastoral-pwa-v2.5.3';
 const ASSETS_TO_CACHE = [
   './',
   './index.html',
-  './styles.css?v=2.5.2',
-  './app.js?v=2.5.2',
-  './pastoral-pwa-adapter.js?v=2.5.2',
-  './markdown.js?v=2.5.2',
-  './liturgical.js?v=2.5.2',
-  './song-data.js?v=2.5.2',
-  './liturgical-templates.js?v=2.5.2',
+  './styles.css?v=2.5.3',
+  './app.js?v=2.5.3',
+  './pastoral-pwa-adapter.js?v=2.5.3',
+  './markdown.js?v=2.5.3',
+  './liturgical.js?v=2.5.3',
+  './song-data.js?v=2.5.3',
+  './liturgical-templates.js?v=2.5.3',
   './manifest.webmanifest',
   './icons/icon-192.png',
   './icons/icon-512.png',
-  './icons/apple-touch-icon.png'
+  './icons/apple-touch-icon.png',
+  './icons/screenshot-desktop.png',
+  './icons/screenshot-mobile.png'
 ];
 
 self.addEventListener('install', (event) => {
