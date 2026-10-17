@@ -2149,6 +2149,7 @@ body.theme-light .form-group select {
   align-items: center;
   gap: 12px;
   margin-top: 24px;
+  flex-wrap: wrap;
 }
 
 .connection-status-msg {
