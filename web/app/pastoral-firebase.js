@@ -19,8 +19,16 @@
   const FIREBASE_CONFIG_KEY = 'pastoral_firebase_config_v2';
   const PENDING_SYNC_KEY = 'pastoral_has_pending_cloud_sync';
 
-  // Configuración oficial predeterminada de la app (opcional: permite que ningún usuario tenga que configurar nada)
-  const DEFAULT_FIREBASE_CONFIG = null;
+  // Configuración oficial predeterminada de la app (integrada de fábrica para todos los usuarios)
+  const DEFAULT_FIREBASE_CONFIG = {
+    apiKey: "AIzaSyCWH_pOaccH6hMxxP2AD_LlSul-zc2YtHo",
+    authDomain: "pastoral-app-213cf.firebaseapp.com",
+    projectId: "pastoral-app-213cf",
+    storageBucket: "pastoral-app-213cf.firebasestorage.app",
+    messagingSenderId: "543175185258",
+    appId: "1:543175185258:web:f8fee35fa81c58bc060b13",
+    measurementId: "G-VQMHLRSXWF"
+  };
 
   class PastoralFirebaseService {
     constructor() {
