@@ -985,10 +985,12 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   function isSaintCacheValid(cache) {
     if (!cache || !cache.dateKey || !cache.name || !cache.history) return false;
-    // Si la caché guardada carece de imageUrl o tiene URL remota http no convertida a base64,
-    // o contiene entidades sin decodificar (como &iquest;) o supera 1800 caracteres,
-    // invalidar para cargar de inmediato la nueva versión abreviada, limpia y con arte sacro en base64
-    if (cache.imageUrl === undefined || (cache.imageUrl && cache.imageUrl.startsWith('http')) || cache.history.includes('&iquest;') || cache.martirology?.includes('&iquest;') || cache.history.length > 1800) {
+    // Si la caché carece de foto, invalidar para cargar de inmediato el retrato de arte sacro
+    if (!cache.imageUrl) {
+      return false;
+    }
+    // Si contiene entidades sin decodificar
+    if (cache.history.includes('&iquest;') || cache.martirology?.includes('&iquest;')) {
       return false;
     }
     const todayKey = getTodayDateKey();
@@ -1081,6 +1083,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             imgContainer.title = cleanSaintText(saint.name || 'Santo del Día');
           }
         };
+        portraitImg.referrerPolicy = 'no-referrer';
         portraitImg.src = saint.imageUrl;
 
         // Si la imagen ya se decodificó de inmediato desde el Data URI base64
@@ -1205,7 +1208,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     const bodyHtml = `
       <div style="text-align: center; padding: 6px 0;">
         <div style="max-height: 440px; overflow: hidden; border-radius: 12px; margin-bottom: 14px; background: rgba(0,0,0,0.3); box-shadow: 0 8px 24px rgba(0,0,0,0.3); display: flex; align-items: center; justify-content: center; border: 1px solid var(--border-color);">
-          <img src="${escapeHtml(saint.imageUrl)}" alt="${escapeHtml(cleanName)}" style="max-width: 100%; max-height: 440px; object-fit: contain; display: block; border-radius: 12px;" onerror="this.onerror=null; this.parentElement.innerHTML='<p style=\\'color:var(--text-muted); padding:30px;\\'>No se pudo cargar la imagen en alta resolución.</p>';" />
+          <img src="${escapeHtml(saint.imageUrl)}" referrerpolicy="no-referrer" alt="${escapeHtml(cleanName)}" style="max-width: 100%; max-height: 440px; object-fit: contain; display: block; border-radius: 12px;" onerror="this.onerror=null; this.parentElement.innerHTML='<p style=\\'color:var(--text-muted); padding:30px;\\'>No se pudo cargar la imagen en alta resolución.</p>';" />
         </div>
         <h4 style="margin: 0 0 6px 0; color: var(--text-primary); font-size: 1.15rem; font-weight: 700;">${escapeHtml(cleanName)}</h4>
         <p style="margin: 0; color: var(--text-muted); font-size: 0.88rem; font-style: italic;">${escapeHtml(cleanTitle)}</p>
@@ -1268,7 +1271,14 @@ document.addEventListener('DOMContentLoaded', async () => {
   let currentPrayerData = null;
 
   function isReadingCacheValid(cache) {
-    if (!cache || !cache.dateKey || !cache.gospel || !cache.gospel.text) return false;
+    if (!cache || !cache.dateKey) return false;
+    const gText = typeof cache.gospel === 'string' ? cache.gospel : cache.gospel?.text;
+    const frText = typeof cache.firstReading === 'string' ? cache.firstReading : cache.firstReading?.text;
+    const psText = typeof cache.psalm === 'string' ? cache.psalm : cache.psalm?.text;
+    // Si faltan textos o están marcados como 'No disponible', invalidar caché para forzar carga real
+    if (!gText || !frText || !psText || frText === 'No disponible' || psText === 'No disponible') {
+      return false;
+    }
     const todayKey = getTodayDateKey();
     if (cache.dateKey !== todayKey) return false;
     const now = Date.now();
@@ -1313,7 +1323,11 @@ document.addEventListener('DOMContentLoaded', async () => {
   }
 
   function renderGospelCard(readings, fromCache = true) {
-    if (!readings || !readings.gospel) return;
+    if (!readings) return;
+
+    const gObj = (typeof readings.gospel === 'object' && readings.gospel !== null)
+      ? readings.gospel
+      : { title: 'Evangelio del Día', text: readings.gospel || '', shortText: '' };
 
     const litTitleElem = document.getElementById('gospel-liturgic-title');
     const titleElem = document.getElementById('gospel-title');
@@ -1323,8 +1337,8 @@ document.addEventListener('DOMContentLoaded', async () => {
     const toggleBtn = document.getElementById('btn-toggle-gospel-text');
 
     if (litTitleElem) litTitleElem.textContent = cleanScriptureText(readings.liturgicTitle || 'Tiempo Ordinario');
-    if (titleElem) titleElem.textContent = cleanScriptureText(readings.gospel.title || 'Evangelio del Día');
-    if (quoteSnippetElem) quoteSnippetElem.textContent = cleanScriptureText(readings.gospel.shortText || 'Palabra del Señor');
+    if (titleElem) titleElem.textContent = cleanScriptureText(gObj.title || 'Evangelio del Día');
+    if (quoteSnippetElem) quoteSnippetElem.textContent = cleanScriptureText(gObj.shortText || gObj.text?.slice(0, 150) || 'Palabra del Señor');
 
     if (cacheBadge) {
       if (fromCache) {
@@ -1337,9 +1351,13 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 
     if (textContentElem) {
-      const text = cleanScriptureText(readings.gospel.text || '');
+      const text = cleanScriptureText(gObj.text || '');
       const paragraphs = text.split(/\n\s*\n/).filter(p => p.trim());
-      textContentElem.innerHTML = paragraphs.map(p => `<p>${escapeHtml(p.trim())}</p>`).join('');
+      if (paragraphs.length > 0) {
+        textContentElem.innerHTML = paragraphs.map(p => `<p>${escapeHtml(p.trim())}</p>`).join('');
+      } else {
+        textContentElem.innerHTML = '<p style="color:var(--text-muted); font-style:italic;">No se pudo cargar el texto del Evangelio.</p>';
+      }
       textContentElem.classList.add('collapsed');
       if (toggleBtn) toggleBtn.innerHTML = '<span>📖 Leer Evangelio completo</span>';
     }
@@ -1396,21 +1414,33 @@ document.addEventListener('DOMContentLoaded', async () => {
     const gospelTitle = document.getElementById('readings-gospel-title');
     const gospelText = document.getElementById('readings-gospel-text');
 
-    if (firstTitle) firstTitle.textContent = cleanScriptureText(readings.firstReading?.title || 'Primera Lectura');
+    const fObj = (typeof readings.firstReading === 'object' && readings.firstReading !== null)
+      ? readings.firstReading
+      : { title: 'Primera Lectura', text: readings.firstReading || '' };
+
+    const pObj = (typeof readings.psalm === 'object' && readings.psalm !== null)
+      ? readings.psalm
+      : { title: 'Salmo Responsorial', text: readings.psalm || '' };
+
+    const gObj = (typeof readings.gospel === 'object' && readings.gospel !== null)
+      ? readings.gospel
+      : { title: 'Santo Evangelio', text: readings.gospel || '' };
+
+    if (firstTitle) firstTitle.textContent = cleanScriptureText(fObj.title || 'Primera Lectura');
     if (firstText) {
-      const cleanFirst = cleanScriptureText(readings.firstReading?.text || 'No disponible');
+      const cleanFirst = cleanScriptureText(fObj.text || 'Palabra de Dios');
       firstText.innerHTML = cleanFirst.split(/\n\s*\n/).filter(Boolean).map(p => `<p>${escapeHtml(p.trim())}</p>`).join('');
     }
 
-    if (psalmTitle) psalmTitle.textContent = cleanScriptureText(readings.psalm?.title || 'Salmo Responsorial');
+    if (psalmTitle) psalmTitle.textContent = cleanScriptureText(pObj.title || 'Salmo Responsorial');
     if (psalmText) {
-      const cleanPs = cleanScriptureText(readings.psalm?.text || 'No disponible');
+      const cleanPs = cleanScriptureText(pObj.text || 'Palabra de Dios');
       psalmText.innerHTML = cleanPs.split(/\n\s*\n/).filter(Boolean).map(p => `<p>${escapeHtml(p.trim())}</p>`).join('');
     }
 
-    if (gospelTitle) gospelTitle.textContent = cleanScriptureText(readings.gospel?.title || 'Santo Evangelio');
+    if (gospelTitle) gospelTitle.textContent = cleanScriptureText(gObj.title || 'Santo Evangelio');
     if (gospelText) {
-      const cleanGsp = cleanScriptureText(readings.gospel?.text || '');
+      const cleanGsp = cleanScriptureText(gObj.text || '');
       gospelText.innerHTML = cleanGsp.split(/\n\s*\n/).filter(Boolean).map(p => `<p>${escapeHtml(p.trim())}</p>`).join('');
     }
 
@@ -1434,11 +1464,15 @@ document.addEventListener('DOMContentLoaded', async () => {
   document.getElementById('daily-readings-copy-btn')?.addEventListener('click', () => {
     const r = state.dailyReadings;
     if (!r) return;
+    const fObj = (typeof r.firstReading === 'object' && r.firstReading !== null) ? r.firstReading : { title: 'Primera Lectura', text: r.firstReading || '' };
+    const pObj = (typeof r.psalm === 'object' && r.psalm !== null) ? r.psalm : { title: 'Salmo Responsorial', text: r.psalm || '' };
+    const gObj = (typeof r.gospel === 'object' && r.gospel !== null) ? r.gospel : { title: 'Santo Evangelio', text: r.gospel || '' };
+
     const txt = [
-      `🕊️ LECTURAS DE LA MISA: ${cleanScriptureText(r.liturgicTitle)}`,
-      `\n📖 ${cleanScriptureText(r.firstReading?.title)}:\n${cleanScriptureText(r.firstReading?.text)}`,
-      `\n🎵 ${cleanScriptureText(r.psalm?.title)}:\n${cleanScriptureText(r.psalm?.text)}`,
-      `\n✝️ ${cleanScriptureText(r.gospel?.title)}:\n${cleanScriptureText(r.gospel?.text)}`
+      `🕊️ LECTURAS DE LA MISA: ${cleanScriptureText(r.liturgicTitle || 'Tiempo Ordinario')}`,
+      `\n📖 ${cleanScriptureText(fObj.title)}:\n${cleanScriptureText(fObj.text)}`,
+      `\n🎵 ${cleanScriptureText(pObj.title)}:\n${cleanScriptureText(pObj.text)}`,
+      `\n✝️ ${cleanScriptureText(gObj.title)}:\n${cleanScriptureText(gObj.text)}`
     ].filter(Boolean).join('\n\n');
 
     navigator.clipboard.writeText(txt).then(() => {
