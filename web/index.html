@@ -1,0 +1,757 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Organizador de Pastoral 2.0 ✝️ — Aplicación de Escritorio con IA para Pastoral Escolar</title>
+  
+  <!-- SEO y Open Graph -->
+  <meta name="description" content="Organizador de escritorio para la pastoral de colegios católicos con espiritualidad dominicana, cantoral litúrgico interactivo, guiones de misa y asistente de IA Google Gemini.">
+  <meta name="keywords" content="pastoral escolar, organizador pastoral, colegios catolicos, dominicos, liturgia, cantoral, guiones de misa, google gemini, electron, manuel guia">
+  <meta name="author" content="Manuel Guia">
+  <meta property="og:title" content="Organizador de Pastoral 2.0 ✝️">
+  <meta property="og:description" content="Gestión, liturgia, cantoral y espiritualidad para la pastoral educativa con IA integrada.">
+  <meta property="og:type" content="website">
+
+  <!-- Fuentes Tipográficas Modernas -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800;900&family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Fira+Code:wght@400;600&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="style.css">
+  
+  <!-- Three.js CDN para la experiencia 3D interactiva en WebGL -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+</head>
+<body class="theme-dark">
+  <!-- Canvas 3D de Fondo WebGL -->
+  <div id="webgl-container"></div>
+
+  <!-- Contenedor Principal de la Página -->
+  <div class="landing-content">
+    
+    <!-- Barra de Navegación Sticky Glassmorphic -->
+    <header class="navbar" id="navbar">
+      <div class="nav-brand">
+        <div class="brand-logo-glow">
+          <svg viewBox="0 0 24 24" width="30" height="30" fill="none">
+            <path d="M12 2L13.8 5.8L18 7.2L14.2 9L12 13L9.8 9L6 7.2L10.2 5.8L12 2Z" fill="var(--primary)"/>
+            <path d="M11 9H13V22H11V9Z" fill="#f8fafc"/>
+            <path d="M5 13H19V15H5V13Z" fill="#f8fafc"/>
+          </svg>
+        </div>
+        <div class="brand-text-wrap">
+          <span class="brand-text">Organizador Pastoral</span>
+          <span class="brand-badge-version">v2.1.0</span>
+        </div>
+      </div>
+
+      <nav class="nav-links">
+        <a href="#features">Módulos</a>
+        <a href="#showcase">Demo en Vivo</a>
+        <a href="#spiritual">Espiritualidad</a>
+        <a href="#ai">Asistente IA</a>
+        <a href="#customization">Personalización</a>
+        <a href="#faq">Preguntas</a>
+      </nav>
+
+      <div class="nav-actions">
+        <!-- Selector rápido de paleta en la web -->
+        <div class="theme-palette-quick-picker" title="Cambiar tema de color de la web">
+          <button class="palette-dot-btn active" data-color="#f59e0b" style="background:#f59e0b;" title="Ámbar Dominicano"></button>
+          <button class="palette-dot-btn" data-color="#0ea5e9" style="background:#0ea5e9;" title="Azul Mariano"></button>
+          <button class="palette-dot-btn" data-color="#ef4444" style="background:#ef4444;" title="Rojo Pentecostés"></button>
+          <button class="palette-dot-btn" data-color="#10b981" style="background:#10b981;" title="Verde Esperanza"></button>
+          <button class="palette-dot-btn" data-color="#8b5cf6" style="background:#8b5cf6;" title="Morado Cuaresmal"></button>
+        </div>
+
+        <button class="theme-toggle-btn" id="web-theme-toggle" title="Alternar Modo Claro / Oscuro">
+          <span class="theme-toggle-icon">☀️</span>
+        </button>
+
+        <a href="#download" class="btn btn-nav-cta">
+          <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor"><path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/></svg>
+          <span>Descargar</span>
+        </a>
+      </div>
+    </header>
+
+    <!-- Sección Hero Principal con Gráficos 3D Interactivos -->
+    <section class="hero-section">
+      <div class="hero-badge">
+        <span class="badge-pulse"></span>
+        <span>Espiritualidad Dominicana &bull; Veritas &bull; Caritas</span>
+      </div>
+
+      <h1 class="hero-title">
+        La Herramienta Definitiva para la <span class="gradient-text">Pastoral Escolar</span> y Comunitaria
+      </h1>
+
+      <p class="hero-subtitle">
+        Una suite de escritorio moderna, segura y elegante diseñada para coordinar retiros, misas, cantoral interactivo con acordes, guiones litúrgicos, catequesis y el acompañamiento fraterno en colegios católicos, con inteligencia artificial integrada.
+      </p>
+
+      <div class="hero-actions" id="download">
+        <a href="https://github.com" target="_blank" rel="noopener" class="btn btn-hero-primary">
+          <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/></svg>
+          <div class="btn-text-block">
+            <span class="btn-primary-title">Descargar para Windows</span>
+            <span class="btn-primary-sub">Instalador Oficial x64 • v2.1.0</span>
+          </div>
+        </a>
+
+        <a href="#showcase" class="btn btn-hero-secondary">
+          <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 14.5v-9l6 4.5-6 4.5z"/></svg>
+          <span>Explorar Simulador Web</span>
+        </a>
+
+        <a href="https://github.com" target="_blank" rel="noopener" class="btn btn-hero-ghost">
+          <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg>
+          <span>GitHub</span>
+        </a>
+      </div>
+
+      <!-- Barra de Insignias de Confianza -->
+      <div class="hero-trust-bar">
+        <div class="trust-item">
+          <span class="trust-icon">🔒</span>
+          <div class="trust-text">
+            <strong>100% Local-First</strong>
+            <small>Tus datos en tu PC, cero telemetría</small>
+          </div>
+        </div>
+        <div class="trust-divider"></div>
+        <div class="trust-item">
+          <span class="trust-icon">⚡</span>
+          <div class="trust-text">
+            <strong>Cero Dependencias</strong>
+            <small>Rendimiento atómico y ultrarrápido</small>
+          </div>
+        </div>
+        <div class="trust-divider"></div>
+        <div class="trust-item">
+          <span class="trust-icon">🤖</span>
+          <div class="trust-text">
+            <strong>IA Google Gemini</strong>
+            <small>Visión y generación de oraciones</small>
+          </div>
+        </div>
+        <div class="trust-divider"></div>
+        <div class="trust-item">
+          <span class="trust-icon">✝️</span>
+          <div class="trust-text">
+            <strong>Cálculo de Pascua Perpetuo</strong>
+            <small>Algoritmo nativo Meeus/Butcher</small>
+          </div>
+        </div>
+      </div>
+
+      <!-- Controles de la Experiencia 3D Interactiva -->
+      <div class="hero-3d-toolbar">
+        <span class="toolbar-label">🎮 Reliquia 3D Interactiva:</span>
+        <div class="toolbar-buttons">
+          <button class="btn-3d-mode active" data-model="cross">✝️ Cruz Dominicana</button>
+          <button class="btn-3d-mode" data-model="star">⭐ Estrella Veritas</button>
+          <button class="btn-3d-mode" data-model="codex">📖 Códice Sagrado</button>
+        </div>
+        <span class="toolbar-hint">Haz clic y arrastra con el ratón para rotar en 3D</span>
+      </div>
+    </section>
+
+    <!-- Sección de Simulación Interactiva del Software (Showcase de la App) -->
+    <section class="showcase-section" id="showcase">
+      <div class="section-header">
+        <span class="section-tag">Experiencia en Vivo</span>
+        <h2 class="section-title">Diseñado con Precisión para el Día a Día Pastoral</h2>
+        <p class="section-desc">Prueba cómo responde la aplicación con datos y funciones reales directamente en tu navegador.</p>
+      </div>
+
+      <!-- Ventana Simulada de la Aplicación de Escritorio -->
+      <div class="desktop-mockup-frame">
+        <!-- Barra de título de ventana -->
+        <div class="mockup-window-header">
+          <div class="window-controls">
+            <span class="control-dot dot-close"></span>
+            <span class="control-dot dot-minimize"></span>
+            <span class="control-dot dot-maximize"></span>
+          </div>
+          <div class="window-title-chip">
+            <svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor"><path d="M12 2L13.8 5.8L18 7.2L14.2 9L12 13L9.8 9L6 7.2L10.2 5.8L12 2Z"/></svg>
+            <span>Organizador de Pastoral 2.0 — Colegio San Vicente de Paul</span>
+          </div>
+          <div class="window-badge-status">
+            <span class="status-indicator"></span> Conectado a Gemini Flash
+          </div>
+        </div>
+
+        <!-- Pestañas interactivas de la aplicación -->
+        <div class="mockup-tabs-bar">
+          <button class="mockup-tab-btn active" data-tab="gospel">📖 Evangelio & Oración IA</button>
+          <button class="mockup-tab-btn" data-tab="songs">🎵 Cantoral & Acordes</button>
+          <button class="mockup-tab-btn" data-tab="scripts">📜 Guiones de Misa</button>
+          <button class="mockup-tab-btn" data-tab="calendar">📅 Calendario & Pascua</button>
+          <button class="mockup-tab-btn" data-tab="tasks">✅ Tareas con Prioridad</button>
+          <button class="mockup-tab-btn" data-tab="notes">📝 Notas Markdown</button>
+        </div>
+
+        <!-- Contenidos de las pestañas -->
+        <div class="mockup-tab-contents">
+          
+          <!-- Pestaña 1: Evangelio & Oración IA -->
+          <div class="mockup-tab-panel active" id="tab-gospel">
+            <div class="mockup-gospel-card">
+              <div class="gospel-header">
+                <div class="gospel-tag">Evangelio del Día</div>
+                <div class="gospel-date">Liturgia de Hoy &bull; San Lucas 12, 8-12</div>
+              </div>
+              <blockquote class="gospel-quote">
+                "En aquel tiempo, dijo Jesús a sus discípulos: Yo les digo: Por todo aquel que se declare por mí ante los hombres, también el Hijo del hombre se declarará ante los ángeles de Dios... El Espíritu Santo les enseñará en aquel mismo momento lo que conviene decir."
+              </blockquote>
+              <div class="gospel-ai-action-box">
+                <div class="ai-box-left">
+                  <div class="ai-sparkle-icon">✨</div>
+                  <div>
+                    <strong>Oración de la Mañana Asistida por IA</strong>
+                    <small>Generada considerando la lectura evangélica y el carisma dominicano</small>
+                  </div>
+                </div>
+                <button class="btn btn-sm btn-primary" id="btn-demo-generate-prayer">
+                  <span>⚡ Regenerar Oración</span>
+                </button>
+              </div>
+              <div class="gospel-prayer-result" id="demo-prayer-text">
+                "Señor Jesús, Luz y Verdad del mundo: al comenzar esta jornada escolar, concédenos la valentía de ser tus testigos ante nuestros alumnos y familias. Que la gracia del Espíritu Santo ilumine nuestras palabras para enseñar con sabiduría y guiar con caridad. Por la intercesión de Santo Domingo de Guzmán, Amén."
+              </div>
+            </div>
+          </div>
+
+          <!-- Pestaña 2: Cantoral Litúrgico Interactivo con Acordes -->
+          <div class="mockup-tab-panel" id="tab-songs">
+            <div class="mockup-songs-layout">
+              <div class="songs-controls-bar">
+                <div class="song-title-info">
+                  <strong>Pescador de Hombres (Tú Has Venido a la Orilla)</strong>
+                  <span class="song-moment-badge">Momento: Comunión / Envío</span>
+                </div>
+                <div class="transposer-widget">
+                  <span class="transposer-label">Transportador de Acordes:</span>
+                  <button class="btn-transpose" id="btn-demo-transpose-down" title="Bajar medio tono">-1</button>
+                  <span class="transposer-current-key" id="demo-current-key">Do Mayor</span>
+                  <button class="btn-transpose" id="btn-demo-transpose-up" title="Subir medio tono">+1</button>
+                </div>
+              </div>
+              <div class="song-chord-sheet" id="demo-chord-sheet">
+                <p><span class="chord" data-chord="C">Do</span>                  <span class="chord" data-chord="G">Sol</span></p>
+                <p>Tú has venido a la orilla,</p>
+                <p><span class="chord" data-chord="Am">Lam</span>                  <span class="chord" data-chord="F">Fa</span></p>
+                <p>no has buscado ni a sabios ni a ricos,</p>
+                <p><span class="chord" data-chord="C">Do</span>          <span class="chord" data-chord="G">Sol</span>           <span class="chord" data-chord="C">Do</span></p>
+                <p>tan solo quieres que yo te siga.</p>
+                <p class="verse-chorus"><strong>Coro:</strong></p>
+                <p><span class="chord" data-chord="F">Fa</span>       <span class="chord" data-chord="G">Sol</span>     <span class="chord" data-chord="C">Do</span>       <span class="chord" data-chord="Am">Lam</span></p>
+                <p>Señor, me has mirado a los ojos,</p>
+                <p><span class="chord" data-chord="Dm">Rem</span>     <span class="chord" data-chord="G">Sol</span>         <span class="chord" data-chord="C">Do</span></p>
+                <p>sonriendo has dicho mi nombre...</p>
+              </div>
+              <div class="song-footer-hint">
+                💡 <em>¡Prueba hacer clic en [+1] o [-1] arriba para ver cómo se transportan los acordes en tiempo real!</em>
+              </div>
+            </div>
+          </div>
+
+          <!-- Pestaña 3: Guiones Litúrgicos Independientes -->
+          <div class="mockup-tab-panel" id="tab-scripts">
+            <div class="mockup-scripts-layout">
+              <div class="script-banner">
+                <div>
+                  <span class="script-badge">Misa Escolar Independiente</span>
+                  <h3>Guión Litúrgico: Inicio del Año Académico y Bendición de Alumnos</h3>
+                </div>
+                <button class="btn btn-sm btn-secondary" onclick="alert('Exportando guión listo para imprimir a PDF...')">
+                  🖨️ Exportar Guión a PDF
+                </button>
+              </div>
+              <div class="script-timeline">
+                <div class="timeline-step">
+                  <div class="step-badge">1. Entrada</div>
+                  <div class="step-content">
+                    <strong>Monición Ambiental:</strong> "Querida comunidad educativa, sean todos bienvenidos a esta Eucaristía con la que ponemos en manos de Dios este nuevo curso escolar..."
+                    <div class="step-song-linked">🎵 Canto de Entrada vinculado: <em>Juntos como Hermanos</em></div>
+                  </div>
+                </div>
+                <div class="timeline-step">
+                  <div class="step-badge">2. Palabra</div>
+                  <div class="step-content">
+                    <strong>Primera Lectura:</strong> Sabiduría 7, 7-14 ("Oré y me fue dada la prudencia").
+                    <strong>Evangelio:</strong> San Mateo 5, 13-16 ("Ustedes son la luz del mundo").
+                  </div>
+                </div>
+                <div class="timeline-step">
+                  <div class="step-badge">3. Preces</div>
+                  <div class="step-content">
+                    <strong>Oración de los Fieles:</strong> Por nuestros profesores, estudiantes y las familias más vulnerables del colegio. <em>Oremos al Señor / Te lo pedimos, Señor.</em>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Pestaña 4: Calendario & Pascua -->
+          <div class="mockup-tab-panel" id="tab-calendar">
+            <div class="mockup-calendar-layout">
+              <div class="calendar-widget-stats">
+                <div class="cal-stat-card">
+                  <span class="cal-stat-title">Tiempo Litúrgico Activo</span>
+                  <strong class="cal-stat-value text-green">Tiempo Ordinario</strong>
+                  <span class="cal-stat-sub">Color litúrgico: Verde Esperanza</span>
+                </div>
+                <div class="cal-stat-card">
+                  <span class="cal-stat-title">Próxima Gran Solemnidad</span>
+                  <strong class="cal-stat-value text-amber">Todos los Santos</strong>
+                  <span class="cal-stat-sub">1 de Noviembre &bull; Blanco</span>
+                </div>
+                <div class="cal-stat-card">
+                  <span class="cal-stat-title">Cálculo Meeus/Butcher</span>
+                  <strong class="cal-stat-value text-blue">Pascua Perpetua</strong>
+                  <span class="cal-stat-sub">Precisión astronómica nativa</span>
+                </div>
+              </div>
+              <div class="calendar-mini-events">
+                <div class="event-row-sample">
+                  <span class="event-pill pill-mass">Misa</span>
+                  <span class="event-name">Misa del Primer Viernes de Mes (Sagrado Corazón)</span>
+                  <span class="event-date">09:00 hrs &bull; Templo Colegial</span>
+                </div>
+                <div class="event-row-sample">
+                  <span class="event-pill pill-retreat">Retiro</span>
+                  <span class="event-name">Retiro Espiritual de 4° Medio: "Tras las Huellas de Domingo"</span>
+                  <span class="event-date">Todo el día &bull; Casa de Retiro Betania</span>
+                </div>
+                <div class="event-row-sample">
+                  <span class="event-pill pill-campaign">Campaña</span>
+                  <span class="event-name">Campaña Solidaria de Alimentos Fraternos</span>
+                  <span class="event-date">Durante toda la semana</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Pestaña 5: Tareas con Prioridad -->
+          <div class="mockup-tab-panel" id="tab-tasks">
+            <div class="mockup-tasks-layout">
+              <div class="tasks-toolbar-demo">
+                <div class="tasks-tabs-demo">
+                  <span class="tt-tab active">Todas (4)</span>
+                  <span class="tt-tab">Pendientes (3)</span>
+                  <span class="tt-tab">Completadas (1)</span>
+                </div>
+                <div class="tasks-select-demo">
+                  <select class="select-styled-demo">
+                    <option>⚡ Todas las prioridades</option>
+                    <option>🔴 Prioridad Alta</option>
+                    <option>🟡 Prioridad Media</option>
+                    <option>🟢 Prioridad Baja</option>
+                  </select>
+                </div>
+              </div>
+              <div class="tasks-items-list">
+                <div class="task-demo-row">
+                  <input type="checkbox" checked disabled>
+                  <span class="task-text done">Coordinar ensayos del coro para la misa escolar</span>
+                  <span class="task-badge badge-high">🔴 Alta</span>
+                </div>
+                <div class="task-demo-row">
+                  <input type="checkbox" disabled>
+                  <span class="task-text">Comprar cirios, hostias y vino de consagrar</span>
+                  <span class="task-badge badge-high">🔴 Alta</span>
+                </div>
+                <div class="task-demo-row">
+                  <input type="checkbox" disabled>
+                  <span class="task-text">Revisar fichas de inscripción para la Confirmación</span>
+                  <span class="task-badge badge-med">🟡 Media</span>
+                </div>
+                <div class="task-demo-row">
+                  <input type="checkbox" disabled>
+                  <span class="task-text">Preparar versículos impresos para la bienvenida</span>
+                  <span class="task-badge badge-low">🟢 Baja</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Pestaña 6: Notas Markdown -->
+          <div class="mockup-tab-panel" id="tab-notes">
+            <div class="mockup-notes-layout">
+              <div class="notes-preview-box">
+                <h2>Acta de Consejo Pastoral — Planificación de Misiones</h2>
+                <p><em>Fecha: 17 de Octubre &bull; Coordinador: Manuel Guia &bull; Comunidad Educativa</em></p>
+                <hr>
+                <h3>Objetivos Evangelizadores:</h3>
+                <ul>
+                  <li>Fortalecer el espíritu de oración comunitaria en los recreos.</li>
+                  <li>Realizar el taller de música litúrgica para el coro de alumnos.</li>
+                  <li>Acompañar a las familias en situación de duelo o enfermedad.</li>
+                </ul>
+                <blockquote>
+                  "No podemos quedarnos en la teoría: el Evangelio se vive en la acogida fraterna de cada día."
+                </blockquote>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </section>
+
+    <!-- Sección de Características y Módulos Completos (8 Bloques) -->
+    <section class="features-section" id="features">
+      <div class="section-header">
+        <span class="section-tag">Funcionalidades Principales</span>
+        <h2 class="section-title">Una Suite Integral para Equipos Pastorales</h2>
+        <p class="section-desc">Diseñada resolviendo las necesidades reales del día a día de profesores, sacerdotes y animadores pastorales.</p>
+      </div>
+
+      <div class="features-grid">
+        
+        <div class="feature-card">
+          <div class="feature-icon icon-amber">📖</div>
+          <h3>Evangelio & Lecturas Diarias</h3>
+          <p>Sincronización del Evangelio del día, Santo de la jornada, versículo bíblico y oraciones matutinas para iluminar la oración comunitaria escolar.</p>
+          <ul class="feature-bullets">
+            <li>Reflexiones guiadas para estudiantes</li>
+            <li>Santo del día con biografía y virtudes</li>
+            <li>Lecturas completas adaptadas</li>
+          </ul>
+        </div>
+
+        <div class="feature-card">
+          <div class="feature-icon icon-blue">🎵</div>
+          <h3>Cantoral Litúrgico Digital</h3>
+          <p>Cancionero enriquecido con acordes musicales interactivos, clasificados por momento de la misa y herramienta de transposición (+/- semitonos).</p>
+          <ul class="feature-bullets">
+            <li>Transportador armónico instantáneo</li>
+            <li>Clasificación: Entrada, Piedad, Comunión, etc.</li>
+            <li>Asignación de cantos a guiones de misa</li>
+          </ul>
+        </div>
+
+        <div class="feature-card">
+          <div class="feature-icon icon-purple">📜</div>
+          <h3>Guiones Litúrgicos Independientes</h3>
+          <p>Diseña y guarda plantillas completas de celebración para misas escolares, primeros viernes, misas de curso y sacramentos de Confirmación y Bautismo.</p>
+          <ul class="feature-bullets">
+            <li>Moniciones ambientales y de lecturas</li>
+            <li>Peticiones universales y cantos vinculados</li>
+            <li>Exportación directa a formato de impresión PDF</li>
+          </ul>
+        </div>
+
+        <div class="feature-card">
+          <div class="feature-icon icon-green">🤖</div>
+          <h3>Asistente de IA (Gemini & OpenRouter)</h3>
+          <p>Potente copiloto teológico para redactar oraciones solemnes, dinámicas de retiro, reflexiones bíblicas y digitalizar fotos de afiches con visión por computadora.</p>
+          <ul class="feature-bullets">
+            <li>Google Gemini Oficial (Flash, Pro) con streaming</li>
+            <li>Soporte alternativo para OpenRouter</li>
+            <li>Function Calling para registrar eventos y notas</li>
+          </ul>
+        </div>
+
+        <div class="feature-card">
+          <div class="feature-icon icon-red">📅</div>
+          <h3>Calendario Litúrgico Perpetuo</h3>
+          <p>Cálculo matemático astronómico de la Pascua y solemnidades con el algoritmo nativo de Meeus/Butcher, sincronización de colores y exportación a iCal (.ics).</p>
+          <ul class="feature-bullets">
+            <li>Tiempo litúrgico automático sin internet</li>
+            <li>Eventos recurrentes (semanales/mensuales)</li>
+            <li>Sincronización con Google Calendar y Outlook</li>
+          </ul>
+        </div>
+
+        <div class="feature-card">
+          <div class="feature-icon icon-cyan">🎨</div>
+          <h3>Personalización Visual & Temas</h3>
+          <p>Adapta la aplicación a tu gusto. En Modo Oscuro los colores son fuertes y vibrantes; en Modo Claro son frescos y pasteles suaves. 7 paletas y selector HEX a medida.</p>
+          <ul class="feature-bullets">
+            <li>Modo Claro Pastel vs Modo Oscuro Intenso</li>
+            <li>7 paletas litúrgicas prediseñadas</li>
+            <li>Algoritmo HSL para tu color personalizado</li>
+          </ul>
+        </div>
+
+        <div class="feature-card">
+          <div class="feature-icon icon-rose">📝</div>
+          <h3>Notas con Soporte Markdown</h3>
+          <p>Editor de apuntes con formato enriquecido (títulos, listas, citas, negritas y código), plantillas de consejo escolar y fichas de acompañamiento personal.</p>
+          <ul class="feature-bullets">
+            <li>Renderizado en tiempo real de Markdown</li>
+            <li>Etiquetas temáticas y buscador inteligente</li>
+            <li>Exportación de actas a PDF y hojas CSV</li>
+          </ul>
+        </div>
+
+        <div class="feature-card">
+          <div class="feature-icon icon-gold">👥</div>
+          <h3>Directorio de Comunidad Escolar</h3>
+          <p>Registro ordenado de catequistas, delegados de pastoral, grupos juveniles y voluntarios con teléfonos de contacto y fichas de misión.</p>
+          <ul class="feature-bullets">
+            <li>Gestión de grupos pastorales</li>
+            <li>Fichas de contacto seguras</li>
+            <li>Exportación rápida a tablas CSV y reportes</li>
+          </ul>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- Sección de Espiritualidad Dominicana -->
+    <section class="spiritual-section" id="spiritual">
+      <div class="spiritual-card">
+        <div class="spiritual-content-left">
+          <div class="spiritual-badge">Espiritualidad de la Orden de Predicadores</div>
+          <h2 class="spiritual-quote-title">"Contemplar y dar a los demás los frutos de lo contemplado"</h2>
+          <p class="spiritual-author">&mdash; Santo Tomás de Aquino, O.P.</p>
+          <p class="spiritual-desc">
+            Inspirada en el carisma de <strong>Santo Domingo de Guzmán</strong>, la aplicación no es un simple programa de oficina: es una herramienta que estructura el servicio pastoral educativo bajo los pilares de la Verdad (<em>Veritas</em>), la Oración en comunidad, el Estudio constante y la Caridad fraterna.
+          </p>
+          <div class="pillars-row">
+            <div class="pillar-item">
+              <strong>Veritas</strong>
+              <span>Búsqueda sincera de la verdad en la educación católica</span>
+            </div>
+            <div class="pillar-item">
+              <strong>Caritas</strong>
+              <span>Amor servicial y fraterno hacia los estudiantes y familias</span>
+            </div>
+            <div class="pillar-item">
+              <strong>Oratio</strong>
+              <span>Alimento diario de la gracia en la liturgia y la Eucaristía</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="spiritual-content-right">
+          <div class="saints-grid-mini">
+            <div class="saint-mini-card">
+              <span class="saint-icon">🌟</span>
+              <strong>Santo Domingo</strong>
+              <small>Fundador y predicador de la gracia</small>
+            </div>
+            <div class="saint-mini-card">
+              <span class="saint-icon">📖</span>
+              <strong>Santo Tomás</strong>
+              <small>Doctor Angélico y teólogo sabio</small>
+            </div>
+            <div class="saint-mini-card">
+              <span class="saint-icon">🕊️</span>
+              <strong>Santa Catalina</strong>
+              <small>Mística y doctora de la caridad</small>
+            </div>
+            <div class="saint-mini-card">
+              <span class="saint-icon">🧹</span>
+              <strong>San Martín</strong>
+              <small>Humildad y servicio a los necesitados</small>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Sección de Demostración del Asistente IA Pastoral -->
+    <section class="ai-section" id="ai">
+      <div class="section-header">
+        <span class="section-tag">Inteligencia Artificial Pastoral</span>
+        <h2 class="section-title">Copiloto Teológico al Servicio de tu Misión</h2>
+        <p class="section-desc">Conexión directa con Google Gemini Oficial (Google AI Studio) o proveedores externos vía OpenRouter.</p>
+      </div>
+
+      <div class="ai-showcase-box">
+        <div class="ai-chat-header">
+          <div class="ai-avatar-circle">🤖</div>
+          <div class="ai-chat-meta">
+            <strong>Asistente Pastoral IA</strong>
+            <small>Modelo activo: Google Gemini Flash 2.5 &bull; Modo Liturgia y Carisma</small>
+          </div>
+          <span class="ai-security-pill">🔒 Clave en almacenamiento local</span>
+        </div>
+
+        <div class="ai-chat-body">
+          <div class="chat-bubble bubble-user">
+            "Redacta una oración solemne y emotiva para bendecir las mochilas y útiles escolares de los alumnos de primer grado."
+          </div>
+          <div class="chat-bubble bubble-assistant">
+            <p><strong>Dios de infinita ternura y sabiduría:</strong></p>
+            <p>Te presentamos hoy estas mochilas y cuadernos, llenos de sueños, colores y esperanzas de nuestros niños pequeños. Que cada lápiz sea instrumento para aprender a escribir palabras de paz; que cada libro abra sus mentes a la belleza de tu Creación; y que cada día en nuestro colegio descubran la alegría de ser amados.</p>
+            <p><em>Bendice a sus familias y maestros, para que juntos caminemos en tu Verdad. Por Jesucristo nuestro Señor. Amén.</em></p>
+          </div>
+        </div>
+
+        <div class="ai-sample-prompts">
+          <span class="sample-label">Prueba pedirle cosas como:</span>
+          <button class="prompt-chip" onclick="setDemoPrompt('guion')">"Guión de Misa de Confirmación"</button>
+          <button class="prompt-chip" onclick="setDemoPrompt('retiro')">"Cronograma para Retiro de Jóvenes"</button>
+          <button class="prompt-chip" onclick="setDemoPrompt('homilia')">"Dinámica pastoral sobre la parábola del Sembrador"</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- Sección de Personalización de Colores & Temas -->
+    <section class="customization-section" id="customization">
+      <div class="section-header">
+        <span class="section-tag">Diseño Adaptable</span>
+        <h2 class="section-title">Colores Pasteles para el Día, Intensos para la Noche</h2>
+        <p class="section-desc">El usuario tiene el control total sobre la atmósfera visual del software.</p>
+      </div>
+
+      <div class="palettes-showcase-grid">
+        <div class="palette-preview-card" style="--card-accent:#f59e0b;">
+          <div class="palette-swatch-bar" style="background:linear-gradient(90deg, #fef3c7 50%, #f59e0b 50%);"></div>
+          <h4>Ámbar Dominicano</h4>
+          <p>Tono cálido, sabio y clásico de la Orden de Predicadores.</p>
+        </div>
+        <div class="palette-preview-card" style="--card-accent:#0ea5e9;">
+          <div class="palette-swatch-bar" style="background:linear-gradient(90deg, #e0f2fe 50%, #0ea5e9 50%);"></div>
+          <h4>Azul Mariano</h4>
+          <p>Serenidad y pureza bajo la maternal protección de la Virgen María.</p>
+        </div>
+        <div class="palette-preview-card" style="--card-accent:#ef4444;">
+          <div class="palette-swatch-bar" style="background:linear-gradient(90deg, #fee2e2 50%, #ef4444 50%);"></div>
+          <h4>Rojo Pentecostés</h4>
+          <p>El fuego del Espíritu Santo y la fuerza testimonial de los mártires.</p>
+        </div>
+        <div class="palette-preview-card" style="--card-accent:#10b981;">
+          <div class="palette-swatch-bar" style="background:linear-gradient(90deg, #d1fae5 50%, #10b981 50%);"></div>
+          <h4>Verde Esperanza</h4>
+          <p>Crecimiento en la fe y perseverancia del Tiempo Ordinario.</p>
+        </div>
+        <div class="palette-preview-card" style="--card-accent:#8b5cf6;">
+          <div class="palette-swatch-bar" style="background:linear-gradient(90deg, #ede9fe 50%, #8b5cf6 50%);"></div>
+          <h4>Morado Cuaresmal</h4>
+          <p>Conversión, sobriedad y contemplación para Adviento y Cuaresma.</p>
+        </div>
+        <div class="palette-preview-card" style="--card-accent:#06b6d4;">
+          <div class="palette-swatch-bar" style="background:linear-gradient(90deg, #cffafe 50%, #06b6d4 50%);"></div>
+          <h4>Turquesa Celestial</h4>
+          <p>Fresco, jovial y energizante para pastoral juvenil.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Sección de Preguntas Frecuentes (FAQ) -->
+    <section class="faq-section" id="faq">
+      <div class="section-header">
+        <span class="section-tag">Resolviendo Inquietudes</span>
+        <h2 class="section-title">Preguntas Frecuentes</h2>
+        <p class="section-desc">Todo lo que necesitas saber antes de instalar o implementar en tu colegio.</p>
+      </div>
+
+      <div class="faq-accordion">
+        
+        <details class="faq-item" open>
+          <summary class="faq-question">
+            <span>¿La aplicación funciona sin conexión a Internet?</span>
+            <span class="faq-icon">+</span>
+          </summary>
+          <div class="faq-answer">
+            <p><strong>Sí, al 100%.</strong> El calendario litúrgico calcula la Pascua y las solemnidades de forma matemática sin requerir conexión externa. Tus notas, tareas, cantoral y eventos se guardan atómicamente en tu disco duro local. La conexión solo se utiliza si deseas usar la IA (Google Gemini u OpenRouter).</p>
+          </div>
+        </details>
+
+        <details class="faq-item">
+          <summary class="faq-question">
+            <span>¿Cómo se conecta con Google Gemini Oficial?</span>
+            <span class="faq-icon">+</span>
+          </summary>
+          <div class="faq-answer">
+            <p>Solo necesitas obtener una clave gratuita (API Key) desde Google AI Studio (generativelanguage.googleapis.com) e ingresarla en la sección de Ajustes. También admite Login con Google para colegios con Google Workspace for Education.</p>
+          </div>
+        </details>
+
+        <details class="faq-item">
+          <summary class="faq-question">
+            <span>¿Mis datos están seguros o se comparten con terceros?</span>
+            <span class="faq-icon">+</span>
+          </summary>
+          <div class="faq-answer">
+            <p>Tus datos son absolutamente privados. Se almacenan en tu propia computadora en formato JSON estructurado con copias de seguridad automáticas diarias. No hay servidores intermedios de recopilación ni analíticas invasivas.</p>
+          </div>
+        </details>
+
+        <details class="faq-item">
+          <summary class="faq-question">
+            <span>¿Es compatible con Windows 10 y Windows 11?</span>
+            <span class="faq-icon">+</span>
+          </summary>
+          <div class="faq-answer">
+            <p>Sí, la aplicación ha sido optimizada y compilada sobre <strong>Electron v33</strong> y Node.js para arquitecturas Windows de 64 bits (x64), funcionando fluidamente en Windows 10 y Windows 11.</p>
+          </div>
+        </details>
+
+        <details class="faq-item">
+          <summary class="faq-question">
+            <span>¿Puedo imprimir o exportar los guiones de misa y calendarios?</span>
+            <span class="faq-icon">+</span>
+          </summary>
+          <div class="faq-answer">
+            <p>Sí, todos los guiones litúrgicos, notas y calendarios cuentan con botones de exportación a documentos PDF listos para imprimir o repartir a los lectores, así como exportación a formato iCal (.ics) para sincronizar con celulares.</p>
+          </div>
+        </details>
+
+      </div>
+    </section>
+
+    <!-- Banner Final de Llamado a la Acción -->
+    <section class="cta-banner-section">
+      <div class="cta-card">
+        <div class="cta-card-content">
+          <h2>Empieza a Organizar la Fe con Excelencia y Belleza</h2>
+          <p>Descarga la aplicación gratuita para tu colegio o parroquia y transforma la coordinación de tus celebraciones y retiros.</p>
+          <div class="cta-card-buttons">
+            <a href="https://github.com" target="_blank" rel="noopener" class="btn btn-hero-primary">
+              <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/></svg>
+              <span>Descargar Instalador (Windows)</span>
+            </a>
+            <a href="https://github.com" target="_blank" rel="noopener" class="btn btn-hero-secondary">
+              <span>Repositorio en GitHub</span>
+            </a>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Pie de Página Institucional -->
+    <footer class="footer">
+      <div class="footer-inner">
+        <div class="footer-top">
+          <div class="footer-brand">
+            <div class="brand-logo-glow">
+              <svg viewBox="0 0 24 24" width="26" height="26" fill="none">
+                <path d="M12 2L13.8 5.8L18 7.2L14.2 9L12 13L9.8 9L6 7.2L10.2 5.8L12 2Z" fill="var(--primary)"/>
+                <path d="M11 9H13V22H11V9Z" fill="#f8fafc"/>
+                <path d="M5 13H19V15H5V13Z" fill="#f8fafc"/>
+              </svg>
+            </div>
+            <strong>Organizador de Pastoral 2.0</strong>
+          </div>
+          <p class="footer-tagline">"Veritas &bull; Caritas &bull; Contemplata aliis tradere"</p>
+        </div>
+
+        <div class="footer-credits-box">
+          <p class="footer-developer">
+            Diseñado y desarrollado con dedicación pastoral por <strong>Manuel Guia</strong>
+          </p>
+          <p class="footer-tech-stack">
+            Tecnología: Electron v33 &bull; Node.js &bull; Google Gemini AI &bull; Three.js 3D &bull; Vercel Ready
+          </p>
+          <p class="footer-copyright">
+            Código abierto bajo Licencia MIT &bull; 2026 Organizador de Pastoral. Todos los derechos reservados.
+          </p>
+        </div>
+      </div>
+    </footer>
+
+  </div>
+
+  <script src="main.js"></script>
+</body>
+</html>

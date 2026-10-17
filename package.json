@@ -1,0 +1,57 @@
+{
+  "name": "organizador-pastoral",
+  "version": "2.0.0",
+  "description": "Organizador de escritorio para la pastoral de un colegio católico con asistente de IA integrado",
+  "main": "main.js",
+  "author": "Manuel Guia",
+  "license": "MIT",
+  "scripts": {
+    "start": "electron .",
+    "dist": "electron-builder",
+    "dist:portable": "electron-builder --win portable",
+    "dist:nsis": "electron-builder --win nsis"
+  },
+  "devDependencies": {
+    "electron": "^33.0.0",
+    "electron-builder": "^25.1.8"
+  },
+  "build": {
+    "appId": "com.pastoral.organizador",
+    "productName": "Organizador Pastoral",
+    "copyright": "Copyright © 2026 Manuel Guia",
+    "directories": {
+      "output": "dist",
+      "buildResources": "build"
+    },
+    "win": {
+      "target": [
+        "nsis",
+        "portable"
+      ],
+      "icon": "build/icon.ico",
+      "artifactName": "${productName}-${version}-${os}-${arch}.${ext}"
+    },
+    "nsis": {
+      "oneClick": false,
+      "perMachine": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true,
+      "shortcutName": "Organizador Pastoral"
+    },
+    "portable": {
+      "artifactName": "${productName}-Portable-${version}.${ext}"
+    },
+    "files": [
+      "main.js",
+      "preload.js",
+      "cloud-manager.js",
+      "saint-manager.js",
+      "reading-manager.js",
+      "song-data.js",
+      "liturgical-templates.js",
+      "renderer/**/*",
+      "build/**/*"
+    ]
+  }
+}

@@ -1,0 +1,1882 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; img-src 'self' data: https: http:; style-src 'self' 'unsafe-inline'; script-src 'self';">
+  <title>Organizador Pastoral</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body class="theme-light">
+  <!-- Layout Principal de la Aplicación -->
+  <div class="app-layout">
+    
+    <!-- Sidebar de Navegación -->
+    <aside class="sidebar">
+      <div class="sidebar-brand">
+        <div class="brand-emblem">
+          <svg viewBox="0 0 24 24" width="26" height="26" fill="currentColor">
+            <!-- Emblema de Cruz con estrella de Santo Domingo -->
+            <path d="M12 2L13.5 5.5L17 7L13.5 8.5L12 12L10.5 8.5L7 7L10.5 5.5L12 2Z" fill="#f59e0b"/>
+            <path d="M11 9H13V21H11V9Z" fill="#f8fafc"/>
+            <path d="M6 13H18V15H6V13Z" fill="#f8fafc"/>
+          </svg>
+        </div>
+        <div class="brand-text">
+          <h1 class="brand-title">Pastoral</h1>
+          <span class="brand-subtitle" id="sidebar-school-name">Colegio Católico</span>
+        </div>
+      </div>
+
+      <!-- Menú de Vistas -->
+      <nav class="sidebar-nav">
+        <button class="nav-item active" data-view="dashboard">
+          <svg viewBox="0 0 24 24" class="nav-icon"><path d="M3 13h8V3H3v10zm0 8h8v-6H3v6zm10 0h8V11h-8v10zm0-18v6h8V3h-8z"/></svg>
+          <span class="nav-label">Inicio</span>
+        </button>
+
+        <button class="nav-item" data-view="notes">
+          <svg viewBox="0 0 24 24" class="nav-icon"><path d="M14 2H6c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 1.99 2H18c1.1 0 2-.9 2-2V8l-6-6zm2 16H8v-2h8v2zm0-4H8v-2h8v2zm-3-5V3.5L18.5 9H13z"/></svg>
+          <span class="nav-label">Ideas y Notas</span>
+        </button>
+
+        <button class="nav-item" data-view="events">
+          <svg viewBox="0 0 24 24" class="nav-icon"><path d="M19 4h-1V2h-2v2H8V2H6v2H5c-1.11 0-1.99.9-1.99 2L3 20a2 2 0 0 0 2 2h14c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 16H5V10h14v10zm0-12H5V6h14v2z"/></svg>
+          <span class="nav-label">Eventos</span>
+        </button>
+
+        <button class="nav-item" data-view="tasks">
+          <svg viewBox="0 0 24 24" class="nav-icon"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-9 14l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg>
+          <span class="nav-label">Tareas</span>
+          <span class="nav-badge" id="sidebar-tasks-count" style="display:none;">0</span>
+        </button>
+
+        <button class="nav-item" data-view="community">
+          <svg viewBox="0 0 24 24" class="nav-icon"><path d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z"/></svg>
+          <span class="nav-label">Comunidad</span>
+        </button>
+
+        <button class="nav-item" data-view="liturgical-scripts">
+          <svg viewBox="0 0 24 24" class="nav-icon"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-1 16H6c-.55 0-1-.45-1-1V5c0-.55.45-1 1-1h12c.55 0 1 .45 1 1v12c0 .55-.45 1-1 1zM7 6h10v2H7zm0 4h10v2H7zm0 4h7v2H7z"/></svg>
+          <span class="nav-label">Guiones y Misas</span>
+        </button>
+
+        <button class="nav-item" data-view="songbook">
+          <svg viewBox="0 0 24 24" class="nav-icon"><path d="M12 3v10.55c-.59-.34-1.27-.55-2-.55-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4V7h4V3h-6z"/></svg>
+          <span class="nav-label">Cancionero</span>
+          <span class="nav-badge" id="sidebar-songs-count">25</span>
+        </button>
+
+        <button class="nav-item" data-view="ai-chat">
+          <svg viewBox="0 0 24 24" class="nav-icon"><path d="M20 2H4c-1.1 0-1.99.9-1.99 2L2 22l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zM6 9h12v2H6V9zm8 5H6v-2h8v2zm4-6H6V6h12v2z"/></svg>
+          <span class="nav-label">Asistente IA</span>
+          <span class="nav-status-dot" id="sidebar-ai-status" title="IA Desconectada"></span>
+        </button>
+
+        <button class="nav-item" data-view="settings">
+          <svg viewBox="0 0 24 24" class="nav-icon"><path d="M19.14 12.94c.04-.3.06-.61.06-.94 0-.32-.02-.64-.07-.94l2.03-1.58c.18-.14.23-.41.12-.61l-1.92-3.32c-.12-.22-.37-.29-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94l-.36-2.54c-.04-.24-.24-.41-.48-.41h-3.84c-.24 0-.43.17-.47.41l-.36 2.54c-.59.24-1.13.57-1.62.94l-2.39-.96c-.22-.08-.47 0-.59.22L2.74 8.87c-.12.21-.08.47.12.61l2.03 1.58c-.05.3-.09.63-.09.94s.02.64.07.94l-2.03 1.58c-.18.14-.23.41-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .44-.17.47-.41l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32c.12-.22.07-.47-.12-.61l-2.01-1.58zM12 15.6c-1.98 0-3.6-1.62-3.6-3.6s1.62-3.6 3.6-3.6 3.6 1.62 3.6 3.6-1.62 3.6-3.6 3.6z"/></svg>
+          <span class="nav-label">Ajustes</span>
+        </button>
+      </nav>
+
+      <!-- Pie del Sidebar -->
+      <div class="sidebar-footer">
+        <button class="quick-search-trigger" id="quick-search-btn" title="Buscar en todo (Ctrl+K)">
+          <svg viewBox="0 0 24 24" width="16" height="16"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z" fill="currentColor"/></svg>
+          <span>Buscar...</span>
+          <kbd class="kbd-shortcut">Ctrl K</kbd>
+        </button>
+        
+        <div class="sidebar-theme-row">
+          <button class="theme-toggle-btn" id="theme-toggle-btn" title="Cambiar tema Claro / Oscuro">
+            <svg id="theme-icon-sun" viewBox="0 0 24 24" width="18" height="18"><path d="M12 7c-2.76 0-5 2.24-5 5s2.24 5 5 5 5-2.24 5-5-2.24-5-5-5zM2 13h2c.55 0 1-.45 1-1s-.45-1-1-1H2c-.55 0-1 .45-1 1s.45 1 1 1zm18 0h2c.55 0 1-.45 1-1s-.45-1-1-1h-2c-.55 0-1 .45-1 1s.45 1 1 1zM11 2v2c0 .55.45 1 1 1s1-.45 1-1V2c0-.55-.45-1-1-1s-1 .45-1 1zm0 18v2c0 .55.45 1 1 1s1-.45 1-1v-2c0-.55-.45-1-1-1s-1 .45-1 1zM5.99 4.58c-.39-.39-1.03-.39-1.41 0s-.39 1.03 0 1.41l1.06 1.06c.39.39 1.03.39 1.41 0s.39-1.03 0-1.41L5.99 4.58zm12.37 12.37c-.39-.39-1.03-.39-1.41 0s-.39 1.03 0 1.41l1.06 1.06c.39.39 1.03.39 1.41 0s.39-1.03 0-1.41l-1.06-1.06zm1.06-10.96c.39-.39.39-1.03 0-1.41s-1.03-.39-1.41 0l-1.06 1.06c-.39.39-.39 1.03 0 1.41s1.03.39 1.41 0l1.06-1.06zM7.05 18.36c.39-.39.39-1.03 0-1.41s-1.03-.39-1.41 0l-1.06 1.06c-.39.39-.39 1.03 0 1.41s1.03.39 1.41 0l1.06-1.06z" fill="currentColor"/></svg>
+            <span class="theme-text">Modo Claro</span>
+          </button>
+          <button class="theme-palette-btn" id="sidebar-palette-btn" title="Personalizar colores y paletas (Pasteles en claro / Fuertes en oscuro)">
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor"><path d="M12 3c-4.97 0-9 4.03-9 9 0 2.12.74 4.07 1.97 5.61L4.35 19.4c-.39.39-.39 1.02 0 1.41.39.39 1.02.39 1.41 0l1.9-1.9C9.22 19.64 10.57 20 12 20c4.97 0 9-4.03 9-9s-4.03-9-9-9zm0 15c-3.31 0-6-2.69-6-6s2.69-6 6-6 6 2.69 6 6-2.69 6-6 6z"/></svg>
+          </button>
+        </div>
+      </div>
+    </aside>
+
+    <!-- Contenido Principal -->
+    <main class="main-content">
+
+      <!-- ============================================== -->
+      <!-- VISTA 1: INICIO (DASHBOARD)                   -->
+      <!-- ============================================== -->
+      <section class="view-panel active" id="view-dashboard">
+        <!-- Banner Litúrgico Dinámico -->
+        <div class="liturgical-banner" id="dash-liturgical-banner">
+          <div class="liturgical-ribbon" id="liturgical-ribbon-color"></div>
+          <div class="liturgical-content">
+            <div class="liturgical-header">
+              <span class="liturgical-season-badge" id="dash-liturgical-season">Tiempo Ordinario</span>
+              <span class="liturgical-color-label" id="dash-liturgical-color">Color Litúrgico: Verde</span>
+            </div>
+            <h2 class="liturgical-celebration" id="dash-liturgical-celebration">Feria del Tiempo Ordinario</h2>
+            <p class="liturgical-upcoming" id="dash-liturgical-upcoming">Próxima solemnidad calculada...</p>
+          </div>
+          <div class="liturgical-symbol">
+            <svg viewBox="0 0 24 24" width="48" height="48" fill="currentColor" opacity="0.15">
+              <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/>
+            </svg>
+          </div>
+        </div>
+
+        <!-- Encabezado de Bienvenida y Versículo -->
+        <header class="dashboard-greeting-row">
+          <div class="greeting-text-block">
+            <h1 class="greeting-title" id="dash-greeting-title">¡Paz y bien!</h1>
+            <p class="greeting-subtitle" id="dash-greeting-subtitle">Bienvenido a la jornada pastoral</p>
+          </div>
+          <div class="quote-card">
+            <blockquote class="quote-verse" id="dash-verse-text">"La caridad es paciente, es servicial; todo lo disculpa, todo lo espera."</blockquote>
+            <cite class="quote-author" id="dash-verse-ref">1 Corintios 13, 4.7</cite>
+          </div>
+        </header>
+
+        <!-- Tarjeta del Santo del Día e Historia (Estilo ePrex / Liturgia de las Horas) -->
+        <div class="saint-card" id="dash-saint-card">
+          <div class="saint-card-header">
+            <div class="saint-badge-group">
+              <span class="saint-tag">
+                <svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor"><path d="M12 2L14.4 7.2L20 8L16 12L17 17.6L12 15L7 17.6L8 12L4 8L9.6 7.2L12 2Z"/></svg>
+                Santo del Día
+              </span>
+              <span class="saint-date-badge" id="saint-card-date">Cargando...</span>
+              <span class="saint-cached-badge" id="saint-card-cache-badge" title="Información guardada para las próximas 24 horas">✓ Al día (24h)</span>
+            </div>
+            <div class="saint-header-actions">
+              <button class="btn btn-sm btn-ghost saint-refresh-btn" id="btn-refresh-saint" title="Actualizar santoral manualmente">
+                <svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor"><path d="M17.65 6.35C16.2 4.9 14.21 4 12 4c-4.42 0-7.99 3.58-7.99 8s3.57 8 7.99 8c3.73 0 6.84-2.55 7.73-6h-2.08c-.82 2.33-3.04 4-5.65 4-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78L13 11h7V4l-2.35 2.35z"/></svg>
+                <span>Actualizar</span>
+              </button>
+            </div>
+          </div>
+
+          <div class="saint-main-info">
+            <div class="saint-image-container" id="saint-image-container" title="Haz clic para ver la imagen del santo">
+              <img id="saint-portrait-img" class="saint-portrait-img" src="" alt="Santo del Día" style="display:none;" />
+              <div id="saint-avatar-fallback" class="saint-avatar-icon">
+                <svg viewBox="0 0 24 24" width="28" height="28" fill="currentColor"><path d="M12 2a5 5 0 1 0 5 5 5 5 0 0 0-5-5zm0 8a3 3 0 1 1 3-3 3 3 0 0 1-3 3zm9 11v-1a7 7 0 0 0-7-7h-4a7 7 0 0 0-7 7v1h2v-1a5 5 0 0 1 5-5h4a5 5 0 0 1 5 5v1z"/></svg>
+              </div>
+            </div>
+            <div class="saint-headings">
+              <h3 class="saint-name" id="saint-name">Cargando Santo del Día...</h3>
+              <p class="saint-title-rank" id="saint-title-rank">Liturgia de la Iglesia Católica</p>
+            </div>
+          </div>
+
+          <!-- Martirologio Romano (Resumen) -->
+          <div class="saint-martirology-box" id="saint-martirology-box">
+            <p class="saint-martirology-text" id="saint-martirology">Memoria del santo del día según el Martirologio Romano...</p>
+          </div>
+
+          <!-- Historia Biográfica ("Un poco de su historia") -->
+          <div class="saint-history-wrapper">
+            <div class="saint-history-title">
+              <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor"><path d="M18 2H6c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zM6 4h5v8l-2.5-1.5L6 12V4z"/></svg>
+              <span>Un poco de su historia</span>
+            </div>
+            <div class="saint-history-content collapsed" id="saint-history-content">
+              <p class="saint-loading-text">Consultando hagiografía...</p>
+            </div>
+            <div class="saint-fade-overlay" id="saint-fade-overlay"></div>
+          </div>
+
+          <!-- Cita o reflexión del Santo -->
+          <div class="saint-quote-banner" id="saint-quote-banner" style="display:none;">
+            <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor"><path d="M6 17h3l2-4V7H5v6h3zm8 0h3l2-4V7h-6v6h3z"/></svg>
+            <span class="saint-quote-text" id="saint-quote-text"></span>
+          </div>
+
+          <!-- Acciones de la Tarjeta del Santo -->
+          <div class="saint-card-footer">
+            <button class="btn btn-sm btn-secondary saint-toggle-expand-btn" id="btn-toggle-saint-history">
+              <span>📖 Leer historia completa</span>
+            </button>
+            <button class="btn btn-sm btn-ghost" id="btn-view-saint-image" title="Ver imagen sagrada del santo en grande" style="display:none;">
+              <svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor"><path d="M21 19V5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2zM8.5 13.5l2.5 3.01L14.5 12l4.5 6H5l3.5-4.5z"/></svg>
+              <span>Ver imagen</span>
+            </button>
+            <button class="btn btn-sm btn-ghost" id="btn-copy-saint-history" title="Copiar nombre e historia para oraciones escolares">
+              <svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/></svg>
+              <span>Copiar reseña</span>
+            </button>
+            <button class="btn btn-sm btn-ghost" id="btn-ask-ai-saint" title="Preguntar a la IA lecciones pastorales de este santo">
+              <svg viewBox="0 0 24 24" width="14" height="14" fill="#f59e0b"><path d="M12 2L13.5 5.5L17 7L13.5 8.5L12 12L10.5 8.5L7 7L10.5 5.5L12 2Z"/></svg>
+              <span>Reflexionar con IA</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Tarjeta del Evangelio del Día y Oración de la Mañana Escolar -->
+        <div class="gospel-card" id="dash-gospel-card">
+          <div class="gospel-card-header">
+            <div class="gospel-badge-group">
+              <span class="gospel-tag">
+                <svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor"><path d="M19 2H5c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm-1 16H6c-.55 0-1-.45-1-1V5c0-.55.45-1 1-1h12c.55 0 1 .45 1 1v12c0 .55-.45 1-1 1zM7 6h10v2H7zm0 4h10v2H7zm0 4h7v2H7z"/></svg>
+                Evangelio del Día
+              </span>
+              <span class="gospel-liturgic-title" id="gospel-liturgic-title">Tiempo Ordinario</span>
+              <span class="saint-cached-badge" id="gospel-cached-badge" title="Lecturas guardadas para las próximas 24 horas">✓ Al día (24h)</span>
+            </div>
+            <div class="gospel-header-actions">
+              <button class="btn btn-sm btn-ghost" id="btn-refresh-gospel" title="Actualizar lecturas del día manualmente">
+                <svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor"><path d="M17.65 6.35C16.2 4.9 14.21 4 12 4c-4.42 0-7.99 3.58-7.99 8s3.57 8 7.99 8c3.73 0 6.84-2.55 7.73-6h-2.08c-.82 2.33-3.04 4-5.65 4-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78L13 11h7V4l-2.35 2.35z"/></svg>
+                <span>Actualizar</span>
+              </button>
+            </div>
+          </div>
+
+          <div class="gospel-main-info">
+            <div class="gospel-icon-badge">
+              <svg viewBox="0 0 24 24" width="28" height="28" fill="#3b82f6"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 14H9V8h2v8zm4 0h-2V8h2v8z"/></svg>
+            </div>
+            <div class="gospel-headings">
+              <h3 class="gospel-title" id="gospel-title">Consultando Evangelio de hoy...</h3>
+              <p class="gospel-quote-snippet" id="gospel-quote-snippet">Palabra del Señor</p>
+            </div>
+          </div>
+
+          <!-- Texto del Evangelio expandible -->
+          <div class="gospel-text-wrapper">
+            <div class="gospel-text-content collapsed" id="gospel-text-content">
+              <p class="saint-loading-text">Cargando texto sagrado...</p>
+            </div>
+            <div class="saint-fade-overlay" id="gospel-fade-overlay"></div>
+          </div>
+
+          <!-- Acciones de la Tarjeta del Evangelio -->
+          <div class="gospel-card-footer">
+            <button class="btn btn-sm btn-secondary" id="btn-toggle-gospel-text">
+              <span>📖 Leer Evangelio completo</span>
+            </button>
+            <button class="btn btn-sm btn-primary" id="btn-open-morning-prayer-modal" title="Generar oración matutina escolar para la sala de clases">
+              <svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor"><path d="M12 2L13.5 5.5L17 7L13.5 8.5L12 12L10.5 8.5L7 7L10.5 5.5L12 2Z"/></svg>
+              <span>🕊️ Oración de la Mañana</span>
+            </button>
+            <button class="btn btn-sm btn-ghost" id="btn-view-all-readings" title="Ver 1ª Lectura, Salmo y Evangelio de la misa completa">
+              <svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor"><path d="M4 6H2v14c0 1.1.9 2 2 2h14v-2H4V6zm16-4H8c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm0 14H8V4h12v12z"/></svg>
+              <span>Misa completa</span>
+            </button>
+            <button class="btn btn-sm btn-ghost" id="btn-copy-gospel" title="Copiar Evangelio al portapapeles">
+              <svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/></svg>
+              <span>Copiar</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Tarjetas de Estadísticas -->
+        <div class="stats-grid">
+          <div class="stat-card" data-goto="notes">
+            <div class="stat-icon-wrap icon-notes">
+              <svg viewBox="0 0 24 24"><path d="M14 2H6c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 1.99 2H18c1.1 0 2-.9 2-2V8l-6-6zm2 16H8v-2h8v2zm0-4H8v-2h8v2zm-3-5V3.5L18.5 9H13z"/></svg>
+            </div>
+            <div class="stat-details">
+              <span class="stat-number" id="dash-stat-notes">0</span>
+              <span class="stat-label">Notas e Ideas</span>
+            </div>
+          </div>
+
+          <div class="stat-card" data-goto="events">
+            <div class="stat-icon-wrap icon-events">
+              <svg viewBox="0 0 24 24"><path d="M19 4h-1V2h-2v2H8V2H6v2H5c-1.11 0-1.99.9-1.99 2L3 20a2 2 0 0 0 2 2h14c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 16H5V10h14v10z"/></svg>
+            </div>
+            <div class="stat-details">
+              <span class="stat-number" id="dash-stat-events">0</span>
+              <span class="stat-label">Eventos Registrados</span>
+            </div>
+          </div>
+
+          <div class="stat-card" data-goto="tasks">
+            <div class="stat-icon-wrap icon-tasks">
+              <svg viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-9 14l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg>
+            </div>
+            <div class="stat-details">
+              <span class="stat-number" id="dash-stat-tasks">0</span>
+              <span class="stat-label">Tareas Pendientes</span>
+            </div>
+          </div>
+
+          <div class="stat-card" data-goto="community">
+            <div class="stat-icon-wrap icon-community">
+              <svg viewBox="0 0 24 24"><path d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5z"/></svg>
+            </div>
+            <div class="stat-details">
+              <span class="stat-number" id="dash-stat-persons">0</span>
+              <span class="stat-label">Personas y Grupos</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Bloque: Cómo usar el Asistente IA (ejemplos clicables) -->
+        <div class="ai-guide-banner">
+          <div class="ai-guide-header">
+            <div class="ai-guide-title">
+              <svg viewBox="0 0 24 24" width="20" height="20" fill="#f59e0b"><path d="M12 2L13.5 5.5L17 7L13.5 8.5L12 12L10.5 8.5L7 7L10.5 5.5L12 2Z"/></svg>
+              <span>Asistente IA para la Pastoral Escolar</span>
+            </div>
+            <span class="ai-guide-hint">Haz clic en cualquier ejemplo para comenzar de inmediato:</span>
+          </div>
+          <div class="ai-guide-pills">
+            <button class="ai-prompt-pill" data-prompt="Escribe una oración solemne y emotiva para iniciar el consejo de profesores, pidiendo sabiduría a Santo Tomás de Aquino.">
+              🙏 Oración para consejo de profesores
+            </button>
+            <button class="ai-prompt-pill" data-prompt="Organiza una propuesta de Retiro Espiritual para jóvenes de 4to medio con el tema 'Luz y Sal del Mundo', incluyendo horarios y dinámicas.">
+              ✝️ Planificar retiro espiritual juvenil
+            </button>
+            <button class="ai-prompt-pill" data-prompt="Registra un evento: Misa de Inicio de Año Escolar el próximo viernes a las 09:00 en la Capilla Mayor, categoría Misa.">
+              📅 Agendar Misa Escolar
+            </button>
+            <button class="ai-prompt-pill" data-prompt="¿Qué tareas pendientes y eventos tenemos programados para esta semana? Hazme un resumen pastoral.">
+              📋 Resumen pastoral de la semana
+            </button>
+            <button class="ai-prompt-pill" data-prompt="Crea una tarea urgente: 'Confirmar lista de cantos del coro para la Misa de Santo Domingo' con fecha límite para pasado mañana.">
+              ✅ Crear tarea de coro escolar
+            </button>
+          </div>
+        </div>
+
+        <!-- Fila de Contenido Dividido: Próximos Eventos y Tareas Pendientes -->
+        <div class="dashboard-split-row">
+          <!-- Columna: Próximos Eventos -->
+          <div class="dash-panel-card">
+            <div class="dash-panel-header">
+              <h3 class="dash-panel-title">
+                <svg viewBox="0 0 24 24" width="18" height="18"><path d="M19 4h-1V2h-2v2H8V2H6v2H5c-1.11 0-1.99.9-1.99 2L3 20a2 2 0 0 0 2 2h14c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 16H5V10h14v10z"/></svg>
+                Próximos Eventos
+              </h3>
+              <button class="btn btn-sm btn-ghost" id="dash-btn-new-event">+ Agendar</button>
+            </div>
+            <div class="dash-list" id="dash-events-list">
+              <div class="empty-state-micro">No hay eventos próximos registrados</div>
+            </div>
+          </div>
+
+          <!-- Columna: Tareas Pendientes -->
+          <div class="dash-panel-card">
+            <div class="dash-panel-header">
+              <h3 class="dash-panel-title">
+                <svg viewBox="0 0 24 24" width="18" height="18"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-9 14l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg>
+                Tareas Pendientes
+              </h3>
+              <button class="btn btn-sm btn-ghost" id="dash-btn-new-task">+ Añadir</button>
+            </div>
+            <div class="dash-list" id="dash-tasks-list">
+              <div class="empty-state-micro">Sin tareas pendientes de momento</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Fila Inferior: Últimas Ideas y Notas -->
+        <div class="dash-panel-card">
+          <div class="dash-panel-header">
+            <h3 class="dash-panel-title">
+              <svg viewBox="0 0 24 24" width="18" height="18"><path d="M14 2H6c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 1.99 2H18c1.1 0 2-.9 2-2V8l-6-6zm2 16H8v-2h8v2zm0-4H8v-2h8v2zm-3-5V3.5L18.5 9H13z"/></svg>
+              Últimas Ideas y Notas
+            </h3>
+            <button class="btn btn-sm btn-ghost" id="dash-btn-new-note">+ Nueva Nota</button>
+          </div>
+          <div class="dash-notes-horizontal" id="dash-recent-notes">
+            <div class="empty-state-micro">No hay notas recientes guardadas</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============================================== -->
+      <!-- VISTA 2: IDEAS Y NOTAS                         -->
+      <!-- ============================================== -->
+      <section class="view-panel" id="view-notes">
+        <div class="view-header">
+          <div class="view-header-left">
+            <h2 class="view-title">Ideas y Notas</h2>
+            <p class="view-desc">Reflexiones pastorales, actas de reunión y planificación espiritual</p>
+          </div>
+          <div class="view-header-actions">
+            <!-- Plantillas de Notas -->
+            <div class="dropdown-container">
+              <button class="btn btn-secondary" id="notes-template-btn">
+                <svg viewBox="0 0 24 24" width="16" height="16"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-5 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z"/></svg>
+                <span>Plantillas</span>
+              </button>
+              <div class="dropdown-menu" id="notes-template-menu">
+                <button class="dropdown-item" data-template="reunion">📝 Reunión de Pastoral</button>
+                <button class="dropdown-item" data-template="ficha">👤 Ficha de Acompañamiento</button>
+                <button class="dropdown-item" data-template="acta">📋 Acta de Consejo Escolar</button>
+                <button class="dropdown-item" data-template="retiro">✝️ Planificación de Retiro</button>
+              </div>
+            </div>
+
+            <!-- Botón Desde Imagen (Visión IA) -->
+            <button class="btn btn-secondary btn-ai-action" id="notes-from-image-btn" title="Crea una nota transcribiendo una foto o documento con IA">
+              <svg viewBox="0 0 24 24" width="16" height="16"><path d="M21 19V5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2zM8.5 13.5l2.5 3.01L14.5 12l4.5 6H5l3.5-4.5z"/></svg>
+              <span>Desde imagen</span>
+            </button>
+
+            <!-- Exportaciones -->
+            <button class="btn btn-secondary" id="notes-export-pdf-btn" title="Guardar / Imprimir reporte en PDF">
+              <svg viewBox="0 0 24 24" width="16" height="16"><path d="M19 8H5c-1.66 0-3 1.34-3 3v6h4v4h12v-4h4v-6c0-1.66-1.34-3-3-3zm-3 11H8v-5h8v5zm3-7c-.55 0-1-.45-1-1s.45-1 1-1 1 .45 1 1-.45 1-1 1zm-1-9H6v4h12V3z"/></svg>
+              <span>PDF</span>
+            </button>
+            <button class="btn btn-secondary" id="notes-export-csv-btn" title="Exportar a tabla CSV">
+              <svg viewBox="0 0 24 24" width="16" height="16"><path d="M14 2H6c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 1.99 2H18c1.1 0 2-.9 2-2V8l-6-6zm-1 9h-2V7h2v4zm0 6h-2v-2h2v2z"/></svg>
+              <span>CSV</span>
+            </button>
+
+            <button class="btn btn-primary" id="btn-create-note">
+              <svg viewBox="0 0 24 24" width="16" height="16"><path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/></svg>
+              <span>Nueva Nota</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Filtros y Búsqueda de Notas -->
+        <div class="filters-row">
+          <div class="search-input-wrap">
+            <svg viewBox="0 0 24 24" width="16" height="16"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/></svg>
+            <input type="text" id="notes-search-input" placeholder="Buscar por título o contenido...">
+          </div>
+          <div class="tag-filters-container" id="notes-tag-filters">
+            <!-- Chips de etiquetas generados dinámicamente -->
+          </div>
+        </div>
+
+        <!-- Cuadrícula de Notas -->
+        <div class="notes-grid" id="notes-cards-container">
+          <!-- Renderizado dinámico -->
+        </div>
+      </section>
+
+      <!-- ============================================== -->
+      <!-- VISTA 3: EVENTOS (CALENDARIO)                  -->
+      <!-- ============================================== -->
+      <section class="view-panel" id="view-events">
+        <div class="view-header">
+          <div class="view-header-left">
+            <h2 class="view-title">Calendario Pastoral</h2>
+            <p class="view-desc">Misas, retiros, convivencias y celebraciones del colegio</p>
+          </div>
+          <div class="view-header-actions">
+            <!-- Plantillas de Celebraciones Católicas Escolares -->
+            <button class="btn btn-secondary" id="btn-event-templates" title="Insertar eventos escolares y litúrgicos típicos con checklist y detalles">
+              <svg viewBox="0 0 24 24" width="16" height="16" fill="#f59e0b"><path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z"/></svg>
+              <span>Plantillas Escolares</span>
+            </button>
+            <!-- Exportar iCal (.ics) -->
+            <button class="btn btn-secondary" id="events-export-ics-btn" title="Exportar archivo .ics para Google Calendar, Apple Calendar o Outlook">
+              <svg viewBox="0 0 24 24" width="16" height="16"><path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/></svg>
+              <span>Exportar .ics</span>
+            </button>
+            <button class="btn btn-secondary" id="events-print-btn" title="Imprimir o guardar como PDF">
+              <svg viewBox="0 0 24 24" width="16" height="16"><path d="M19 8H5c-1.66 0-3 1.34-3 3v6h4v4h12v-4h4v-6c0-1.66-1.34-3-3-3zm-3 11H8v-5h8v5zm3-7c-.55 0-1-.45-1-1s.45-1 1-1 1 .45 1 1-.45 1-1 1zm-1-9H6v4h12V3z"/></svg>
+              <span>PDF</span>
+            </button>
+            <button class="btn btn-primary" id="btn-create-event">
+              <svg viewBox="0 0 24 24" width="16" height="16"><path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/></svg>
+              <span>Nuevo Evento</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Controles de Navegación del Calendario -->
+        <div class="calendar-controls-bar">
+          <div class="cal-nav-group">
+            <button class="btn btn-icon" id="cal-prev-btn" title="Mes anterior">
+              <svg viewBox="0 0 24 24" width="18" height="18"><path d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z"/></svg>
+            </button>
+            <button class="btn btn-sm btn-secondary" id="cal-today-btn">Hoy</button>
+            <button class="btn btn-icon" id="cal-next-btn" title="Mes siguiente">
+              <svg viewBox="0 0 24 24" width="18" height="18"><path d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z"/></svg>
+            </button>
+            <h3 class="cal-current-label" id="cal-month-year-label">Mes Año</h3>
+          </div>
+
+          <div class="cal-view-modes">
+            <div class="segmented-control" id="cal-view-mode-toggle" style="background:var(--bg-surface-alt);">
+              <button class="segmented-btn active" id="btn-cal-view-month" data-mode="month" title="Vista de Cuadrícula Mensual">📅 Mes</button>
+              <button class="segmented-btn" id="btn-cal-view-agenda" data-mode="agenda" title="Vista de Agenda y Próximos Eventos">📋 Agenda</button>
+            </div>
+            <div class="search-input-wrap">
+              <input type="text" id="events-search-input" placeholder="Buscar evento o lugar...">
+            </div>
+          </div>
+        </div>
+
+        <!-- Categorías con Filtro Interactivo -->
+        <div class="cal-categories-legend" id="cal-categories-filter">
+          <button type="button" class="legend-chip active" data-category="all">Todos</button>
+          <button type="button" class="legend-chip cat-misa" data-category="Misa">Misa</button>
+          <button type="button" class="legend-chip cat-retiro" data-category="Retiro">Retiro</button>
+          <button type="button" class="legend-chip cat-reunion" data-category="Reunión">Reunión</button>
+          <button type="button" class="legend-chip cat-campana" data-category="Campaña">Campaña</button>
+          <button type="button" class="legend-chip cat-formacion" data-category="Formación">Formación</button>
+          <button type="button" class="legend-chip cat-convivencia" data-category="Convivencia">Convivencia</button>
+          <button type="button" class="legend-chip cat-otro" data-category="Otro">Otro</button>
+        </div>
+
+        <!-- Grid del Calendario (Vista Mes) -->
+        <div class="calendar-container" id="cal-month-container">
+          <div class="cal-weekdays-row">
+            <span>Lun</span>
+            <span>Mar</span>
+            <span>Mié</span>
+            <span>Jue</span>
+            <span>Vie</span>
+            <span>Sáb</span>
+            <span>Dom</span>
+          </div>
+          <div class="cal-days-grid" id="cal-days-grid">
+            <!-- Días generados dinámicamente -->
+          </div>
+        </div>
+
+        <!-- Vista de Agenda Cronológica (Oculta por defecto) -->
+        <div class="cal-agenda-container" id="cal-agenda-container" style="display:none;">
+          <!-- Eventos generados dinámicamente -->
+        </div>
+
+        <!-- Panel Lateral de Detalles de Día Seleccionado -->
+        <div class="cal-day-detail-drawer" id="cal-day-drawer" style="display:none;">
+          <div class="drawer-header">
+            <h4 id="drawer-date-title">Eventos del Día</h4>
+            <button class="btn btn-icon btn-sm" id="drawer-close-btn">&times;</button>
+          </div>
+          <div class="drawer-events-list" id="drawer-events-list"></div>
+          <div class="drawer-footer">
+            <button class="btn btn-sm btn-primary" id="drawer-add-event-btn">+ Añadir a este día</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============================================== -->
+      <!-- VISTA 4: TAREAS                                -->
+      <!-- ============================================== -->
+      <section class="view-panel" id="view-tasks">
+        <div class="view-header">
+          <div class="view-header-left">
+            <h2 class="view-title">Tareas Pastorales</h2>
+            <p class="view-desc">Gestión y seguimiento de compromisos, compras y preparativos</p>
+          </div>
+          <div class="view-header-actions">
+            <button class="btn btn-primary" id="btn-create-task">
+              <svg viewBox="0 0 24 24" width="16" height="16"><path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/></svg>
+              <span>Nueva Tarea</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Filtros de Tareas -->
+        <div class="filters-row">
+          <div class="filter-tabs" id="tasks-status-tabs">
+            <button class="filter-tab active" data-filter="all">Todas (<span id="count-tasks-all">0</span>)</button>
+            <button class="filter-tab" data-filter="pending">Pendientes (<span id="count-tasks-pending">0</span>)</button>
+            <button class="filter-tab" data-filter="completed">Completadas (<span id="count-tasks-completed">0</span>)</button>
+          </div>
+
+          <div class="filters-right-group">
+            <div class="search-input-wrap">
+              <svg viewBox="0 0 24 24" width="16" height="16"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/></svg>
+              <input type="text" id="tasks-search-input" placeholder="Buscar tarea...">
+            </div>
+
+            <div class="select-wrap">
+              <select id="tasks-priority-filter" title="Filtrar por nivel de prioridad">
+                <option value="all">⚡ Todas las prioridades</option>
+                <option value="alta">🔴 Prioridad Alta</option>
+                <option value="media">🟡 Prioridad Media</option>
+                <option value="baja">🟢 Prioridad Baja</option>
+              </select>
+              <svg class="select-chevron" viewBox="0 0 24 24" width="16" height="16"><path d="M7.41 8.59L12 13.17l4.59-4.58L18 10l-6 6-6-6 1.41-1.41z"/></svg>
+            </div>
+          </div>
+        </div>
+
+        <!-- Lista de Tareas -->
+        <div class="tasks-container" id="tasks-list-container">
+          <!-- Renderizado dinámico -->
+        </div>
+      </section>
+
+      <!-- ============================================== -->
+      <!-- VISTA 5: COMUNIDAD                             -->
+      <!-- ============================================== -->
+      <section class="view-panel" id="view-community">
+        <div class="view-header">
+          <div class="view-header-left">
+            <h2 class="view-title">Comunidad Pastoral</h2>
+            <p class="view-desc">Directorio de agentes pastorales, profesores, catequistas y grupos</p>
+          </div>
+          <div class="view-header-actions">
+            <button class="btn btn-secondary" id="community-export-pdf-btn">
+              <svg viewBox="0 0 24 24" width="16" height="16"><path d="M19 8H5c-1.66 0-3 1.34-3 3v6h4v4h12v-4h4v-6c0-1.66-1.34-3-3-3zm-3 11H8v-5h8v5zm3-7c-.55 0-1-.45-1-1s.45-1 1-1 1 .45 1 1-.45 1-1 1zm-1-9H6v4h12V3z"/></svg>
+              <span>PDF</span>
+            </button>
+            <button class="btn btn-secondary" id="community-export-csv-btn">
+              <svg viewBox="0 0 24 24" width="16" height="16"><path d="M14 2H6c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 1.99 2H18c1.1 0 2-.9 2-2V8l-6-6zm-1 9h-2V7h2v4zm0 6h-2v-2h2v2z"/></svg>
+              <span>CSV</span>
+            </button>
+            <button class="btn btn-primary" id="btn-create-community-item">
+              <svg viewBox="0 0 24 24" width="16" height="16"><path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/></svg>
+              <span id="btn-create-community-label">Nuevo Registro</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Pestañas Grupos / Personas -->
+        <div class="community-tabs-bar">
+          <div class="filter-tabs" id="community-subview-tabs">
+            <button class="filter-tab active" data-subview="groups">
+              Grupos Pastorales (<span id="count-groups">0</span>)
+            </button>
+            <button class="filter-tab" data-subview="persons">
+              Directorio de Personas (<span id="count-persons">0</span>)
+            </button>
+          </div>
+          <div class="search-input-wrap">
+            <input type="text" id="community-search-input" placeholder="Buscar por nombre, rol o grupo...">
+          </div>
+        </div>
+
+        <!-- Subvista: Grupos -->
+        <div class="community-subview active" id="community-subview-groups">
+          <div class="cards-grid" id="groups-container"></div>
+        </div>
+
+        <!-- Subvista: Personas -->
+        <div class="community-subview" id="community-subview-persons" style="display:none;">
+          <div class="cards-grid" id="persons-container"></div>
+        </div>
+      </section>
+
+      <!-- ============================================== -->
+      <!-- VISTA: GUIONES LITÚRGICOS Y MISAS ESCOLARES    -->
+      <!-- ============================================== -->
+      <section class="view-panel" id="view-liturgical-scripts">
+        <div class="view-header">
+          <div>
+            <h2 class="view-title">Guiones Litúrgicos y Misas Escolares</h2>
+            <p class="view-subtitle">Organiza, redacta con IA e imprime guiones completos para misas, actos litúrgicos y liturgias de la palabra.</p>
+          </div>
+          <div class="view-actions">
+            <button class="btn btn-secondary" id="btn-liturgical-templates" title="Ver catálogo de plantillas litúrgicas para el colegio">
+              <svg viewBox="0 0 24 24" width="16" height="16" fill="#f59e0b"><path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z"/></svg>
+              <span>Plantillas</span>
+            </button>
+            <button class="btn btn-secondary" id="btn-ai-create-script" title="Crear guión litúrgico con ayuda del Asistente IA">
+              <svg viewBox="0 0 24 24" width="16" height="16" fill="#f59e0b"><path d="M12 2L13.5 5.5L17 7L13.5 8.5L12 12L10.5 8.5L7 7L10.5 5.5L12 2Z"/></svg>
+              <span>Crear con IA</span>
+            </button>
+            <button class="btn btn-primary" id="btn-new-script">
+              <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor"><path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/></svg>
+              <span>Nuevo Guión</span>
+            </button>
+          </div>
+        </div>
+
+        <div class="view-toolbar">
+          <div class="filter-tabs" id="script-filter-tabs">
+            <button class="filter-tab active" data-filter="all">Todos (<span id="count-scripts-all">0</span>)</button>
+            <button class="filter-tab" data-filter="Misa Escolar">Misas Escolares</button>
+            <button class="filter-tab" data-filter="Primer Viernes">Primer Viernes</button>
+            <button class="filter-tab" data-filter="Misa de Curso">Misas de Curso</button>
+            <button class="filter-tab" data-filter="Graduación">Graduación / Envío</button>
+            <button class="filter-tab" data-filter="Liturgia de la Palabra">Liturgias de la Palabra</button>
+          </div>
+          <div class="search-input-wrap">
+            <input type="text" id="scripts-search-input" placeholder="Buscar guión por título, tema o curso...">
+          </div>
+        </div>
+
+        <!-- Cuadrícula de Guiones Litúrgicos -->
+        <div class="cards-grid" id="scripts-container"></div>
+      </section>
+
+      <!-- ============================================== -->
+      <!-- VISTA: CANCIONERO PASTORAL Y LITÚRGICO         -->
+      <!-- ============================================== -->
+      <section class="view-panel" id="view-songbook">
+        <div class="view-header">
+          <div>
+            <h2 class="view-title">Cancionero Pastoral y Litúrgico</h2>
+            <p class="view-subtitle">Repertorio católico con letras, acordes, transposición de tono en vivo y hojas imprimibles para misas y retiros.</p>
+          </div>
+          <div class="view-actions">
+            <button class="btn btn-secondary" id="btn-open-mass-repertoire" title="Seleccionar cantos para armar la lista de la misa">
+              <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-5 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z"/></svg>
+              <span>Armar Lista de Misa</span>
+            </button>
+            <button class="btn btn-secondary" id="btn-reset-default-songs" title="Restaurar el cancionero oficial con secciones y acordes corregidos">
+              <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor"><path d="M17.65 6.35C16.2 4.9 14.21 4 12 4c-4.42 0-7.99 3.58-7.99 8s3.57 8 7.99 8c3.73 0 6.84-2.55 7.73-6h-2.08c-.82 2.33-3.04 4-5.65 4-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78L13 11h7V4l-2.35 2.35z"/></svg>
+              <span>Restaurar Catálogo</span>
+            </button>
+            <button class="btn btn-primary" id="btn-new-song">
+              <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor"><path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/></svg>
+              <span>Nueva Canción</span>
+            </button>
+          </div>
+        </div>
+
+        <div class="view-toolbar">
+          <div class="filter-tabs song-moment-tabs" id="song-filter-tabs">
+            <button class="filter-tab active" data-category="all">Todos (<span id="count-songs-all">25</span>)</button>
+            <button class="filter-tab" data-category="Entrada">Entrada</button>
+            <button class="filter-tab" data-category="Piedad">Piedad</button>
+            <button class="filter-tab" data-category="Gloria">Gloria</button>
+            <button class="filter-tab" data-category="Salmo/Aclamación">Aclamación</button>
+            <button class="filter-tab" data-category="Ofertorio">Ofertorio</button>
+            <button class="filter-tab" data-category="Santo">Santo</button>
+            <button class="filter-tab" data-category="Paz/Cordero">Paz / Cordero</button>
+            <button class="filter-tab" data-category="Comunión">Comunión</button>
+            <button class="filter-tab" data-category="Salida">Salida</button>
+            <button class="filter-tab" data-category="Mariano">Mariano</button>
+            <button class="filter-tab" data-category="Alabanza">Alabanza</button>
+          </div>
+          <div class="search-input-wrap">
+            <input type="text" id="songs-search-input" placeholder="Buscar por título, autor o letra...">
+          </div>
+        </div>
+
+        <!-- Contenedor Maestro-Detalle del Cancionero -->
+        <div class="songbook-layout">
+          <div class="songbook-list-column" id="songs-list-container"></div>
+          <div class="songbook-viewer-column" id="song-viewer-container">
+            <div class="empty-state-card" style="padding: 60px 20px;">
+              <svg viewBox="0 0 24 24" width="48" height="48" fill="var(--text-muted)"><path d="M12 3v10.55c-.59-.34-1.27-.55-2-.55-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4V7h4V3h-6z"/></svg>
+              <h3>Selecciona una canción del catálogo</h3>
+              <p>Podrás ver la letra completa, cambiar el tono con transposición de acordes o imprimirla para el coro y los alumnos.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============================================== -->
+      <!-- VISTA 6: ASISTENTE IA                          -->
+      <!-- ============================================== -->
+      <section class="view-panel" id="view-ai-chat">
+        <!-- Tarjeta de activación si no hay API Key -->
+        <div class="ai-setup-card" id="ai-setup-container" style="display:none;">
+          <div class="ai-setup-emblem">
+            <svg viewBox="0 0 24 24" width="48" height="48" fill="#f59e0b">
+              <path d="M12 2L13.5 5.5L17 7L13.5 8.5L12 12L10.5 8.5L7 7L10.5 5.5L12 2Z"/>
+            </svg>
+          </div>
+          <h2 class="ai-setup-title">Activa tu Asistente Pastoral</h2>
+          <p class="ai-setup-desc">
+            Integra la inteligencia de <strong>Google Gemini Oficial</strong> o <strong>OpenRouter</strong> para redactar oraciones, generar guiones litúrgicos,
+            estructurar retiros y crear automáticamente notas, eventos y tareas.
+          </p>
+
+          <div class="ai-setup-form">
+            <!-- Selector de Proveedor -->
+            <div class="form-group">
+              <label>Selecciona el Proveedor de IA:</label>
+              <div class="provider-radio-group">
+                <label class="provider-radio-card active" id="provider-card-gemini">
+                  <input type="radio" name="setup-provider" value="gemini" checked>
+                  <div class="provider-info">
+                    <strong>Google Gemini (Oficial)</strong>
+                    <small>Recomendado &bull; Google AI Studio &bull; Clave gratuita</small>
+                  </div>
+                </label>
+                <label class="provider-radio-card" id="provider-card-openrouter">
+                  <input type="radio" name="setup-provider" value="openrouter">
+                  <div class="provider-info">
+                    <strong>OpenRouter Cloud</strong>
+                    <small>Multi-proveedor &bull; Gemma, Claude, Llama</small>
+                  </div>
+                </label>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label for="setup-api-key" id="setup-key-label">Clave de API de Google AI Studio:</label>
+              <input type="password" id="setup-api-key" placeholder="AIzaSy... o AQ...." autocomplete="off">
+              <small class="form-hint" id="setup-key-hint">Obtén tu clave de API gratuita en <a href="#" id="link-get-gemini-key">aistudio.google.com</a>.</small>
+            </div>
+
+            <div class="form-group">
+              <label for="setup-model">Modelo de IA:</label>
+              <div class="input-with-button">
+                <input type="text" id="setup-model" value="gemini-flash-latest" placeholder="gemini-flash-latest">
+                <button type="button" class="btn btn-secondary btn-sm" id="btn-browse-models-setup">Ver modelos</button>
+              </div>
+            </div>
+
+            <div class="setup-actions-row">
+              <button class="btn btn-secondary" id="btn-test-connection-setup">Probar Conexión</button>
+              <button class="btn btn-primary" id="btn-save-ai-setup">Guardar y Activar Asistente</button>
+            </div>
+            <div class="connection-status-msg" id="setup-conn-status"></div>
+          </div>
+        </div>
+
+        <!-- Chat Activo del Asistente -->
+        <div class="ai-chat-interface" id="ai-chat-container">
+          <div class="chat-header">
+            <div class="chat-model-info">
+              <div class="ai-avatar">
+                <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor">
+                  <path d="M12 2L13.5 5.5L17 7L13.5 8.5L12 12L10.5 8.5L7 7L10.5 5.5L12 2Z" fill="#f59e0b"/>
+                </svg>
+              </div>
+              <div class="model-meta">
+                <span class="model-name-label" id="chat-active-model">google/gemma-4-31b-it:free</span>
+                <span class="model-provider-badge">OpenRouter Cloud</span>
+              </div>
+            </div>
+
+            <div class="chat-header-actions">
+              <button class="btn btn-sm btn-ghost" id="chat-btn-redo" title="Rehacer última respuesta">
+                <svg viewBox="0 0 24 24" width="16" height="16"><path d="M17.65 6.35C16.2 4.9 14.21 4 12 4c-4.42 0-7.99 3.58-7.99 8s3.57 8 7.99 8c3.73 0 6.84-2.55 7.73-6h-2.08c-.82 2.33-3.04 4-5.65 4-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78L13 11h7V4l-2.35 2.35z"/></svg>
+                <span>Rehacer</span>
+              </button>
+              <button class="btn btn-sm btn-ghost" id="chat-btn-clear" title="Limpiar conversación">
+                <svg viewBox="0 0 24 24" width="16" height="16"><path d="M16 9v10H8V9h8m-1.5-6h-5l-1 1H5v2h14V4h-3.5l-1-1zM18 7H6v12c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7z"/></svg>
+                <span>Limpiar</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Área de Mensajes -->
+          <div class="chat-messages-scroll" id="chat-messages-area">
+            <!-- Mensajes generados dinámicamente -->
+          </div>
+
+          <!-- Barra de Sugerencias Rápidas -->
+          <div class="chat-quick-suggestions" id="chat-suggestions-bar">
+            <button class="quick-pill" data-msg="Escribe una oración completa para iniciar la semana escolar.">🙏 Oración de inicio de semana</button>
+            <button class="quick-pill" data-msg="¿Qué eventos y tareas tenemos pendientes?">📋 Ver pendientes de hoy</button>
+            <button class="quick-pill" data-msg="Agenda una reunión de equipo pastoral para este jueves a las 16:00 en la sala de profesores.">📅 Agendar reunión pastoral</button>
+            <button class="quick-pill" data-msg="Revisa mis tareas pendientes y dime cuáles puedo marcar como completadas.">✅ Gestionar tareas</button>
+            <button class="quick-pill" data-msg="Crea una nota con una dinámica de integración para jóvenes sobre la parábola de los talentos.">💡 Dinámica juvenil</button>
+          </div>
+
+          <!-- Previews de Imágenes Adjuntas -->
+          <div class="chat-attachment-previews" id="chat-image-previews" style="display:none;"></div>
+
+          <!-- Barra de Entrada y Envío -->
+          <div class="chat-input-bar">
+            <!-- Botón de Adjuntar Imagen -->
+            <label class="btn btn-icon btn-ghost file-attach-btn" title="Adjuntar hasta 4 imágenes (o pégalas con Ctrl+V)">
+              <svg viewBox="0 0 24 24" width="20" height="20"><path d="M21 19V5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2zM8.5 13.5l2.5 3.01L14.5 12l4.5 6H5l3.5-4.5z"/></svg>
+              <input type="file" id="chat-image-input" accept="image/*" multiple style="display:none;">
+            </label>
+
+            <!-- Textarea de Entrada -->
+            <div class="textarea-wrap">
+              <textarea id="chat-textarea" rows="1" placeholder="Escribe tu consulta o pide una oración... (Enter para enviar, Shift+Enter para salto de línea)"></textarea>
+            </div>
+
+            <!-- Botón Detener Generación -->
+            <button class="btn btn-danger btn-sm" id="chat-btn-stop" style="display:none;">
+              <svg viewBox="0 0 24 24" width="16" height="16"><path d="M6 6h12v12H6z"/></svg>
+              <span>Detener</span>
+            </button>
+
+            <!-- Botón Enviar -->
+            <button class="btn btn-primary btn-icon" id="chat-btn-send" title="Enviar mensaje">
+              <svg viewBox="0 0 24 24" width="20" height="20"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg>
+            </button>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============================================== -->
+      <!-- VISTA 7: AJUSTES                               -->
+      <!-- ============================================== -->
+      <section class="view-panel" id="view-settings">
+        <div class="view-header">
+          <div class="view-header-left">
+            <h2 class="view-title">Configuración del Sistema</h2>
+            <p class="view-desc">Personalización de identidad, inteligencia artificial, tema y copias de seguridad</p>
+          </div>
+        </div>
+
+        <div class="settings-sections-container">
+          <!-- Tarjeta: Identidad Escolar -->
+          <div class="settings-card">
+            <h3 class="settings-card-title">Identidad de la Pastoral</h3>
+            <div class="form-row-2">
+              <div class="form-group">
+                <label for="settings-pastor-name">Nombre del Agente o Encargado:</label>
+                <input type="text" id="settings-pastor-name" placeholder="ej: Hno. Juan Pérez, O.P.">
+              </div>
+              <div class="form-group">
+                <label for="settings-school-name">Nombre del Colegio o Institución:</label>
+                <input type="text" id="settings-school-name" placeholder="ej: Colegio Santo Domingo">
+              </div>
+            </div>
+          </div>
+
+          <!-- Tarjeta: Personalización de Colores y Apariencia -->
+          <div class="settings-card" id="settings-card-appearance">
+            <div style="display:flex; align-items:center; gap:10px; margin-bottom:16px;">
+              <div style="width:36px; height:36px; border-radius:var(--radius-md); background:var(--primary-light); color:var(--primary); display:flex; align-items:center; justify-content:center;">
+                <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><path d="M12 3c-4.97 0-9 4.03-9 9 0 2.12.74 4.07 1.97 5.61L4.35 19.4c-.39.39-.39 1.02 0 1.41.39.39 1.02.39 1.41 0l1.9-1.9C9.22 19.64 10.57 20 12 20c4.97 0 9-4.03 9-9s-4.03-9-9-9zm0 15c-3.31 0-6-2.69-6-6s2.69-6 6-6 6 2.69 6 6-2.69 6-6 6z"/></svg>
+              </div>
+              <div>
+                <h3 class="settings-card-title" style="margin:0;">Personalización de Colores y Apariencia</h3>
+                <p style="margin:2px 0 0; color:var(--text-muted); font-size:0.83rem;">
+                  Modifica los colores de toda la aplicación: <strong>tonos frescos y pasteles en Modo Claro</strong> y <strong>colores fuertes y vibrantes en Modo Oscuro</strong>.
+                </p>
+              </div>
+            </div>
+
+            <!-- Selector de Modo de Pantalla (Claro / Oscuro) -->
+            <div class="form-group mb-4">
+              <label style="font-weight:600; font-size:0.85rem; color:var(--text-secondary); display:block; margin-bottom:8px;">Modo del Sistema:</label>
+              <div class="theme-mode-segmented" id="settings-theme-mode-segmented">
+                <button type="button" class="theme-mode-choice-btn active" data-theme-mode="light" id="btn-choice-light">
+                  <div class="theme-mode-btn-content">
+                    <div class="theme-mode-icon-circle">☀️</div>
+                    <div class="theme-mode-btn-info">
+                      <strong>Modo Claro <span class="theme-mode-pill-badge pill-pastel">Pastel</span></strong>
+                      <small>Colores frescos, tonos pasteles suaves y descansados para el día</small>
+                    </div>
+                  </div>
+                  <div class="theme-mode-radio-check"></div>
+                </button>
+                <button type="button" class="theme-mode-choice-btn" data-theme-mode="dark" id="btn-choice-dark">
+                  <div class="theme-mode-btn-content">
+                    <div class="theme-mode-icon-circle">🌙</div>
+                    <div class="theme-mode-btn-info">
+                      <strong>Modo Oscuro <span class="theme-mode-pill-badge pill-vibrant">Fuerte</span></strong>
+                      <small>Colores intensos, contrastados y vibrantes sobre fondo oscuro</small>
+                    </div>
+                  </div>
+                  <div class="theme-mode-radio-check"></div>
+                </button>
+              </div>
+            </div>
+
+            <!-- Paletas Temáticas -->
+            <div class="form-group mb-4">
+              <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; flex-wrap:wrap; gap:8px;">
+                <label style="font-weight:600; font-size:0.85rem; color:var(--text-secondary); margin:0;">Paletas de Color Prediseñadas:</label>
+                <span style="font-size:0.78rem; color:var(--text-muted); background:var(--bg-surface-alt); padding:3px 10px; border-radius:var(--radius-full); border:1px solid var(--border-color);">
+                  Muestra: ☀️ Pastel (izq.) / 🌙 Fuerte (der.)
+                </span>
+              </div>
+              <div class="color-palettes-grid" id="color-palettes-grid">
+                <!-- Se poblará dinámicamente con las 7 paletas y estado activo -->
+              </div>
+            </div>
+
+            <!-- Selector de Color Personalizado -->
+            <div class="custom-color-picker-box mb-4" id="custom-color-picker-box">
+              <div style="display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:14px;">
+                <div style="display:flex; align-items:center; gap:14px;">
+                  <input type="color" id="settings-custom-color-input" value="#d97706" title="Elige tu color personalizado">
+                  <div>
+                    <label for="settings-custom-color-input" style="font-weight:700; font-size:0.95rem; display:block; cursor:pointer;">Color Personalizado a tu Gusto</label>
+                    <span style="font-size:0.8rem; color:var(--text-muted);">HEX seleccionado: <code id="custom-color-hex-label" style="font-weight:700; background:var(--bg-surface-alt); padding:2px 8px; border-radius:4px; border:1px solid var(--border-color);">#D97706</code></span>
+                  </div>
+                </div>
+                <button type="button" class="btn btn-sm btn-primary" id="btn-activate-custom-color">
+                  <svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>
+                  <span>Aplicar Mi Color</span>
+                </button>
+              </div>
+              <div class="custom-color-preview-chips">
+                <span style="font-size:0.75rem; color:var(--text-muted); font-weight:600;">Adaptación inteligente:</span>
+                <span class="custom-mode-chip" id="custom-chip-light">☀️ Claro: Pastel Fresco</span>
+                <span class="custom-mode-chip" id="custom-chip-dark">🌙 Oscuro: Potente y Contrastado</span>
+              </div>
+              <p style="font-size:0.8rem; color:var(--text-muted); margin:10px 0 0; line-height:1.4;">
+                Al activar tu color personalizado, la aplicación generará automáticamente una versión <strong>pastel y suave</strong> para el Modo Claro, y una versión <strong>eléctrica y potente</strong> para el Modo Oscuro.
+              </p>
+            </div>
+
+            <!-- Estilo de Fondo / Canvas -->
+            <div class="form-group mb-4">
+              <label style="font-weight:600; font-size:0.85rem; color:var(--text-secondary); display:block; margin-bottom:8px;">Atmósfera de Fondo:</label>
+              <div class="segmented-control" id="settings-bg-style-control" style="width:100%; max-width:580px;">
+                <button type="button" class="segmented-btn active" data-bg-style="tinted">Fondo Suave Armonizado (Pastel / Profundo)</button>
+                <button type="button" class="segmented-btn" data-bg-style="neutral">Fondo Neutro Minimalista (Blanco / Grafito)</button>
+              </div>
+            </div>
+
+            <!-- Vista Previa en Vivo -->
+            <div class="theme-live-preview-box mb-3">
+              <span style="font-weight:700; font-size:0.78rem; color:var(--text-muted); text-transform:uppercase; letter-spacing:0.04em; display:block; margin-bottom:8px;">
+                Vista Previa de Elementos en Tiempo Real:
+              </span>
+              <div class="preview-content-row">
+                <button type="button" class="btn btn-primary btn-sm">Botón Primario</button>
+                <button type="button" class="btn btn-secondary btn-sm">Botón Secundario</button>
+                <span class="preview-badge-sample">Etiqueta de Acento</span>
+                <div class="preview-card-sample">
+                  <strong>Tarjeta con Acento</strong>
+                  <p>Borde y destacados sincronizados</p>
+                </div>
+              </div>
+            </div>
+
+            <!-- Botón Restablecer Predeterminados -->
+            <div style="display:flex; justify-content:flex-end; gap:10px; margin-top:14px; border-top:1px solid var(--border-color); padding-top:14px;">
+              <button type="button" class="btn btn-ghost btn-sm" id="btn-reset-default-colors">
+                <svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor"><path d="M17.65 6.35C16.2 4.9 14.21 4 12 4c-4.42 0-7.99 3.58-7.99 8s3.57 8 7.99 8c3.73 0 6.84-2.55 7.73-6h-2.08c-.82 2.33-3.04 4-5.65 4-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78L13 11h7V4l-2.35 2.35z"/></svg>
+                <span>Restablecer Colores Predeterminados (Ámbar Dominicano)</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Tarjeta: Preferencias del Sistema y Notificaciones -->
+          <div class="settings-card">
+            <h3 class="settings-card-title">Preferencias del Sistema</h3>
+            <div class="checkbox-row">
+              <label class="custom-checkbox">
+                <input type="checkbox" id="settings-show-welcome">
+                <span class="checkmark"></span>
+                <span>Mostrar pantalla de bienvenida y versículo al iniciar</span>
+              </label>
+            </div>
+            <div class="checkbox-row">
+              <label class="custom-checkbox">
+                <input type="checkbox" id="settings-notifications">
+                <span class="checkmark"></span>
+                <span>Activar avisos y notificaciones del sistema de escritorio</span>
+              </label>
+            </div>
+          </div>
+
+          <!-- Tarjeta: Asistente de IA (Gemini / OpenRouter) -->
+          <div class="settings-card">
+            <h3 class="settings-card-title">Asistente de Inteligencia Artificial</h3>
+            
+            <div class="form-group">
+              <label>Proveedor de IA Activo:</label>
+              <div class="provider-radio-group">
+                <label class="provider-radio-card" id="settings-provider-gemini">
+                  <input type="radio" name="settings-ai-provider" value="gemini" checked>
+                  <div class="provider-info">
+                    <strong>Google Gemini (Oficial)</strong>
+                    <small>Google AI Studio &bull; Clave Gratuita</small>
+                  </div>
+                </label>
+                <label class="provider-radio-card" id="settings-provider-openrouter">
+                  <input type="radio" name="settings-ai-provider" value="openrouter">
+                  <div class="provider-info">
+                    <strong>OpenRouter Cloud</strong>
+                    <small>Multi-proveedor (Gemma, Claude, Llama)</small>
+                  </div>
+                </label>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label for="settings-cloud-key" id="settings-key-label">Clave de API de Google AI Studio:</label>
+              <div class="input-with-button">
+                <input type="password" id="settings-cloud-key" placeholder="AIzaSy... o AQ....">
+                <button type="button" class="btn btn-secondary btn-sm" id="btn-toggle-key-visibility">Mostrar</button>
+              </div>
+              <small class="form-hint" id="settings-key-hint">Consigue tu clave gratuita en <a href="#" id="link-get-gemini-key-settings">aistudio.google.com</a>.</small>
+            </div>
+
+            <div class="form-group">
+              <label for="settings-cloud-model">Modelo de Lenguaje:</label>
+              <div class="input-with-button">
+                <input type="text" id="settings-cloud-model" placeholder="gemini-flash-latest">
+                <button type="button" class="btn btn-secondary btn-sm" id="btn-browse-models-settings">Ver modelos disponibles</button>
+              </div>
+            </div>
+
+            <div class="setup-actions-row">
+              <button class="btn btn-secondary" id="btn-test-connection-settings">Probar Conexión</button>
+              <span class="connection-status-msg" id="settings-conn-status"></span>
+            </div>
+          </div>
+
+          <!-- Tarjeta: Copias de Seguridad (Backups) -->
+          <div class="settings-card">
+            <div class="card-header-flex">
+              <div>
+                <h3 class="settings-card-title">Copias de Seguridad (Backups)</h3>
+                <p class="settings-card-desc">Se guarda una copia automática cada día. Se conservan las últimas 30 copias.</p>
+              </div>
+              <div class="btn-group">
+                <button class="btn btn-sm btn-secondary" id="btn-create-backup-now">+ Crear copia ahora</button>
+                <button class="btn btn-sm btn-secondary" id="btn-export-backup-file">Exportar archivo...</button>
+                <button class="btn btn-sm btn-secondary" id="btn-import-backup-file">Importar archivo...</button>
+                <button class="btn btn-sm btn-ghost" id="btn-open-data-folder">Abrir carpeta de datos</button>
+              </div>
+            </div>
+
+            <div class="backups-table-container">
+              <table class="data-table" id="backups-table">
+                <thead>
+                  <tr>
+                    <th>Fecha y Nombre</th>
+                    <th>Tamaño</th>
+                    <th class="text-right">Acciones</th>
+                  </tr>
+                </thead>
+                <tbody id="backups-table-body">
+                  <tr><td colspan="3" class="text-center">Cargando copias de seguridad...</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- Tarjeta: Zona de Peligro -->
+          <div class="settings-card card-danger">
+            <h3 class="settings-card-title text-danger">Zona de Peligro</h3>
+            <p class="settings-card-desc">Si deseas reiniciar la aplicación por completo, puedes restablecer todos los registros.</p>
+            <button class="btn btn-danger btn-sm" id="btn-wipe-data">Borrar todos los datos y reiniciar</button>
+          </div>
+
+          <!-- Tarjeta: Acerca de la Aplicación -->
+          <div class="settings-card card-about">
+            <div class="about-flex">
+              <div class="about-logo">
+                <svg viewBox="0 0 24 24" width="36" height="36" fill="#f59e0b">
+                  <path d="M12 2L13.5 5.5L17 7L13.5 8.5L12 12L10.5 8.5L7 7L10.5 5.5L12 2Z"/>
+                </svg>
+              </div>
+              <div class="about-info">
+                <h4>Organizador Pastoral Desktop</h4>
+                <p>Versión 2.0.0 &bull; Arquitectura Electron v33 &bull; Modo seguro ContextBridge</p>
+                <p class="about-author">Desarrollado con dedicación pastoral por <strong>Manuel Guia</strong></p>
+                <p class="about-motto"><em>"Veritas" &bull; "Contemplari et contemplata aliis tradere"</em></p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="settings-bottom-bar">
+          <button class="btn btn-primary" id="btn-save-all-settings">Guardar Cambios de Ajustes</button>
+        </div>
+      </section>
+
+    </main>
+  </div>
+
+  <!-- ============================================== -->
+  <!-- MODALES Y DIÁLOGOS GLOBALES                    -->
+  <!-- ============================================== -->
+
+  <!-- Modal Global de Edición/Creación Reutilizable -->
+  <div class="modal-backdrop" id="generic-modal" style="display:none;">
+    <div class="modal-window">
+      <div class="modal-header">
+        <h3 class="modal-title" id="modal-title">Título del Modal</h3>
+        <button class="btn btn-icon btn-sm" id="modal-close-btn">&times;</button>
+      </div>
+      <div class="modal-body" id="modal-body">
+        <!-- Contenido dinámico según la entidad -->
+      </div>
+      <div class="modal-footer" id="modal-footer">
+        <button class="btn btn-secondary" id="modal-cancel-btn">Cancelar</button>
+        <button class="btn btn-primary" id="modal-save-btn">Guardar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Buscador Global Rápido (Ctrl+K) -->
+  <div class="modal-backdrop" id="omnisearch-modal" style="display:none;">
+    <div class="omnisearch-box">
+      <div class="omnisearch-input-row">
+        <svg viewBox="0 0 24 24" width="20" height="20" class="search-icon"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z" fill="currentColor"/></svg>
+        <input type="text" id="omnisearch-input" placeholder="Buscar en notas, eventos, tareas y personas... (↑ ↓ para navegar, Esc para cerrar)">
+        <kbd class="kbd-shortcut">ESC</kbd>
+      </div>
+      <div class="omnisearch-results" id="omnisearch-results-list">
+        <div class="omnisearch-empty">Escribe algo para buscar en todo el sistema...</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal Selector de Modelos de OpenRouter -->
+  <div class="modal-backdrop" id="models-browser-modal" style="display:none;">
+    <div class="modal-window modal-lg">
+      <div class="modal-header">
+        <h3 class="modal-title">Modelos Disponibles en OpenRouter</h3>
+        <button class="btn btn-icon btn-sm" id="models-browser-close-btn">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div class="search-input-wrap mb-3">
+          <input type="text" id="models-filter-input" placeholder="Filtrar por nombre (ej: gemma, claude, llama, free)...">
+        </div>
+        <div class="models-list-scroll" id="models-list-container">
+          <div class="text-center py-4">Cargando modelos...</div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" id="models-browser-cancel-btn">Cerrar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal Desde Imagen (Visión IA) -->
+  <div class="modal-backdrop" id="from-image-modal" style="display:none;">
+    <div class="modal-window">
+      <div class="modal-header">
+        <h3 class="modal-title">Crear Nota desde Imagen (Visión IA)</h3>
+        <button class="btn btn-icon btn-sm" id="from-image-close-btn">&times;</button>
+      </div>
+      <div class="modal-body">
+        <p class="modal-desc">
+          Sube una foto de un documento, afiche, acta de reunión o lista escrita.
+          La IA la analizará y generará automáticamente una nota con título y contenido organizado.
+        </p>
+
+        <div class="drop-zone" id="image-upload-dropzone">
+          <svg viewBox="0 0 24 24" width="40" height="40" fill="currentColor"><path d="M21 19V5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2zM8.5 13.5l2.5 3.01L14.5 12l4.5 6H5l3.5-4.5z"/></svg>
+          <p>Arrastra tu imagen aquí o haz clic para seleccionarla</p>
+          <input type="file" id="image-upload-file-input" accept="image/*" style="display:none;">
+        </div>
+
+        <div class="image-preview-container" id="from-image-preview-box" style="display:none;">
+          <img id="from-image-preview-elem" alt="Vista previa de imagen">
+          <button class="btn btn-sm btn-ghost" id="from-image-change-btn">Cambiar imagen</button>
+        </div>
+
+        <div class="form-group mt-3">
+          <label for="from-image-instructions">Instrucciones opcionales para la IA:</label>
+          <input type="text" id="from-image-instructions" placeholder="ej: Extraer acuerdos y lista de asistentes">
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" id="from-image-cancel-btn">Cancelar</button>
+        <button class="btn btn-primary" id="from-image-process-btn" disabled>Analizar y Crear Nota</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal Pantalla de Bienvenida Litúrgica -->
+  <div class="modal-backdrop" id="welcome-modal" style="display:none;">
+    <div class="welcome-card">
+      <div class="welcome-emblem">
+        <svg viewBox="0 0 24 24" width="56" height="56" fill="currentColor">
+          <path d="M12 2L13.5 5.5L17 7L13.5 8.5L12 12L10.5 8.5L7 7L10.5 5.5L12 2Z" fill="#f59e0b"/>
+          <path d="M11 9H13V21H11V9Z" fill="#f8fafc"/>
+          <path d="M6 13H18V15H6V13Z" fill="#f8fafc"/>
+        </svg>
+      </div>
+      <h2 class="welcome-title">¡La paz esté con ustedes!</h2>
+      <p class="welcome-subtitle" id="welcome-school-subtitle">Organizador Pastoral</p>
+      
+      <div class="welcome-liturgical-box" id="welcome-liturgical-box">
+        <span class="welcome-season" id="welcome-season-label">Tiempo Ordinario</span>
+        <h3 class="welcome-celebration" id="welcome-celebration-label">Celebración de Hoy</h3>
+        <p class="welcome-color" id="welcome-color-label">Color Litúrgico: Verde</p>
+      </div>
+
+      <div class="welcome-verse-box">
+        <p class="welcome-verse" id="welcome-verse-text">"La verdad los hará libres."</p>
+        <cite class="welcome-ref" id="welcome-verse-ref">Juan 8, 32</cite>
+      </div>
+
+      <button class="btn btn-primary btn-lg" id="welcome-continue-btn">Comenzar la Jornada</button>
+    </div>
+  </div>
+
+  <!-- Modal: Oración de la Mañana Escolar -->
+  <div class="modal-backdrop" id="morning-prayer-modal" style="display:none;">
+    <div class="modal-window modal-lg">
+      <div class="modal-header">
+        <div class="modal-header-icon-title">
+          <svg viewBox="0 0 24 24" width="22" height="22" fill="#f59e0b"><path d="M12 2L13.5 5.5L17 7L13.5 8.5L12 12L10.5 8.5L7 7L10.5 5.5L12 2Z"/></svg>
+          <h3 class="modal-title">Oración de la Mañana Escolar</h3>
+        </div>
+        <button class="btn btn-icon btn-sm" id="prayer-modal-close-btn">&times;</button>
+      </div>
+      <div class="modal-body">
+        <!-- Selector de Audiencia / Ciclo -->
+        <div class="prayer-audience-selector">
+          <span class="prayer-audience-label">Destinatarios:</span>
+          <div class="segmented-control" id="prayer-audience-tabs">
+            <button class="segmented-btn" data-audience="infantil">🎒 Niños / Básica</button>
+            <button class="segmented-btn active" data-audience="juvenil">🎓 Jóvenes / Media</button>
+            <button class="segmented-btn" data-audience="docentes">🍎 Docentes / Personal</button>
+            <button class="segmented-btn" data-audience="familias">👨‍👩‍👧‍👦 Familias</button>
+          </div>
+        </div>
+
+        <!-- Contenido de la Oración -->
+        <div class="prayer-sheet-card" id="prayer-sheet-content">
+          <div class="prayer-sheet-header">
+            <h4 class="prayer-sheet-title" id="prayer-card-title">Cargando oración...</h4>
+            <span class="prayer-sheet-sign" id="prayer-card-sign">En el nombre del Padre, y del Hijo y del Espíritu Santo. Amén.</span>
+          </div>
+          <div class="prayer-sheet-gospel" id="prayer-card-gospel-echo"></div>
+          <div class="prayer-sheet-reflection" id="prayer-card-reflection"></div>
+          <div class="prayer-sheet-petitions">
+            <h5>Peticiones de la comunidad:</h5>
+            <ul id="prayer-card-petitions-list"></ul>
+          </div>
+          <div class="prayer-sheet-closing" id="prayer-card-closing"></div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-ghost" id="prayer-modal-ai-regen-btn" title="Generar una nueva reflexión con el Asistente IA">
+          <svg viewBox="0 0 24 24" width="14" height="14" fill="#f59e0b"><path d="M12 2L13.5 5.5L17 7L13.5 8.5L12 12L10.5 8.5L7 7L10.5 5.5L12 2Z"/></svg>
+          <span>Regenerar con IA</span>
+        </button>
+        <button class="btn btn-secondary" id="prayer-modal-copy-btn">
+          <svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/></svg>
+          <span>Copiar Oración</span>
+        </button>
+        <button class="btn btn-primary" id="prayer-modal-print-btn">
+          <svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor"><path d="M19 8H5c-1.66 0-3 1.34-3 3v6h4v4h12v-4h4v-6c0-1.66-1.34-3-3-3zm-3 11H8v-5h8v5zm3-7c-.55 0-1-.45-1-1s.45-1 1-1 1 .45 1 1-.45 1-1 1zm-1-9H6v4h12V3z"/></svg>
+          <span>Imprimir Hoja de Clase</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal: Lecturas Completas de la Misa -->
+  <div class="modal-backdrop" id="daily-readings-modal" style="display:none;">
+    <div class="modal-window modal-lg">
+      <div class="modal-header">
+        <h3 class="modal-title" id="daily-readings-modal-title">Lecturas de la Misa de Hoy</h3>
+        <button class="btn btn-icon btn-sm" id="daily-readings-close-btn">&times;</button>
+      </div>
+      <div class="modal-body readings-modal-body" id="daily-readings-modal-body">
+        <div class="reading-section">
+          <h4 class="reading-heading" id="readings-first-title">Primera Lectura</h4>
+          <div class="reading-text" id="readings-first-text"></div>
+        </div>
+        <div class="reading-section">
+          <h4 class="reading-heading" id="readings-psalm-title">Salmo Responsorial</h4>
+          <div class="reading-text" id="readings-psalm-text"></div>
+        </div>
+        <div class="reading-section reading-gospel-section">
+          <h4 class="reading-heading text-primary" id="readings-gospel-title">Evangelio</h4>
+          <div class="reading-text" id="readings-gospel-text"></div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" id="daily-readings-copy-btn">Copiar Todas las Lecturas</button>
+        <button class="btn btn-primary" id="daily-readings-close-action-btn">Cerrar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal: Editor de Canción (Cancionero) -->
+  <div class="modal-backdrop" id="song-editor-modal" style="display:none;">
+    <div class="modal-window modal-lg">
+      <div class="modal-header">
+        <h3 class="modal-title" id="song-modal-title">Nueva Canción Pastoral</h3>
+        <button class="btn btn-icon btn-sm" id="song-editor-close-btn">&times;</button>
+      </div>
+      <div class="modal-body">
+        <input type="hidden" id="song-edit-id">
+        <div class="form-grid-2">
+          <div class="form-group">
+            <label for="song-input-title">Título de la Canción *</label>
+            <input type="text" id="song-input-title" placeholder="ej: Pescador de Hombres" required>
+          </div>
+          <div class="form-group">
+            <label for="song-input-author">Autor / Compositor</label>
+            <input type="text" id="song-input-author" placeholder="ej: Cesáreo Gabaráin">
+          </div>
+        </div>
+        <div class="form-grid-3 mt-3">
+          <div class="form-group">
+            <label for="song-input-category">Momento Litúrgico *</label>
+            <select id="song-input-category">
+              <option value="Entrada">Entrada</option>
+              <option value="Piedad">Piedad / Perdón</option>
+              <option value="Gloria">Gloria</option>
+              <option value="Salmo/Aclamación">Salmo / Aclamación</option>
+              <option value="Ofertorio">Ofertorio</option>
+              <option value="Santo">Santo</option>
+              <option value="Paz/Cordero">Paz / Cordero</option>
+              <option value="Comunión">Comunión</option>
+              <option value="Salida">Salida / Envío</option>
+              <option value="Mariano">Mariano</option>
+              <option value="Alabanza">Alabanza / Animación</option>
+              <option value="Adoración">Adoración</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="song-input-key">Tono Original</label>
+            <input type="text" id="song-input-key" placeholder="ej: C, D, G, Am" value="C">
+          </div>
+          <div class="form-group">
+            <label for="song-input-tempo">Ritmo / Tempo</label>
+            <input type="text" id="song-input-tempo" placeholder="ej: Alegre, Balada, Marcha">
+          </div>
+        </div>
+        <div class="form-group mt-3">
+          <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:6px; margin-bottom:6px;">
+            <label for="song-input-lyrics" style="margin:0;">Letra y Acordes *</label>
+            <div class="song-editor-tags-bar" style="display:flex; gap:4px; flex-wrap:wrap;">
+              <button type="button" class="btn btn-sm btn-ghost btn-quick-insert-tag" data-tag="[CORO]&#10;">+ Coro</button>
+              <button type="button" class="btn btn-sm btn-ghost btn-quick-insert-tag" data-tag="[ESTROFA 1]&#10;">+ Estrofa 1</button>
+              <button type="button" class="btn btn-sm btn-ghost btn-quick-insert-tag" data-tag="[ESTROFA 2]&#10;">+ Estrofa 2</button>
+              <button type="button" class="btn btn-sm btn-ghost btn-quick-insert-tag" data-tag="[PUENTE]&#10;">+ Puente</button>
+            </div>
+          </div>
+          <span class="form-hint" style="display:block; margin-bottom:6px; font-size:0.8rem; color:var(--text-muted);">Escribe los acordes entre corchetes <code>[C]</code> o <code>[Do]</code> y encabeza las partes con <code>[CORO]</code> y <code>[ESTROFA 1]</code>:</span>
+          <textarea id="song-input-lyrics" rows="12" style="font-family: monospace; font-size: 0.95rem; line-height: 1.5;" placeholder="[CORO]&#10;[C] Tú has venido a la [G] orilla...&#10;&#10;[ESTROFA 1]&#10;[C] No has buscado..." required></textarea>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" id="song-editor-cancel-btn">Cancelar</button>
+        <button class="btn btn-primary" id="song-editor-save-btn">Guardar Canción</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal: Armador de Lista de Misa (Repertorio) -->
+  <div class="modal-backdrop" id="mass-repertoire-modal" style="display:none;">
+    <div class="modal-window modal-lg">
+      <div class="modal-header">
+        <h3 class="modal-title">Lista de Cantos para la Misa</h3>
+        <button class="btn btn-icon btn-sm" id="repertoire-modal-close-btn">&times;</button>
+      </div>
+      <div class="modal-body">
+        <p class="modal-desc" style="color:var(--text-muted); font-size:0.9rem; margin-bottom:16px;">Selecciona los cantos para cada momento litúrgico. Podrás copiarlos o imprimirlos en una hoja para el coro y los alumnos.</p>
+        <div class="form-grid-2">
+          <div class="form-group">
+            <label for="rep-select-entrada">Canto de Entrada:</label>
+            <select id="rep-select-entrada"></select>
+          </div>
+          <div class="form-group">
+            <label for="rep-select-piedad">Canto de Piedad / Perdón:</label>
+            <select id="rep-select-piedad"></select>
+          </div>
+          <div class="form-group mt-2">
+            <label for="rep-select-gloria">Canto de Gloria:</label>
+            <select id="rep-select-gloria"></select>
+          </div>
+          <div class="form-group mt-2">
+            <label for="rep-select-ofertorio">Canto de Ofertorio:</label>
+            <select id="rep-select-ofertorio"></select>
+          </div>
+          <div class="form-group mt-2">
+            <label for="rep-select-santo">Canto de Santo:</label>
+            <select id="rep-select-santo"></select>
+          </div>
+          <div class="form-group mt-2">
+            <label for="rep-select-paz">Canto de Paz / Cordero:</label>
+            <select id="rep-select-paz"></select>
+          </div>
+          <div class="form-group mt-2">
+            <label for="rep-select-comunion">Canto de Comunión:</label>
+            <select id="rep-select-comunion"></select>
+          </div>
+          <div class="form-group mt-2">
+            <label for="rep-select-salida">Canto de Salida / Envío:</label>
+            <select id="rep-select-salida"></select>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" id="repertoire-copy-btn">Copiar Lista</button>
+        <button class="btn btn-primary" id="repertoire-print-btn">
+          <svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor"><path d="M19 8H5c-1.66 0-3 1.34-3 3v6h4v4h12v-4h4v-6c0-1.66-1.34-3-3-3zm-3 11H8v-5h8v5zm3-7c-.55 0-1-.45-1-1s.45-1 1-1 1 .45 1 1-.45 1-1 1zm-1-9H6v4h12V3z"/></svg>
+          <span>Imprimir Hoja de Cantos</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal: Editor y Creador de Guión Litúrgico -->
+  <div class="modal-backdrop" id="script-editor-modal" style="display:none;">
+    <div class="modal-window modal-xl">
+      <div class="modal-header">
+        <h3 class="modal-title" id="script-modal-title">Editor de Guión Litúrgico</h3>
+        <button class="btn btn-icon btn-sm" id="script-editor-close-btn">&times;</button>
+      </div>
+      <div class="modal-body script-editor-body">
+        <input type="hidden" id="script-edit-id">
+
+        <!-- Selector de Plantilla Rápida -->
+        <div class="template-quick-picker-box mb-3" style="background:var(--bg-secondary); padding:10px 14px; border-radius:var(--radius-md); border:1px solid var(--border-color); display:flex; align-items:center; gap:12px; flex-wrap:wrap;">
+          <label style="font-weight:600; font-size:0.85rem; color:var(--text-secondary);">Cargar plantilla:</label>
+          <div class="template-buttons-row" style="display:flex; gap:8px; flex-wrap:wrap;">
+            <button type="button" class="btn btn-sm btn-ghost btn-load-tmpl" data-template-id="template-inicio-ano">Inicio de Año</button>
+            <button type="button" class="btn btn-sm btn-ghost btn-load-tmpl" data-template-id="template-primer-viernes">Primer Viernes</button>
+            <button type="button" class="btn btn-sm btn-ghost btn-load-tmpl" data-template-id="template-graduacion">Graduación</button>
+            <button type="button" class="btn btn-sm btn-ghost btn-load-tmpl" data-template-id="template-misa-curso">Misa de Curso</button>
+            <button type="button" class="btn btn-sm btn-ghost btn-load-tmpl" data-template-id="template-fiesta-patronal">Fiesta Patronal</button>
+            <button type="button" class="btn btn-sm btn-ghost btn-load-tmpl" data-template-id="template-liturgia-palabra">Liturgia Palabra</button>
+            <button type="button" class="btn btn-sm btn-secondary" id="btn-editor-open-templates" style="margin-left:auto;">
+              <span>Explorar catálogo completo...</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Secciones Colapsables del Guión -->
+        <div class="script-sections-accordion">
+          
+          <!-- 1. Datos Generales -->
+          <details class="script-section-block" open>
+            <summary class="script-section-summary">1. Información General de la Celebración</summary>
+            <div class="script-section-content">
+              <div class="form-grid-2">
+                <div class="form-group">
+                  <label for="script-input-title">Título de la Celebración *</label>
+                  <input type="text" id="script-input-title" placeholder="ej: Misa Escolar de San Alberto Magno" required>
+                </div>
+                <div class="form-group">
+                  <label for="script-input-type">Tipo de Celebración *</label>
+                  <select id="script-input-type">
+                    <option value="Misa Escolar">Misa Escolar General</option>
+                    <option value="Primer Viernes">Primer Viernes de Mes</option>
+                    <option value="Misa de Curso">Misa de Curso</option>
+                    <option value="Graduación">Graduación / Envío</option>
+                    <option value="Liturgia de la Palabra">Liturgia de la Palabra</option>
+                  </select>
+                </div>
+              </div>
+              <div class="form-grid-3 mt-3">
+                <div class="form-group">
+                  <label for="script-input-date">Fecha</label>
+                  <input type="date" id="script-input-date">
+                </div>
+                <div class="form-group">
+                  <label for="script-input-course">Curso / Participantes</label>
+                  <input type="text" id="script-input-course" placeholder="ej: 7° Básico / Todo el Colegio">
+                </div>
+                <div class="form-group">
+                  <label for="script-input-celebrant">Sacerdote o Celebrante</label>
+                  <input type="text" id="script-input-celebrant" placeholder="ej: Pbro. Juan Pérez">
+                </div>
+              </div>
+              <div class="form-group mt-3">
+                <label for="script-input-theme">Lema o Eje Pastoral</label>
+                <input type="text" id="script-input-theme" placeholder="ej: «Sean sal de la tierra y luz del mundo»">
+              </div>
+            </div>
+          </details>
+
+          <!-- 2. Ritos Iniciales -->
+          <details class="script-section-block">
+            <summary class="script-section-summary">2. Ritos Iniciales (Monición, Cantos, Perdón)</summary>
+            <div class="script-section-content">
+              <div class="form-group">
+                <label for="script-input-entrance-com">Monición de Entrada (leída por un alumno o monitor):</label>
+                <textarea id="script-input-entrance-com" rows="3"></textarea>
+              </div>
+              <div class="form-grid-2 mt-3">
+                <div class="form-group">
+                  <label for="script-input-entrance-song">Canto de Entrada:</label>
+                  <input type="text" id="script-input-entrance-song" placeholder="ej: Vienen con Alegría">
+                </div>
+                <div class="form-group">
+                  <label for="script-input-penitential">Acto Penitencial (Señor ten piedad):</label>
+                  <textarea id="script-input-penitential" rows="3"></textarea>
+                </div>
+              </div>
+            </div>
+          </details>
+
+          <!-- 3. Liturgia de la Palabra -->
+          <details class="script-section-block">
+            <summary class="script-section-summary">3. Liturgia de la Palabra (Lecturas y Evangelio)</summary>
+            <div class="script-section-content">
+              <div class="form-group">
+                <label for="script-input-word-com">Monición a las Lecturas:</label>
+                <textarea id="script-input-word-com" rows="2"></textarea>
+              </div>
+              <div class="form-group mt-3">
+                <label for="script-input-first-reading">Primera Lectura:</label>
+                <textarea id="script-input-first-reading" rows="3"></textarea>
+              </div>
+              <div class="form-group mt-3">
+                <label for="script-input-psalm">Salmo Responsorial:</label>
+                <textarea id="script-input-psalm" rows="2"></textarea>
+              </div>
+              <div class="form-group mt-3">
+                <label for="script-input-gospel">Santo Evangelio:</label>
+                <textarea id="script-input-gospel" rows="4"></textarea>
+              </div>
+            </div>
+          </details>
+
+          <!-- 4. Oración de los Fieles (Peticiones) -->
+          <details class="script-section-block">
+            <summary class="script-section-summary">4. Oración Universal (Peticiones de la Comunidad)</summary>
+            <div class="script-section-content">
+              <div class="petitions-header-row mb-2" style="display:flex; justify-content:space-between; align-items:center;">
+                <span style="font-weight:600; font-size:0.85rem; color:var(--text-secondary);">Intenciones para leer por los estudiantes y profesores:</span>
+                <button type="button" class="btn btn-sm btn-ghost" id="script-btn-add-petition">+ Agregar Petición</button>
+              </div>
+              <div id="script-petitions-container" style="display:flex; flex-direction:column; gap:8px;"></div>
+            </div>
+          </details>
+
+          <!-- 5. Presentación de Dones / Ofrendas -->
+          <details class="script-section-block">
+            <summary class="script-section-summary">5. Liturgia Eucarística y Ofrendas Escolares</summary>
+            <div class="script-section-content">
+              <div class="form-group">
+                <label for="script-input-offertory-com">Monición de Ofrendas:</label>
+                <textarea id="script-input-offertory-com" rows="2"></textarea>
+              </div>
+              <div class="offerings-header-row mt-3 mb-2" style="display:flex; justify-content:space-between; align-items:center;">
+                <span style="font-weight:600; font-size:0.85rem; color:var(--text-secondary);">Signos escolares a presentar (ej: Cuadernos, Cirio, Pan y Vino):</span>
+                <button type="button" class="btn btn-sm btn-ghost" id="script-btn-add-offering">+ Agregar Signo</button>
+              </div>
+              <div id="script-offerings-container" style="display:flex; flex-direction:column; gap:8px;"></div>
+              <div class="form-group mt-3">
+                <label for="script-input-offertory-song">Canto de Ofertorio:</label>
+                <input type="text" id="script-input-offertory-song" placeholder="ej: Saber que Vendrás">
+              </div>
+            </div>
+          </details>
+
+          <!-- 6. Comunión y Conclusión -->
+          <details class="script-section-block">
+            <summary class="script-section-summary">6. Comunión, Acción de Gracias y Envío</summary>
+            <div class="script-section-content">
+              <div class="form-grid-2">
+                <div class="form-group">
+                  <label for="script-input-communion-com">Monición de Comunión:</label>
+                  <textarea id="script-input-communion-com" rows="2"></textarea>
+                </div>
+                <div class="form-group">
+                  <label for="script-input-communion-song">Canto de Comunión:</label>
+                  <input type="text" id="script-input-communion-song" placeholder="ej: Pescador de Hombres">
+                </div>
+              </div>
+              <div class="form-group mt-3">
+                <label for="script-input-thanksgiving">Acción de Gracias (leída por un alumno o profesor):</label>
+                <textarea id="script-input-thanksgiving" rows="3"></textarea>
+              </div>
+              <div class="form-group mt-3">
+                <label for="script-input-recessional-song">Canto de Salida / Envío:</label>
+                <input type="text" id="script-input-recessional-song" placeholder="ej: Santa María del Camino">
+              </div>
+            </div>
+          </details>
+
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" id="script-editor-cancel-btn">Cancelar</button>
+        <button class="btn btn-primary" id="script-editor-save-btn">Guardar Guión</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal: Plantillas de Celebraciones Escolares -->
+  <div class="modal-backdrop" id="event-templates-modal" style="display:none;">
+    <div class="modal-window modal-lg">
+      <div class="modal-header">
+        <h3 class="modal-title">Plantillas de Eventos Escolares y Litúrgicos</h3>
+        <button class="btn btn-icon btn-sm" id="event-templates-close-btn">&times;</button>
+      </div>
+      <div class="modal-body">
+        <p class="modal-desc" style="color:var(--text-muted); font-size:0.9rem; margin-bottom:18px;">
+          Selecciona una celebración predeterminada. Se cargará con su categoría, lugar sugerido, checklist litúrgico y notas para que ahorres tiempo al planificar el año escolar.
+        </p>
+        <div class="event-templates-grid" id="event-templates-container"></div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" id="event-templates-cancel-btn">Cerrar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal: Catálogo Independiente de Plantillas Litúrgicas para el Colegio -->
+  <div class="modal-backdrop" id="liturgical-templates-modal" style="display:none;">
+    <div class="modal-window modal-lg">
+      <div class="modal-header">
+        <div style="display:flex; align-items:center; gap:8px;">
+          <svg viewBox="0 0 24 24" width="20" height="20" fill="#f59e0b"><path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z"/></svg>
+          <h3 class="modal-title">Plantillas Litúrgicas Escolares</h3>
+        </div>
+        <button class="btn btn-icon btn-sm" id="liturgical-templates-close-btn">&times;</button>
+      </div>
+      <div class="modal-body">
+        <p class="modal-desc" style="color:var(--text-muted); font-size:0.9rem; margin-bottom:18px;">
+          Selecciona una plantilla oficial para celebraciones del colegio. Al pulsar <strong>«Usar esta Plantilla»</strong>, se cargará en el editor con moniciones, lecturas bíblicas, peticiones y ofrendas escolares para que la personalices y guardes como tu propia celebración.
+        </p>
+        <div class="event-templates-grid" id="liturgical-templates-container"></div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" id="liturgical-templates-cancel-btn">Cerrar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal: Generador IA de Circulares y Convocatorias -->
+  <div class="modal-backdrop" id="event-announcement-modal" style="display:none;">
+    <div class="modal-window modal-lg">
+      <div class="modal-header">
+        <div style="display:flex; align-items:center; gap:8px;">
+          <svg viewBox="0 0 24 24" width="20" height="20" fill="#f59e0b"><path d="M12 2L13.5 5.5L17 7L13.5 8.5L12 12L10.5 8.5L7 7L10.5 5.5L12 2Z"/></svg>
+          <h3 class="modal-title">Redactar Convocatoria Escolar con IA</h3>
+        </div>
+        <button class="btn btn-icon btn-sm" id="announcement-modal-close-btn">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div class="announcement-event-banner" id="announcement-event-info"></div>
+
+        <div class="form-group mb-3">
+          <label style="font-weight:600; font-size:0.85rem; color:var(--text-secondary); margin-bottom:6px; display:block;">Tipo de Convocatoria / Destinatarios:</label>
+          <div class="segmented-control" id="announcement-target-tabs" style="width:100%;">
+            <button type="button" class="segmented-btn active" data-target="apoderados">Circular a Apoderados</button>
+            <button type="button" class="segmented-btn" data-target="profesores">Aviso a Profesores</button>
+            <button type="button" class="segmented-btn" data-target="whatsapp">WhatsApp / Redes</button>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="announcement-result-text" style="display:flex; justify-content:space-between;">
+            <span>Texto de la Convocatoria:</span>
+            <span id="announcement-ai-status" style="font-size:0.8rem; color:var(--primary); font-weight:600;"></span>
+          </label>
+          <textarea id="announcement-result-text" rows="10" style="font-size:0.92rem; line-height:1.6;"></textarea>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" id="btn-regenerate-announcement">
+          <svg viewBox="0 0 24 24" width="14" height="14" fill="#f59e0b"><path d="M12 2L13.5 5.5L17 7L13.5 8.5L12 12L10.5 8.5L7 7L10.5 5.5L12 2Z"/></svg>
+          <span>Regenerar con IA</span>
+        </button>
+        <button class="btn btn-secondary" id="btn-copy-announcement">
+          <svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/></svg>
+          <span>Copiar Texto</span>
+        </button>
+        <button class="btn btn-primary" id="announcement-modal-done-btn">Listo</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================== -->
+  <!-- MODAL: VISOR DE NOTAS (RENDERIZADO MARKDOWN)   -->
+  <!-- ============================================== -->
+  <div class="modal-backdrop" id="note-viewer-modal" style="display:none;">
+    <div class="modal-window modal-lg">
+      <div class="modal-header">
+        <div class="note-viewer-header-info">
+          <h3 class="modal-title" id="note-viewer-title">Título de la Nota</h3>
+          <div class="note-viewer-meta">
+            <span id="note-viewer-date" class="note-viewer-date"></span>
+            <div id="note-viewer-tags" class="note-viewer-tags"></div>
+          </div>
+        </div>
+        <button class="btn btn-icon btn-sm" id="note-viewer-close-btn">&times;</button>
+      </div>
+      <div class="modal-body note-viewer-body">
+        <div id="note-viewer-content" class="note-markdown-view markdown-body">
+          <!-- Contenido renderizado en Markdown con checklists interactivas -->
+        </div>
+      </div>
+      <div class="modal-footer note-viewer-footer">
+        <div class="note-viewer-left-actions">
+          <button class="btn btn-secondary btn-sm" id="btn-viewer-copy-md" title="Copiar código Markdown crudo">
+            <svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/></svg>
+            <span>Copiar Markdown</span>
+          </button>
+          <button class="btn btn-secondary btn-sm" id="btn-viewer-export-pdf" title="Exportar o imprimir esta nota en PDF">
+            <svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor"><path d="M19 8H5c-1.66 0-3 1.34-3 3v6h4v4h12v-4h4v-6c0-1.66-1.34-3-3-3zm-3 11H8v-5h8v5zm3-7c-.55 0-1-.45-1-1s.45-1 1-1 1 .45 1 1-.45 1-1 1zm-1-9H6v4h12V3z"/></svg>
+            <span>Imprimir / PDF</span>
+          </button>
+          <button class="btn btn-ghost btn-sm text-danger" id="btn-viewer-delete-note" title="Eliminar nota">
+            <svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor"><path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/></svg>
+            <span>Eliminar</span>
+          </button>
+        </div>
+        <div class="note-viewer-right-actions">
+          <button class="btn btn-secondary" id="btn-viewer-close">Cerrar</button>
+          <button class="btn btn-primary" id="btn-viewer-edit-note">
+            <svg viewBox="0 0 24 24" width="15" height="15" fill="currentColor"><path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/></svg>
+            <span>Editar Nota</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ======================================================== -->
+  <!-- MODAL: EDITOR DE NOTAS (BARRA DE HERRAMIENTAS Y PREVIEW) -->
+  <!-- ======================================================== -->
+  <div class="modal-backdrop" id="note-editor-modal" style="display:none;">
+    <div class="modal-window modal-lg">
+      <div class="modal-header">
+        <h3 class="modal-title" id="note-editor-title">Nueva Nota Pastoral</h3>
+        <button class="btn btn-icon btn-sm" id="note-editor-close-btn">&times;</button>
+      </div>
+      <div class="modal-body note-editor-modal-body">
+        <input type="hidden" id="note-editor-id">
+        <div class="form-group mb-3">
+          <label for="note-editor-input-title">Título de la Nota *</label>
+          <input type="text" id="note-editor-input-title" placeholder="ej: Guion para Misa de San José" required>
+        </div>
+
+        <div class="form-group mb-3">
+          <label for="note-editor-input-tags">Etiquetas (separadas por coma):</label>
+          <input type="text" id="note-editor-input-tags" placeholder="Reunión, Retiro, Catequesis, Liturgia">
+        </div>
+
+        <!-- Barra de Modos: Escribir vs Vista Previa -->
+        <div class="markdown-editor-wrapper">
+          <div class="markdown-editor-tabs-bar">
+            <div class="segmented-control" id="note-editor-mode-tabs">
+              <button type="button" class="segmented-btn active" data-tab="write">
+                <svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor"><path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25z"/></svg>
+                <span>Escribir</span>
+              </button>
+              <button type="button" class="segmented-btn" data-tab="preview">
+                <svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor"><path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zm0 12.5c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"/></svg>
+                <span>Vista Previa (Markdown)</span>
+              </button>
+            </div>
+            <div class="markdown-counter-badge" id="note-editor-counter">0 caracteres</div>
+          </div>
+
+          <!-- Barra de Herramientas de Formato Markdown -->
+          <div class="markdown-toolbar" id="note-markdown-toolbar">
+            <button type="button" class="md-tool-btn" data-action="bold" title="Negrita (**texto**)"><b>B</b></button>
+            <button type="button" class="md-tool-btn" data-action="italic" title="Cursiva (*texto*)"><i>I</i></button>
+            <button type="button" class="md-tool-btn" data-action="strike" title="Tachado (~~texto~~)"><s>S</s></button>
+            <span class="md-tool-divider"></span>
+            <button type="button" class="md-tool-btn" data-action="h1" title="Encabezado 1 (# Titular)">H1</button>
+            <button type="button" class="md-tool-btn" data-action="h2" title="Encabezado 2 (## Sección)">H2</button>
+            <button type="button" class="md-tool-btn" data-action="h3" title="Encabezado 3 (### Subtítulo)">H3</button>
+            <span class="md-tool-divider"></span>
+            <button type="button" class="md-tool-btn" data-action="quote" title="Cita litúrgica / bíblica (> Cita)">❝ Cita</button>
+            <button type="button" class="md-tool-btn" data-action="ul" title="Lista de viñetas (- Ítem)">• Lista</button>
+            <button type="button" class="md-tool-btn" data-action="ol" title="Lista numerada (1. Ítem)">1. Num</button>
+            <button type="button" class="md-tool-btn" data-action="checklist" title="Lista de tareas (- [ ] Tarea)">☑ Tarea</button>
+            <span class="md-tool-divider"></span>
+            <button type="button" class="md-tool-btn" data-action="table" title="Insertar tabla Markdown">⊞ Tabla</button>
+            <button type="button" class="md-tool-btn" data-action="link" title="Enlace [texto](url)">🔗 Enlace</button>
+            <button type="button" class="md-tool-btn" data-action="bible" title="Cita bíblica con referencia">✝ Bíblica</button>
+            <button type="button" class="md-tool-btn" data-action="hr" title="Línea horizontal divisoria (---)">―</button>
+          </div>
+
+          <!-- Área de Edición (Pestaña Escribir) -->
+          <div class="markdown-tab-pane" id="note-pane-write">
+            <textarea id="note-editor-input-body" rows="12" placeholder="Escribe tus reflexiones, acuerdos, guiones o listas aquí con soporte Markdown completo..."></textarea>
+            <div class="markdown-quick-help">
+              <span>Soporta Markdown: <code>**negritas**</code>, <code>*cursivas*</code>, <code># títulos</code>, <code>> citas bíblicas</code>, <code>- viñetas</code> y <code>- [ ] tareas</code></span>
+            </div>
+          </div>
+
+          <!-- Área de Vista Previa (Pestaña Vista Previa) -->
+          <div class="markdown-tab-pane" id="note-pane-preview" style="display:none;">
+            <div id="note-editor-preview-content" class="note-markdown-view markdown-body">
+              <p style="color:var(--text-muted); font-style:italic;">Escribe algo en la pestaña 'Escribir' para ver la vista previa aquí.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" id="note-editor-cancel-btn">Cancelar</button>
+        <button class="btn btn-primary" id="note-editor-save-btn">Guardar Nota</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Contenedor Flotante de Toasts -->
+  <div class="toast-container" id="toast-container"></div>
+
+  <!-- Área Oculta Especial para Impresión y Exportación a PDF -->
+  <div id="print-area" class="print-only"></div>
+
+  <!-- Scripts: Calendario Litúrgico, Renderizador Markdown y Lógica de la Aplicación -->
+  <script src="liturgical.js"></script>
+  <script src="markdown.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>

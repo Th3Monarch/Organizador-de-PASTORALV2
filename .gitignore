@@ -1,0 +1,26 @@
+# Dependencias
+node_modules/
+
+# Compilación y ejecutables
+dist/
+out/
+release/
+
+# Datos locales y logs
+userData/
+*.log
+.package-lock.json
+
+# Entorno y credenciales
+.env
+.env.local
+.env.*.local
+
+# Sistema operativo
+.DS_Store
+Thumbs.db
+ehthumbs.db
+
+# Editores
+.vscode/
+.idea/
