@@ -174,8 +174,23 @@
     },
 
     async openExternal(url) {
-      window.open(url, '_blank', 'noopener,noreferrer');
-      return { success: true };
+      if (!url) return { success: false };
+      try {
+        const win = window.open(url, '_blank', 'noopener,noreferrer');
+        if (!win || win.closed || typeof win.closed === 'undefined') {
+          const link = document.createElement('a');
+          link.href = url;
+          link.target = '_blank';
+          link.rel = 'noopener noreferrer';
+          document.body.appendChild(link);
+          link.click();
+          link.remove();
+        }
+        return { success: true };
+      } catch (_) {
+        window.location.href = url;
+        return { success: true };
+      }
     },
 
     async notify(payload) {
@@ -385,31 +400,33 @@
       async testConnection(params) {
         const provider = params.provider || 'gemini';
         const apiKey = params.apiKey;
-        if (!apiKey) return { success: false, error: 'Por favor ingresa una API Key válida' };
+        if (!apiKey) return { ok: false, success: false, error: 'Por favor ingresa una API Key válida' };
 
         try {
           if (provider === 'gemini') {
-            const url = `https://generativelanguage.googleapis.com/v1beta/models?key=${encodeURIComponent(apiKey)}`;
+            const cleanKey = apiKey.trim();
+            const url = `https://generativelanguage.googleapis.com/v1beta/models?key=${encodeURIComponent(cleanKey)}`;
             const res = await fetch(url);
             if (!res.ok) {
               const errJson = await res.json().catch(() => ({}));
-              return { success: false, error: errJson.error?.message || `HTTP ${res.status}` };
+              const msg = errJson.error?.message || `Error HTTP ${res.status}`;
+              return { ok: false, success: false, error: msg };
             }
-            return { success: true, message: 'Conexión exitosa con Google Gemini AI' };
+            return { ok: true, success: true, reply: 'Conexión verificada con Google Gemini AI', message: 'Conexión exitosa con Google Gemini AI' };
           } else {
+            const cleanKey = apiKey.trim();
             const res = await fetch('https://openrouter.ai/api/v1/auth/key', {
-              headers: { Authorization: `Bearer ${apiKey}` }
+              headers: { Authorization: `Bearer ${cleanKey}` }
             });
-            if (!res.ok) return { success: false, error: `Error HTTP ${res.status}` };
-            return { success: true, message: 'Conexión exitosa con OpenRouter' };
+            if (!res.ok) return { ok: false, success: false, error: `Error HTTP ${res.status}` };
+            return { ok: true, success: true, reply: 'Conexión verificada con OpenRouter', message: 'Conexión exitosa con OpenRouter' };
           }
         } catch (err) {
-          return { success: false, error: err.message };
+          return { ok: false, success: false, error: err.message };
         }
       },
 
       async getModels(params) {
-        // Modelos soportados directamente
         return {
           success: true,
           models: [
@@ -425,7 +442,7 @@
         }
         currentAbortController = new AbortController();
 
-        const { provider = 'gemini', apiKey, model = 'gemini-2.5-flash', messages, systemPrompt } = params;
+        const { provider = 'gemini', apiKey, model, messages = [], systemPrompt, appContext } = params;
 
         if (!apiKey) {
           emitStatus('error', 'Falta la API Key en Ajustes');
@@ -435,23 +452,72 @@
 
         emitStatus('connecting', 'Conectando con la IA...');
 
+        // Construir system prompt pastoral si no fue provisto
+        let systemText = systemPrompt;
+        if (!systemText && appContext) {
+          systemText = `Eres el Asistente Pastoral inteligente del "Organizador de Pastoral 2.0" en ${appContext.schoolName || 'la comunidad educativa'}. `
+            + `Fecha actual: ${appContext.todayStr || ''}. Tiempo litúrgico: ${appContext.liturgicalSeason || 'Tiempo Ordinario'} (${appContext.liturgicalColor || 'Verde'}). `
+            + `Tu misión es redactar oraciones inspiradoras, guiones para misas y celebraciones, cantos litúrgicos y dinámicas pastorales con calidez humana y fidelidad cristiana. `
+            + `Responde siempre en español con formato Markdown claro y bien estructurado.`;
+        }
+
+        let accumulatedResponse = '';
+
         try {
           if (provider === 'gemini') {
-            const contents = messages.map(m => ({
-              role: m.role === 'assistant' ? 'model' : 'user',
-              parts: [{ text: m.content }]
-            }));
+            // Normalizar modelo para Gemini REST v1beta
+            let targetModel = model ? model.trim().replace(/^models\//, '') : 'gemini-2.5-flash';
+            if (!targetModel || targetModel === 'gemini-flash-latest') {
+              targetModel = 'gemini-2.5-flash';
+            }
+
+            // Normalizar mensajes y contenidos multi-modal
+            const contents = [];
+            for (const m of messages) {
+              if (m.role === 'system') continue;
+              const role = m.role === 'assistant' ? 'model' : 'user';
+              const parts = [];
+
+              if (typeof m.content === 'string' && m.content.trim()) {
+                parts.push({ text: m.content.trim() });
+              } else if (Array.isArray(m.content)) {
+                for (const part of m.content) {
+                  if (part.type === 'text' && part.text) {
+                    parts.push({ text: part.text });
+                  } else if (part.type === 'image_url' && part.image_url?.url) {
+                    const dataUrl = part.image_url.url;
+                    const match = dataUrl.match(/^data:(image\/[a-zA-Z+]+);base64,(.+)$/);
+                    if (match) {
+                      parts.push({
+                        inlineData: {
+                          mimeType: match[1],
+                          data: match[2]
+                        }
+                      });
+                    }
+                  }
+                }
+              }
+
+              if (parts.length > 0) {
+                contents.push({ role, parts });
+              }
+            }
+
+            if (contents.length === 0) {
+              throw new Error('No hay mensajes válidos para enviar.');
+            }
 
             const reqBody = {
               contents,
-              systemInstruction: systemPrompt ? { parts: [{ text: systemPrompt }] } : undefined,
+              systemInstruction: systemText ? { parts: [{ text: systemText }] } : undefined,
               generationConfig: {
                 temperature: 0.7,
                 maxOutputTokens: 2048
               }
             };
 
-            const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(model)}:streamGenerateContent?alt=sse&key=${encodeURIComponent(apiKey)}`;
+            const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(targetModel)}:streamGenerateContent?alt=sse&key=${encodeURIComponent(apiKey.trim())}`;
             
             const response = await fetch(endpoint, {
               method: 'POST',
@@ -487,6 +553,7 @@
                     const parsed = JSON.parse(dataStr);
                     const chunkText = parsed.candidates?.[0]?.content?.parts?.[0]?.text;
                     if (chunkText) {
+                      accumulatedResponse += chunkText;
                       emitChunk(chunkText);
                     }
                   } catch (_) {}
@@ -495,14 +562,17 @@
             }
 
             emitStatus('done', 'Listo');
-            return { success: true };
+            return {
+              success: true,
+              response: { role: 'assistant', content: accumulatedResponse }
+            };
 
           } else {
             // OpenRouter Provider
             const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
               method: 'POST',
               headers: {
-                'Authorization': `Bearer ${apiKey}`,
+                'Authorization': `Bearer ${apiKey.trim()}`,
                 'Content-Type': 'application/json',
                 'HTTP-Referer': window.location.origin,
                 'X-Title': 'Organizador Pastoral PWA'
@@ -510,7 +580,7 @@
               body: JSON.stringify({
                 model: model || 'google/gemma-3-27b-it:free',
                 messages: [
-                  ...(systemPrompt ? [{ role: 'system', content: systemPrompt }] : []),
+                  ...(systemText ? [{ role: 'system', content: systemText }] : []),
                   ...messages
                 ],
                 stream: true
@@ -522,7 +592,7 @@
               throw new Error(`OpenRouter HTTP ${response.status}`);
             }
 
-            emitStatus('streaming', 'Generando...');
+            emitStatus('streaming', 'Generando respuesta...');
 
             const reader = response.body.getReader();
             const decoder = new TextDecoder('utf-8');
@@ -544,23 +614,30 @@
                   try {
                     const parsed = JSON.parse(dataStr);
                     const chunk = parsed.choices?.[0]?.delta?.content;
-                    if (chunk) emitChunk(chunk);
+                    if (chunk) {
+                      accumulatedResponse += chunk;
+                      emitChunk(chunk);
+                    }
                   } catch (_) {}
                 }
               }
             }
 
             emitStatus('done', 'Listo');
-            return { success: true };
+            return {
+              success: true,
+              response: { role: 'assistant', content: accumulatedResponse }
+            };
           }
         } catch (err) {
           if (err.name === 'AbortError') {
             emitStatus('cancelled', 'Cancelado por el usuario');
             return { success: false, cancelled: true };
           }
-          emitStatus('error', err.message);
-          emitChunk(`\n\n❌ **Error en la IA:** ${err.message}`);
-          return { success: false, error: err.message };
+          const errorMsg = err.message || 'Error en la conexión con la IA';
+          emitStatus('error', errorMsg);
+          emitChunk(`\n\n❌ **Error en la IA:** ${errorMsg}`);
+          return { success: false, error: errorMsg };
         } finally {
           currentAbortController = null;
         }
@@ -607,8 +684,9 @@
   }
 
   function emitStatus(status, text) {
+    const textMsg = text || (typeof status === 'string' ? status : 'Pensando...');
     streamStatusListeners.forEach(cb => {
-      try { cb({ status, text }); } catch (e) { console.error(e); }
+      try { cb(textMsg); } catch (e) { console.error(e); }
     });
   }
 

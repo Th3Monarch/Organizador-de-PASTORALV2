@@ -2212,6 +2212,9 @@ body.theme-light .form-group select {
   font-weight: 700;
   color: var(--text-primary);
   display: block;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .model-provider-badge {
@@ -5286,6 +5289,155 @@ body {
   .ios-pwa-install-banner {
     margin: 8px 0 14px 0 !important;
     padding: 12px 14px !important;
+  }
+
+  /* --- ASISTENTE IA EN MÓVILES (iOS / PWA) --- */
+  #view-ai {
+    height: 100% !important;
+    display: flex !important;
+    flex-direction: column !important;
+  }
+
+  .ai-chat-interface {
+    height: calc(100dvh - 54px - 58px - env(safe-area-inset-bottom, 0px) - 24px) !important;
+    max-height: calc(100dvh - 54px - 58px - env(safe-area-inset-bottom, 0px) - 24px) !important;
+    border-radius: var(--radius-md) !important;
+    display: flex !important;
+    flex-direction: column !important;
+    overflow: hidden !important;
+    margin-bottom: 0 !important;
+  }
+
+  .chat-header {
+    padding: 8px 12px !important;
+    gap: 8px !important;
+    background: var(--bg-surface-alt) !important;
+    flex-shrink: 0 !important;
+  }
+
+  .chat-model-info {
+    min-width: 0 !important;
+    flex: 1 1 auto !important;
+    gap: 8px !important;
+    overflow: hidden !important;
+  }
+
+  .ai-avatar {
+    width: 32px !important;
+    height: 32px !important;
+    flex-shrink: 0 !important;
+  }
+
+  .model-meta {
+    min-width: 0 !important;
+    overflow: hidden !important;
+    flex: 1 1 auto !important;
+  }
+
+  .model-name-label {
+    font-size: 0.82rem !important;
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    display: block !important;
+    line-height: 1.25 !important;
+  }
+
+  .model-provider-badge {
+    font-size: 0.68rem !important;
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    display: block !important;
+    line-height: 1.2 !important;
+  }
+
+  .chat-header-actions {
+    flex-shrink: 0 !important;
+    display: flex !important;
+    gap: 4px !important;
+  }
+
+  .chat-header-actions .btn {
+    padding: 6px 10px !important;
+    font-size: 0.78rem !important;
+    height: 32px !important;
+    min-height: 32px !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+  }
+
+  .chat-header-actions .btn span {
+    display: none !important;
+  }
+
+  .chat-header-actions .btn svg {
+    margin: 0 !important;
+  }
+
+  .chat-messages-scroll {
+    flex: 1 1 auto !important;
+    padding: 12px 10px !important;
+    gap: 12px !important;
+    overflow-y: auto !important;
+    -webkit-overflow-scrolling: touch !important;
+  }
+
+  .chat-quick-suggestions {
+    padding: 6px 10px !important;
+    gap: 6px !important;
+    overflow-x: auto !important;
+    -webkit-overflow-scrolling: touch !important;
+    flex-shrink: 0 !important;
+  }
+
+  .quick-pill {
+    padding: 5px 10px !important;
+    font-size: 0.75rem !important;
+    white-space: nowrap !important;
+    flex-shrink: 0 !important;
+  }
+
+  .chat-input-bar {
+    padding: 8px 10px !important;
+    gap: 8px !important;
+    align-items: center !important;
+    background: var(--bg-surface) !important;
+    border-top: 1px solid var(--border-color) !important;
+    flex-shrink: 0 !important;
+    box-sizing: border-box !important;
+  }
+
+  .textarea-wrap {
+    flex: 1 1 auto !important;
+    min-width: 0 !important;
+  }
+
+  .textarea-wrap textarea {
+    padding: 9px 12px !important;
+    font-size: 0.88rem !important;
+    line-height: 1.35 !important;
+    min-height: 42px !important;
+    height: 42px !important;
+    box-sizing: border-box !important;
+    overflow-y: hidden !important;
+    border-radius: var(--radius-md) !important;
+    resize: none !important;
+  }
+
+  .chat-input-bar .btn-icon,
+  .file-attach-btn {
+    width: 38px !important;
+    height: 38px !important;
+    min-width: 38px !important;
+    min-height: 38px !important;
+    flex-shrink: 0 !important;
+    padding: 0 !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    border-radius: var(--radius-md) !important;
   }
 }
 

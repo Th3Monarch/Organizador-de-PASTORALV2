@@ -542,7 +542,7 @@ class CloudManager {
   constructor() {
     this.openRouterBaseUrl = 'https://openrouter.ai/api/v1';
     this.geminiBaseUrl = 'https://generativelanguage.googleapis.com/v1beta';
-    this.defaultGeminiModel = 'gemini-flash-latest';
+    this.defaultGeminiModel = 'gemini-2.5-flash';
     this.defaultOpenRouterModel = 'google/gemma-4-31b-it:free';
   }
 
@@ -552,8 +552,7 @@ class CloudManager {
   normalizeGeminiModel(model) {
     if (!model || typeof model !== 'string') return this.defaultGeminiModel;
     const clean = model.trim().replace(/^models\//, '');
-    const deprecated = ['gemini-2.0-flash', 'gemini-1.5-flash', 'gemini-2.5-flash', 'gemini-2.5-flash-lite', 'gemini-1.5-pro'];
-    if (deprecated.includes(clean) || clean.includes('gemma') || clean.includes('nemotron') || clean.includes('llama')) {
+    if (clean === 'gemini-flash-latest' || clean.includes('gemma') || clean.includes('nemotron') || clean.includes('llama')) {
       return this.defaultGeminiModel;
     }
     return clean;

@@ -5829,7 +5829,13 @@ Por favor incluye: Monición de entrada, sugerencia de lecturas y Evangelio, 5 p
     const removeStatusListener = window.pastoral.ai.onStreamStatus((status) => {
       if (streamStatusBox && streamStatusText) {
         streamStatusBox.style.display = 'flex';
-        streamStatusText.textContent = status;
+        let msg = 'Pensando...';
+        if (typeof status === 'string' && status.trim()) {
+          msg = status.trim();
+        } else if (typeof status === 'object' && status !== null) {
+          msg = status.text || status.status || status.message || 'Pensando...';
+        }
+        streamStatusText.textContent = msg;
       }
     });
 

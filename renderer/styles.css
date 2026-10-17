@@ -2201,6 +2201,9 @@ body.theme-light .form-group select {
   font-weight: 700;
   color: var(--text-primary);
   display: block;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .model-provider-badge {

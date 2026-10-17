@@ -5907,7 +5907,13 @@ Por favor incluye: Monición de entrada, sugerencia de lecturas y Evangelio, 5 p
     const removeStatusListener = window.pastoral.ai.onStreamStatus((status) => {
       if (streamStatusBox && streamStatusText) {
         streamStatusBox.style.display = 'flex';
-        streamStatusText.textContent = status;
+        let msg = 'Pensando...';
+        if (typeof status === 'string' && status.trim()) {
+          msg = status.trim();
+        } else if (typeof status === 'object' && status !== null) {
+          msg = status.text || status.status || status.message || 'Pensando...';
+        }
+        streamStatusText.textContent = msg;
       }
     });
 
@@ -5990,8 +5996,9 @@ Por favor incluye: Monición de entrada, sugerencia de lecturas y Evangelio, 5 p
       isGeneratingChat = false;
       chatStopBtn.style.display = 'none';
 
-      if (res.success && res.response) {
-        state.chat.push(res.response);
+      if (res.success) {
+        const assistantMsg = res.response || { role: 'assistant', content: accumulatedText };
+        state.chat.push(assistantMsg);
         persistData();
       } else if (res.aborted) {
         if (accumulatedText) {
@@ -5999,7 +6006,12 @@ Por favor incluye: Monición de entrada, sugerencia de lecturas y Evangelio, 5 p
           persistData();
         }
       } else {
-        streamContentBox.innerHTML = `<span style="color:var(--danger);">⚠️ Error: ${escapeHtml(res.error || 'Fallo desconocido')}</span>`;
+        if (accumulatedText) {
+          state.chat.push({ role: 'assistant', content: accumulatedText });
+          persistData();
+        } else {
+          streamContentBox.innerHTML = `<span style="color:var(--danger);">⚠️ Error: ${escapeHtml(res.error || 'Fallo de conexión')}</span>`;
+        }
       }
 
       if (streamStatusBox) streamStatusBox.style.display = 'none';
@@ -6086,14 +6098,14 @@ Por favor incluye: Monición de entrada, sugerencia de lecturas y Evangelio, 5 p
         cardGemini.classList.add('active');
         cardOpenRouter.classList.remove('active');
         keyLabel.textContent = 'Clave de API de Google AI Studio:';
-        keyHint.innerHTML = 'Obtén tu clave de API gratuita en <a href="#" id="link-get-gemini-key">aistudio.google.com</a>.';
-        modelInput.value = 'gemini-flash-latest';
+        keyHint.innerHTML = 'Obtén tu clave de API gratuita en <a href="https://aistudio.google.com/app/apikey" target="_blank" rel="noopener noreferrer" id="link-get-gemini-key">aistudio.google.com</a>.';
+        modelInput.value = 'gemini-2.5-flash';
         attachGeminiLinkListeners();
       } else {
         cardOpenRouter.classList.add('active');
         cardGemini.classList.remove('active');
         keyLabel.textContent = 'Clave de API de OpenRouter:';
-        keyHint.innerHTML = 'Obtén tu clave en <a href="#" id="link-openrouter">openrouter.ai</a>.';
+        keyHint.innerHTML = 'Obtén tu clave en <a href="https://openrouter.ai/keys" target="_blank" rel="noopener noreferrer" id="link-openrouter">openrouter.ai</a>.';
         modelInput.value = 'google/gemma-4-31b-it:free';
         attachOpenRouterLinkListeners();
       }
@@ -6152,7 +6164,7 @@ Por favor incluye: Monición de entrada, sugerencia de lecturas y Evangelio, 5 p
 
     state.settings.cloud.provider = selectedProvider;
     state.settings.cloud.apiKey = key;
-    state.settings.cloud.model = model || (selectedProvider === 'gemini' ? 'gemini-flash-latest' : 'google/gemma-4-31b-it:free');
+    state.settings.cloud.model = model || (selectedProvider === 'gemini' ? 'gemini-2.5-flash' : 'google/gemma-4-31b-it:free');
 
     persistData();
     updateAiStatusIndicator();
@@ -6175,8 +6187,8 @@ Por favor incluye: Monición de entrada, sugerencia de lecturas y Evangelio, 5 p
     statusElem.style.color = 'var(--text-secondary)';
 
     const res = await window.pastoral.ai.testConnection({ provider: selectedProvider, apiKey: key, model });
-    if (res.ok) {
-      statusElem.textContent = '✅ ' + (res.reply || 'Conexión exitosa');
+    if (res.ok || res.success) {
+      statusElem.textContent = '✅ ' + (res.reply || res.message || 'Conexión exitosa');
       statusElem.style.color = 'var(--success)';
     } else {
       statusElem.textContent = '❌ ' + (res.error || 'Error de conexión');
@@ -6342,16 +6354,16 @@ Por favor incluye: Monición de entrada, sugerencia de lecturas y Evangelio, 5 p
       cardGemini?.classList.add('active');
       cardOpenRouter?.classList.remove('active');
       if (keyLabel) keyLabel.textContent = 'Clave de API de Google AI Studio:';
-      if (keyHint) keyHint.innerHTML = 'Consigue tu clave gratuita en <a href="#" id="link-get-gemini-key-settings">aistudio.google.com</a>.';
-      if (modelInput && (!modelInput.value || modelInput.value.includes('gemma') || modelInput.value.includes('gemini-2') || modelInput.value.includes('gemini-1'))) {
-        modelInput.value = 'gemini-flash-latest';
+      if (keyHint) keyHint.innerHTML = 'Consigue tu clave gratuita en <a href="https://aistudio.google.com/app/apikey" target="_blank" rel="noopener noreferrer" id="link-get-gemini-key-settings">aistudio.google.com</a>.';
+      if (modelInput && (!modelInput.value || modelInput.value.includes('gemma') || modelInput.value.includes('gemini-flash-latest'))) {
+        modelInput.value = 'gemini-2.5-flash';
       }
       attachGeminiLinkListeners();
     } else {
       cardOpenRouter?.classList.add('active');
       cardGemini?.classList.remove('active');
       if (keyLabel) keyLabel.textContent = 'Clave de API de OpenRouter:';
-      if (keyHint) keyHint.innerHTML = 'Obtén tu clave en <a href="#" id="link-openrouter">openrouter.ai</a>.';
+      if (keyHint) keyHint.innerHTML = 'Obtén tu clave en <a href="https://openrouter.ai/keys" target="_blank" rel="noopener noreferrer" id="link-openrouter">openrouter.ai</a>.';
       if (modelInput && (!modelInput.value || modelInput.value.includes('gemini'))) {
         modelInput.value = 'google/gemma-4-31b-it:free';
       }
@@ -6574,8 +6586,8 @@ Por favor incluye: Monición de entrada, sugerencia de lecturas y Evangelio, 5 p
     statusElem.style.color = 'var(--text-secondary)';
 
     const res = await window.pastoral.ai.testConnection({ provider: selectedProvider, apiKey: key, model });
-    if (res.ok) {
-      statusElem.textContent = '✅ ' + (res.reply || 'Conexión verificada');
+    if (res.ok || res.success) {
+      statusElem.textContent = '✅ ' + (res.reply || res.message || 'Conexión verificada');
       statusElem.style.color = 'var(--success)';
     } else {
       statusElem.textContent = '❌ ' + (res.error || 'Error al conectar');

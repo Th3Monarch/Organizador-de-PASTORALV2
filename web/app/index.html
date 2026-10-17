@@ -22,7 +22,7 @@
   <link rel="icon" type="image/png" sizes="512x512" href="icons/icon-512.png">
   <link rel="shortcut icon" href="icons/icon-192.png">
 
-  <link rel="stylesheet" href="styles.css?v=2.2.0">
+  <link rel="stylesheet" href="styles.css?v=2.3.0">
 </head>
 <body class="theme-light">
   <!-- Layout Principal de la Aplicación -->
@@ -851,13 +851,13 @@
             <div class="form-group">
               <label for="setup-api-key" id="setup-key-label">Clave de API de Google AI Studio:</label>
               <input type="password" id="setup-api-key" placeholder="AIzaSy... o AQ...." autocomplete="off">
-              <small class="form-hint" id="setup-key-hint">Obtén tu clave de API gratuita en <a href="#" id="link-get-gemini-key">aistudio.google.com</a>.</small>
+              <small class="form-hint" id="setup-key-hint">Obtén tu clave de API gratuita en <a href="https://aistudio.google.com/app/apikey" target="_blank" rel="noopener noreferrer" id="link-get-gemini-key">aistudio.google.com</a>.</small>
             </div>
 
             <div class="form-group">
               <label for="setup-model">Modelo de IA:</label>
               <div class="input-with-button">
-                <input type="text" id="setup-model" value="gemini-flash-latest" placeholder="gemini-flash-latest">
+                <input type="text" id="setup-model" value="gemini-2.5-flash" placeholder="gemini-2.5-flash">
                 <button type="button" class="btn btn-secondary btn-sm" id="btn-browse-models-setup">Ver modelos</button>
               </div>
             </div>
@@ -880,8 +880,8 @@
                 </svg>
               </div>
               <div class="model-meta">
-                <span class="model-name-label" id="chat-active-model">google/gemma-4-31b-it:free</span>
-                <span class="model-provider-badge">OpenRouter Cloud</span>
+                <span class="model-name-label" id="chat-active-model">gemini-2.5-flash</span>
+                <span class="model-provider-badge">Google Gemini Oficial</span>
               </div>
             </div>
 
@@ -924,7 +924,7 @@
 
             <!-- Textarea de Entrada -->
             <div class="textarea-wrap">
-              <textarea id="chat-textarea" rows="1" placeholder="Escribe tu consulta o pide una oración... (Enter para enviar, Shift+Enter para salto de línea)"></textarea>
+              <textarea id="chat-textarea" rows="1" placeholder="Escribe tu consulta o pide una oración..."></textarea>
             </div>
 
             <!-- Botón Detener Generación -->
@@ -1130,7 +1130,7 @@
                 <input type="password" id="settings-cloud-key" placeholder="AIzaSy... o AQ....">
                 <button type="button" class="btn btn-secondary btn-sm" id="btn-toggle-key-visibility">Mostrar</button>
               </div>
-              <small class="form-hint" id="settings-key-hint">Consigue tu clave gratuita en <a href="#" id="link-get-gemini-key-settings">aistudio.google.com</a>.</small>
+              <small class="form-hint" id="settings-key-hint">Consigue tu clave gratuita en <a href="https://aistudio.google.com/app/apikey" target="_blank" rel="noopener noreferrer" id="link-get-gemini-key-settings">aistudio.google.com</a>.</small>
             </div>
 
             <div class="form-group">
@@ -1957,11 +1957,11 @@
   </nav>
 
   <!-- Scripts: Datos Litúrgicos, Adaptador PWA iOS, Renderizador Markdown y Lógica de la Aplicación -->
-  <script src="song-data.js?v=2.2.0"></script>
-  <script src="liturgical-templates.js?v=2.2.0"></script>
-  <script src="liturgical.js?v=2.2.0"></script>
-  <script src="markdown.js?v=2.2.0"></script>
-  <script src="pastoral-pwa-adapter.js?v=2.2.0"></script>
-  <script src="app.js?v=2.2.0"></script>
+  <script src="song-data.js?v=2.3.0"></script>
+  <script src="liturgical-templates.js?v=2.3.0"></script>
+  <script src="liturgical.js?v=2.3.0"></script>
+  <script src="markdown.js?v=2.3.0"></script>
+  <script src="pastoral-pwa-adapter.js?v=2.3.0"></script>
+  <script src="app.js?v=2.3.0"></script>
 </body>
 </html>
