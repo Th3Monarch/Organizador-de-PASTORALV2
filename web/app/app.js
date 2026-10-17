@@ -90,10 +90,11 @@ document.addEventListener('DOMContentLoaded', async () => {
 
       // Asegurar valores por defecto de IA
       if (!state.settings.cloud.provider) state.settings.cloud.provider = 'gemini';
-      if (!state.settings.cloud.model) state.settings.cloud.model = 'gemini-flash-latest';
-      const deprecatedGemini = ['gemini-2.0-flash', 'gemini-1.5-flash', 'gemini-2.5-flash', 'gemini-2.5-flash-lite'];
-      if (state.settings.cloud.provider === 'gemini' && (deprecatedGemini.includes(state.settings.cloud.model) || state.settings.cloud.model.includes('llama') || state.settings.cloud.model.includes('nemotron'))) {
-        state.settings.cloud.model = 'gemini-flash-latest';
+      if (!state.settings.cloud.model) state.settings.cloud.model = 'gemini-3.8-flash';
+      const deprecatedGemini = ['gemini-2.0-flash', 'gemini-1.5-flash', 'gemini-2.5-flash', 'gemini-2.5-flash-lite', 'gemini-flash-latest'];
+      if (state.settings.cloud.provider === 'gemini' && (deprecatedGemini.includes(state.settings.cloud.model) || state.settings.cloud.model.includes('llama') || state.settings.cloud.model.includes('nemotron') || state.settings.cloud.model.includes('flash-latest') || state.settings.cloud.model.includes('2.5') || state.settings.cloud.model.includes('1.5') || state.settings.cloud.model.includes('2.0'))) {
+        state.settings.cloud.model = 'gemini-3.8-flash';
+        persistData();
       }
       if (state.settings.cloud.apiKey && (state.settings.cloud.apiKey.startsWith('AQ.') || state.settings.cloud.apiKey.startsWith('AIza'))) {
         state.settings.cloud.provider = 'gemini';
@@ -5609,7 +5610,7 @@ Por favor incluye: Monición de entrada, sugerencia de lecturas y Evangelio, 5 p
     const isGemini = provider === 'gemini';
 
     if (activeModelLabel) {
-      activeModelLabel.textContent = state.settings.cloud.model || (isGemini ? 'gemini-flash-latest' : 'google/gemma-4-31b-it:free');
+      activeModelLabel.textContent = state.settings.cloud.model || (isGemini ? 'gemini-3.8-flash' : 'google/gemma-4-31b-it:free');
     }
     if (providerBadge) {
       providerBadge.textContent = isGemini ? 'Google Gemini Oficial' : 'OpenRouter Cloud';
@@ -5842,7 +5843,7 @@ Por favor incluye: Monición de entrada, sugerencia de lecturas y Evangelio, 5 p
 
     const apiKey = state.settings.cloud?.apiKey;
     const provider = state.settings.cloud?.provider || 'gemini';
-    const model = state.settings.cloud?.model || (provider === 'gemini' ? 'gemini-flash-latest' : 'google/gemma-4-31b-it:free');
+    const model = state.settings.cloud?.model || (provider === 'gemini' ? 'gemini-3.8-flash' : 'google/gemma-4-31b-it:free');
 
     if (!apiKey) {
       showToast('Configura tu clave de API para usar el asistente.', 'warning');
@@ -6099,7 +6100,7 @@ Por favor incluye: Monición de entrada, sugerencia de lecturas y Evangelio, 5 p
         cardOpenRouter.classList.remove('active');
         keyLabel.textContent = 'Clave de API de Google AI Studio:';
         keyHint.innerHTML = 'Obtén tu clave de API gratuita en <a href="https://aistudio.google.com/app/apikey" target="_blank" rel="noopener noreferrer" id="link-get-gemini-key">aistudio.google.com</a>.';
-        modelInput.value = 'gemini-2.5-flash';
+        modelInput.value = 'gemini-3.8-flash';
         attachGeminiLinkListeners();
       } else {
         cardOpenRouter.classList.add('active');
@@ -6164,7 +6165,7 @@ Por favor incluye: Monición de entrada, sugerencia de lecturas y Evangelio, 5 p
 
     state.settings.cloud.provider = selectedProvider;
     state.settings.cloud.apiKey = key;
-    state.settings.cloud.model = model || (selectedProvider === 'gemini' ? 'gemini-2.5-flash' : 'google/gemma-4-31b-it:free');
+    state.settings.cloud.model = model || (selectedProvider === 'gemini' ? 'gemini-3.8-flash' : 'google/gemma-4-31b-it:free');
 
     persistData();
     updateAiStatusIndicator();
@@ -6336,7 +6337,7 @@ Por favor incluye: Monición de entrada, sugerencia de lecturas y Evangelio, 5 p
     updateSettingsProviderUI(provider);
 
     if (cloudModelInput) {
-      cloudModelInput.value = state.settings.cloud?.model || (provider === 'gemini' ? 'gemini-flash-latest' : 'google/gemma-4-31b-it:free');
+      cloudModelInput.value = state.settings.cloud?.model || (provider === 'gemini' ? 'gemini-3.8-flash' : 'google/gemma-4-31b-it:free');
     }
 
     updateSettingsAppearanceUI();
@@ -6355,8 +6356,8 @@ Por favor incluye: Monición de entrada, sugerencia de lecturas y Evangelio, 5 p
       cardOpenRouter?.classList.remove('active');
       if (keyLabel) keyLabel.textContent = 'Clave de API de Google AI Studio:';
       if (keyHint) keyHint.innerHTML = 'Consigue tu clave gratuita en <a href="https://aistudio.google.com/app/apikey" target="_blank" rel="noopener noreferrer" id="link-get-gemini-key-settings">aistudio.google.com</a>.';
-      if (modelInput && (!modelInput.value || modelInput.value.includes('gemma') || modelInput.value.includes('gemini-flash-latest'))) {
-        modelInput.value = 'gemini-2.5-flash';
+      if (modelInput && (!modelInput.value || modelInput.value.includes('gemma') || modelInput.value.includes('gemini-flash') || modelInput.value.includes('2.5'))) {
+        modelInput.value = 'gemini-3.8-flash';
       }
       attachGeminiLinkListeners();
     } else {
@@ -6546,7 +6547,7 @@ Por favor incluye: Monición de entrada, sugerencia de lecturas y Evangelio, 5 p
     
     const selectedProvider = document.querySelector('input[name="settings-ai-provider"]:checked')?.value || 'gemini';
     state.settings.cloud.provider = selectedProvider;
-    state.settings.cloud.model = document.getElementById('settings-cloud-model').value.trim() || (selectedProvider === 'gemini' ? 'gemini-flash-latest' : 'google/gemma-4-31b-it:free');
+    state.settings.cloud.model = document.getElementById('settings-cloud-model').value.trim() || (selectedProvider === 'gemini' ? 'gemini-3.8-flash' : 'google/gemma-4-31b-it:free');
 
     persistData();
     updateHeaderIdentity();

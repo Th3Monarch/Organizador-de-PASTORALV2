@@ -79,10 +79,10 @@ document.addEventListener('DOMContentLoaded', async () => {
 
       // Asegurar valores por defecto de IA
       if (!state.settings.cloud.provider) state.settings.cloud.provider = 'gemini';
-      if (!state.settings.cloud.model) state.settings.cloud.model = 'gemini-flash-latest';
-      const deprecatedGemini = ['gemini-2.0-flash', 'gemini-1.5-flash', 'gemini-2.5-flash', 'gemini-2.5-flash-lite'];
-      if (state.settings.cloud.provider === 'gemini' && (deprecatedGemini.includes(state.settings.cloud.model) || state.settings.cloud.model.includes('llama') || state.settings.cloud.model.includes('nemotron'))) {
-        state.settings.cloud.model = 'gemini-flash-latest';
+      if (!state.settings.cloud.model) state.settings.cloud.model = 'gemini-3.8-flash';
+      const deprecatedGemini = ['gemini-2.0-flash', 'gemini-1.5-flash', 'gemini-2.5-flash', 'gemini-2.5-flash-lite', 'gemini-flash-latest'];
+      if (state.settings.cloud.provider === 'gemini' && (deprecatedGemini.includes(state.settings.cloud.model) || state.settings.cloud.model.includes('llama') || state.settings.cloud.model.includes('nemotron') || state.settings.cloud.model.includes('flash-latest') || state.settings.cloud.model.includes('2.5') || state.settings.cloud.model.includes('1.5') || state.settings.cloud.model.includes('2.0'))) {
+        state.settings.cloud.model = 'gemini-3.8-flash';
       }
       if (state.settings.cloud.apiKey && (state.settings.cloud.apiKey.startsWith('AQ.') || state.settings.cloud.apiKey.startsWith('AIza'))) {
         state.settings.cloud.provider = 'gemini';

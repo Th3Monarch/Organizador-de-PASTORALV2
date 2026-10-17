@@ -90,7 +90,7 @@
       schoolName: 'Pastoral Educativa',
       aiProvider: 'gemini',
       geminiApiKey: '',
-      geminiModel: 'gemini-2.5-flash',
+      geminiModel: 'gemini-3.8-flash',
       openRouterApiKey: '',
       openRouterModel: 'google/gemma-3-27b-it:free'
     },
@@ -430,8 +430,8 @@
         return {
           success: true,
           models: [
-            { id: 'gemini-2.5-flash', name: 'Gemini 2.5 Flash (Recomendado - Rápido y con Visión)' },
-            { id: 'gemini-2.5-pro', name: 'Gemini 2.5 Pro (Razonamiento Complejo y Teología)' }
+            { id: 'gemini-3.8-flash', name: 'Gemini 3.8 Flash (Recomendado - Rápido, Oficial y con Visión)' },
+            { id: 'gemini-3.5-flash', name: 'Gemini 3.5 Flash (Versión Estable)' }
           ]
         };
       },
@@ -466,9 +466,10 @@
         try {
           if (provider === 'gemini') {
             // Normalizar modelo para Gemini REST v1beta
-            let targetModel = model ? model.trim().replace(/^models\//, '') : 'gemini-2.5-flash';
-            if (!targetModel || targetModel === 'gemini-flash-latest') {
-              targetModel = 'gemini-2.5-flash';
+            let targetModel = model ? model.trim().replace(/^models\//, '') : 'gemini-3.8-flash';
+            const deprecated = ['gemini-flash-latest', 'gemini-2.5-flash', 'gemini-2.5-flash-lite', 'gemini-2.0-flash', 'gemini-1.5-flash', 'gemini-1.5-pro'];
+            if (!targetModel || deprecated.includes(targetModel) || targetModel.includes('2.5') || targetModel.includes('1.5') || targetModel.includes('2.0') || targetModel.includes('flash-latest')) {
+              targetModel = 'gemini-3.8-flash';
             }
 
             // Normalizar mensajes y contenidos multi-modal
