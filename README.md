@@ -3,8 +3,16 @@
 > Organizador de escritorio para la pastoral de un colegio católico (espiritualidad dominicana), con soporte oficial para **Google Gemini**, **Login con Google** y **OpenRouter**.
 
 **Desarrollado por:** Manuel Guia  
-**Versión:** 2.1.0  
+**Versión:** 2.0.0  
 **Licencia:** MIT  
+
+---
+
+## 📥 Descargas Oficiales de la Versión 2.0.0
+
+- 💿 **Instalador Oficial Windows (x64):** [Descargar Organizador.Pastoral-2.0.0-win-x64.exe](https://github.com/Th3Monarch/Organizador-de-PASTORALV2/releases/latest/download/Organizador.Pastoral-2.0.0-win-x64.exe)
+- 🚀 **Versión Portable (.exe sin instalación):** [Descargar Organizador.Pastoral-Portable-2.0.0.exe](https://github.com/Th3Monarch/Organizador-de-PASTORALV2/releases/latest/download/Organizador.Pastoral-Portable-2.0.0.exe)
+- 🌐 **Landing Page 3D en Vivo:** Visita la carpeta `web/` o tu despliegue en Vercel.
 
 ---
 

@@ -7,6 +7,14 @@ Página web informativa 3D oficial para el **Organizador de Pastoral 2.0**, dise
 
 ---
 
+## 📥 Descargas Oficiales (Windows x64)
+
+- 💿 **Instalador NSIS:** [Organizador.Pastoral-2.0.0-win-x64.exe](https://github.com/Th3Monarch/Organizador-de-PASTORALV2/releases/latest/download/Organizador.Pastoral-2.0.0-win-x64.exe)
+- 🚀 **Versión Portable (Sin instalación):** [Organizador.Pastoral-Portable-2.0.0.exe](https://github.com/Th3Monarch/Organizador-de-PASTORALV2/releases/latest/download/Organizador.Pastoral-Portable-2.0.0.exe)
+- 🏷️ **Página del Release:** [GitHub Releases v2.0.0](https://github.com/Th3Monarch/Organizador-de-PASTORALV2/releases/latest)
+
+---
+
 ## 🚀 Despliegue en Vercel (Recomendado)
 
 ### Opción A: Despliegue automático desde GitHub (1 Clic)
