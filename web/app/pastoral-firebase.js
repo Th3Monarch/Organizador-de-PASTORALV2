@@ -19,6 +19,9 @@
   const FIREBASE_CONFIG_KEY = 'pastoral_firebase_config_v2';
   const PENDING_SYNC_KEY = 'pastoral_has_pending_cloud_sync';
 
+  // Configuración oficial predeterminada de la app (opcional: permite que ningún usuario tenga que configurar nada)
+  const DEFAULT_FIREBASE_CONFIG = null;
+
   class PastoralFirebaseService {
     constructor() {
       this.app = null;
@@ -63,14 +66,14 @@
     }
 
     /**
-     * Obtiene la configuración de Firebase almacenada
+     * Obtiene la configuración de Firebase almacenada (o la predeterminada del sistema)
      */
     getConfig() {
       try {
         const raw = localStorage.getItem(FIREBASE_CONFIG_KEY);
         if (raw) return JSON.parse(raw);
       } catch (_) {}
-      return null;
+      return DEFAULT_FIREBASE_CONFIG;
     }
 
     /**
