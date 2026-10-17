@@ -22,7 +22,7 @@
   <link rel="icon" type="image/png" sizes="512x512" href="icons/icon-512.png">
   <link rel="shortcut icon" href="icons/icon-192.png">
 
-  <link rel="stylesheet" href="styles.css?v=2.5.1">
+  <link rel="stylesheet" href="styles.css?v=2.5.2">
 </head>
 <body class="theme-light">
   <!-- Layout Principal de la Aplicación -->
@@ -148,16 +148,19 @@
     <!-- Contenido Principal -->
     <main class="main-content">
 
-      <!-- Banner de Instalación iOS Safari PWA -->
-      <div class="ios-pwa-install-banner" id="ios-pwa-banner">
+      <!-- Banner de Instalación PWA Móvil (Android / iOS) -->
+      <div class="ios-pwa-install-banner" id="pwa-install-banner">
         <div class="ios-banner-left">
           <span class="ios-banner-icon">📲</span>
-          <div class="ios-banner-text">
-            <strong>Instalar app en tu iPhone o iPad</strong>
-            <small>Toca el icono Compartir <svg style="display:inline-block;vertical-align:middle;" viewBox="0 0 24 24" width="14" height="14" fill="currentColor"><path d="M12 2L6 8h4v8h4V8h4L12 2zm-8 16v4h16v-4H4z"/></svg> en Safari y pulsa <em>"Añadir a pantalla de inicio"</em>.</small>
+          <div class="ios-banner-text" id="pwa-banner-text">
+            <strong>Instalar app en tu dispositivo</strong>
+            <small id="pwa-banner-instructions">Añade la app a tu pantalla de inicio para usarla sin conexión y a pantalla completa.</small>
           </div>
         </div>
-        <button class="ios-banner-close" id="ios-banner-close-btn" aria-label="Cerrar banner">✕</button>
+        <div style="display:flex; align-items:center; gap:8px;">
+          <button class="btn btn-sm btn-primary" id="pwa-install-action-btn" style="display:none; padding:6px 12px; font-size:0.82rem; font-weight:700;">Instalar</button>
+          <button class="ios-banner-close" id="pwa-banner-close-btn" aria-label="Cerrar banner">✕</button>
+        </div>
       </div>
 
       <!-- ============================================== -->
@@ -1961,11 +1964,11 @@
   </nav>
 
   <!-- Scripts: Datos Litúrgicos, Adaptador PWA iOS, Renderizador Markdown y Lógica de la Aplicación -->
-  <script src="song-data.js?v=2.5.1"></script>
-  <script src="liturgical-templates.js?v=2.5.1"></script>
-  <script src="liturgical.js?v=2.5.1"></script>
-  <script src="markdown.js?v=2.5.1"></script>
-  <script src="pastoral-pwa-adapter.js?v=2.5.1"></script>
-  <script src="app.js?v=2.5.1"></script>
+  <script src="song-data.js?v=2.5.2"></script>
+  <script src="liturgical-templates.js?v=2.5.2"></script>
+  <script src="liturgical.js?v=2.5.2"></script>
+  <script src="markdown.js?v=2.5.2"></script>
+  <script src="pastoral-pwa-adapter.js?v=2.5.2"></script>
+  <script src="app.js?v=2.5.2"></script>
 </body>
 </html>

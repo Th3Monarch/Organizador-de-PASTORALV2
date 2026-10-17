@@ -7157,16 +7157,56 @@ Por favor incluye: Monición de entrada, sugerencia de lecturas y Evangelio, 5 p
     return escapeHtml(md);
   }
 
-  // Control de Banner PWA para iOS Safari
-  function initIosPwaBanner() {
-    const isIos = /iphone|ipad|ipod/i.test(window.navigator.userAgent);
-    const isStandalone = window.navigator.standalone === true || window.matchMedia('(display-mode: standalone)').matches;
-    const banner = document.getElementById('ios-pwa-banner');
-    const closeBtn = document.getElementById('ios-banner-close-btn');
+  // Control de Banner PWA para Android e iOS
+  let deferredInstallPrompt = null;
 
-    if (banner) {
-      const dismissed = localStorage.getItem('pastoral_pwa_banner_dismissed');
-      if ((isIos || window.innerWidth <= 768) && !isStandalone && !dismissed) {
+  window.addEventListener('beforeinstallprompt', (e) => {
+    e.preventDefault();
+    deferredInstallPrompt = e;
+    const banner = document.getElementById('pwa-install-banner') || document.getElementById('ios-pwa-banner');
+    const actionBtn = document.getElementById('pwa-install-action-btn');
+    const textTitle = document.querySelector('#pwa-banner-text strong');
+    const textDesc = document.getElementById('pwa-banner-instructions');
+    const dismissed = localStorage.getItem('pastoral_pwa_banner_dismissed');
+
+    if (banner && !dismissed) {
+      if (textTitle) textTitle.textContent = 'Instalar app en tu Android';
+      if (textDesc) textDesc.textContent = 'Instálala con un toque para acceder a pantalla completa y usarla sin conexión.';
+      if (actionBtn) {
+        actionBtn.style.display = 'inline-flex';
+        actionBtn.onclick = async () => {
+          if (deferredInstallPrompt) {
+            deferredInstallPrompt.prompt();
+            const { outcome } = await deferredInstallPrompt.userChoice;
+            if (outcome === 'accepted') {
+              banner.classList.remove('show');
+            }
+            deferredInstallPrompt = null;
+          }
+        };
+      }
+      banner.classList.add('show');
+    }
+  });
+
+  function initPwaInstallBanner() {
+    const isIos = /iphone|ipad|ipod/i.test(window.navigator.userAgent);
+    const isAndroid = /android/i.test(window.navigator.userAgent);
+    const isStandalone = window.navigator.standalone === true || window.matchMedia('(display-mode: standalone)').matches;
+    const banner = document.getElementById('pwa-install-banner') || document.getElementById('ios-pwa-banner');
+    const closeBtn = document.getElementById('pwa-banner-close-btn') || document.getElementById('ios-banner-close-btn');
+    const textTitle = document.querySelector('#pwa-banner-text strong');
+    const textDesc = document.getElementById('pwa-banner-instructions');
+    const dismissed = localStorage.getItem('pastoral_pwa_banner_dismissed');
+
+    if (banner && !isStandalone && !dismissed) {
+      if (isIos) {
+        if (textTitle) textTitle.textContent = 'Instalar app en tu iPhone o iPad';
+        if (textDesc) textDesc.innerHTML = 'Toca el icono Compartir <svg style="display:inline-block;vertical-align:middle;" viewBox="0 0 24 24" width="14" height="14" fill="currentColor"><path d="M12 2L6 8h4v8h4V8h4L12 2zm-8 16v4h16v-4H4z"/></svg> en Safari y pulsa <em>"Añadir a pantalla de inicio"</em>.';
+        banner.classList.add('show');
+      } else if (isAndroid && !deferredInstallPrompt) {
+        if (textTitle) textTitle.textContent = 'Instalar en tu Android';
+        if (textDesc) textDesc.innerHTML = 'Pulsa los 3 puntos <strong>⋮</strong> en Chrome y selecciona <em>"Instalar aplicación"</em> o <em>"Añadir a pantalla de inicio"</em>.';
         banner.classList.add('show');
       }
     }
@@ -7179,7 +7219,7 @@ Por favor incluye: Monición de entrada, sugerencia de lecturas y Evangelio, 5 p
     }
   }
 
-  initIosPwaBanner();
+  initPwaInstallBanner();
 
   // Arrancar la aplicación
   await initApp();
