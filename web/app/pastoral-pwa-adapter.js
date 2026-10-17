@@ -128,20 +128,34 @@
 
   /** Objeto API de Pastoral para el navegador e iOS */
   const PastoralWebAdapter = {
-    // 1. Persistencia de Datos
     async getData() {
+      const defaultSongs = (typeof PastoralSongData !== 'undefined' && PastoralSongData.DEFAULT_SONGS)
+        ? PastoralSongData.DEFAULT_SONGS
+        : (typeof window !== 'undefined' && window.PastoralSongData ? window.PastoralSongData.DEFAULT_SONGS : []);
+
       try {
         const raw = localStorage.getItem(STORAGE_KEY);
         if (raw) {
           const parsed = JSON.parse(raw);
+          // Asegurar que las canciones por defecto estén siempre presentes
+          if (!Array.isArray(parsed.songs) || parsed.songs.length === 0) {
+            parsed.songs = JSON.parse(JSON.stringify(defaultSongs));
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(parsed));
+          }
           return parsed;
         }
       } catch (err) {
         console.warn('[PWA Adapter] Error leyendo localStorage, usando seed:', err);
       }
-      // Guardar seed inicial
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(INITIAL_SEED_DATA));
-      return JSON.parse(JSON.stringify(INITIAL_SEED_DATA));
+      // Guardar seed inicial con las 25 canciones litúrgicas
+      const seed = JSON.parse(JSON.stringify(INITIAL_SEED_DATA));
+      seed.songs = JSON.parse(JSON.stringify(defaultSongs));
+      try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(seed));
+      } catch (e) {
+        console.warn('[PWA Adapter] No se pudo guardar seed en localStorage:', e);
+      }
+      return seed;
     },
 
     async saveData(data) {

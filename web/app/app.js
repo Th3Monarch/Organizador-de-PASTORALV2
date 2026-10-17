@@ -63,6 +63,17 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
         if (!state.settings) state.settings = {};
         if (!state.settings.cloud) state.settings.cloud = {};
+
+        // Asegurar que las canciones litúrgicas por defecto estén cargadas
+        if (!Array.isArray(state.songs) || state.songs.length === 0) {
+          const defaultSongs = (typeof PastoralSongData !== 'undefined' && PastoralSongData.DEFAULT_SONGS)
+            ? PastoralSongData.DEFAULT_SONGS
+            : (window.PastoralSongData?.DEFAULT_SONGS || []);
+          if (defaultSongs.length > 0) {
+            state.songs = JSON.parse(JSON.stringify(defaultSongs));
+            window.pastoral.saveData(state);
+          }
+        }
       }
 
       // Cargar catálogo independiente de plantillas litúrgicas oficiales

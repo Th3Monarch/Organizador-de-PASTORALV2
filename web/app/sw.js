@@ -2,7 +2,7 @@
  * sw.js - Service Worker para Organizador de Pastoral 2.0 (PWA en iOS y Web)
  */
 
-const CACHE_NAME = 'pastoral-pwa-v2.0.0';
+const CACHE_NAME = 'pastoral-pwa-v2.1.0';
 const ASSETS_TO_CACHE = [
   './',
   './index.html',
