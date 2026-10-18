@@ -951,14 +951,46 @@
   // Exponer API en el objeto global de la ventana
   window.pastoral = PastoralWebAdapter;
 
-  // Registrar Service Worker para PWA en iOS y navegadores
+  // Registrar Service Worker para PWA en iOS y navegadores con auto-actualización inmediata
   if ('serviceWorker' in navigator && (window.location.protocol === 'https:' || window.location.hostname === 'localhost')) {
+    let refreshing = false;
+    navigator.serviceWorker.addEventListener('controllerchange', () => {
+      if (!refreshing) {
+        refreshing = true;
+        console.log('[Pastoral PWA] Nueva versión activada. Recargando la aplicación...');
+        window.location.reload();
+      }
+    });
+
     window.addEventListener('load', () => {
       navigator.serviceWorker.register('./sw.js').then((reg) => {
         console.log('[Pastoral PWA] Service Worker registrado con éxito:', reg.scope);
+        // Chequeo forzado de actualización
+        reg.update();
+
+        reg.addEventListener('updatefound', () => {
+          const newWorker = reg.installing;
+          if (newWorker) {
+            newWorker.addEventListener('statechange', () => {
+              if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+                console.log('[Pastoral PWA] Nueva versión disponible. Activando...');
+                newWorker.postMessage({ action: 'skipWaiting' });
+              }
+            });
+          }
+        });
       }).catch((err) => {
         console.warn('[Pastoral PWA] Error registrando Service Worker:', err);
       });
+    });
+
+    // Rechequear cada vez que el usuario vuelve a la app (ej: desde segundo plano en el teléfono)
+    document.addEventListener('visibilitychange', () => {
+      if (document.visibilityState === 'visible') {
+        navigator.serviceWorker.getRegistration().then((reg) => {
+          if (reg) reg.update();
+        });
+      }
     });
   }
 
