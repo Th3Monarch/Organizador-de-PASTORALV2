@@ -2318,6 +2318,7 @@ body.theme-light .form-group select {
   display: flex;
   gap: 14px;
   max-width: 85%;
+  min-width: 0;
   animation: fadeIn 0.2s ease;
   user-select: text;
 }
@@ -2356,10 +2357,14 @@ body.theme-light .form-group select {
   border: 1px solid var(--border-color);
   user-select: text;
   word-break: break-word;
+  min-width: 0;
+  max-width: 100%;
 }
 
 .chat-msg-content {
   user-select: text;
+  min-width: 0;
+  max-width: 100%;
 }
 
 .chat-msg-actions {
@@ -2496,36 +2501,78 @@ body.theme-light .form-group select {
 
 /* Tablas dentro del chat y notas */
 .chat-table-wrapper {
+  display: block;
+  width: 100%;
+  max-width: 100%;
   overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
   margin: 14px 0;
   border-radius: var(--radius-md);
   border: 1px solid var(--border-color);
   box-shadow: var(--shadow-sm);
+  background: var(--bg-surface);
+  overscroll-behavior-x: contain;
 }
+
+.chat-table-wrapper::-webkit-scrollbar {
+  height: 6px;
+}
+.chat-table-wrapper::-webkit-scrollbar-track {
+  background: rgba(0, 0, 0, 0.04);
+  border-radius: 3px;
+}
+.theme-dark .chat-table-wrapper::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.04);
+}
+.chat-table-wrapper::-webkit-scrollbar-thumb {
+  background: var(--border-color);
+  border-radius: 3px;
+}
+.chat-table-wrapper::-webkit-scrollbar-thumb:hover {
+  background: var(--primary);
+}
+
 .chat-msg-bubble .chat-table,
 .markdown-body .chat-table,
 .note-markdown-view .chat-table {
   border-collapse: collapse;
   width: 100%;
+  min-width: 100%;
   font-size: 0.85rem;
   background: var(--bg-surface);
+  table-layout: auto;
 }
+
 .chat-msg-bubble .chat-table th, .markdown-body .chat-table th, .note-markdown-view .chat-table th,
 .chat-msg-bubble .chat-table td, .markdown-body .chat-table td, .note-markdown-view .chat-table td {
   border: 1px solid var(--border-color);
-  padding: 8px 12px;
+  padding: 9px 13px;
+  word-break: normal !important;
+  overflow-wrap: break-word;
+  white-space: normal;
+  vertical-align: top;
+  min-width: 110px;
 }
+
 .chat-msg-bubble .chat-table th,
 .markdown-body .chat-table th,
 .note-markdown-view .chat-table th {
   background: var(--bg-surface-alt);
   font-weight: 700;
   color: var(--text-primary);
+  white-space: nowrap;
 }
+
 .chat-msg-bubble .chat-table tr:nth-child(even),
 .markdown-body .chat-table tr:nth-child(even),
 .note-markdown-view .chat-table tr:nth-child(even) {
   background: rgba(0, 0, 0, 0.02);
+}
+
+.theme-dark .chat-msg-bubble .chat-table tr:nth-child(even),
+.theme-dark .markdown-body .chat-table tr:nth-child(even),
+.theme-dark .note-markdown-view .chat-table tr:nth-child(even) {
+  background: rgba(255, 255, 255, 0.03);
 }
 
 /* Bloques de código con cabecera y botón de copiar */
@@ -5529,6 +5576,26 @@ body {
     gap: 12px !important;
     overflow-y: auto !important;
     -webkit-overflow-scrolling: touch !important;
+  }
+
+  .chat-msg {
+    max-width: 98% !important;
+    gap: 8px !important;
+  }
+
+  .chat-msg.user {
+    max-width: 92% !important;
+  }
+
+  .chat-msg-bubble {
+    padding: 11px 13px !important;
+    font-size: 0.88rem !important;
+  }
+
+  .chat-msg-bubble .chat-table,
+  .markdown-body .chat-table,
+  .note-markdown-view .chat-table {
+    min-width: 480px !important;
   }
 
   .chat-quick-suggestions {
