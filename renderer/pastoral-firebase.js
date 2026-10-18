@@ -80,7 +80,12 @@
     getConfig() {
       try {
         const raw = localStorage.getItem(FIREBASE_CONFIG_KEY);
-        if (raw) return JSON.parse(raw);
+        if (raw) {
+          const parsed = JSON.parse(raw);
+          if (parsed && typeof parsed === 'object' && parsed.apiKey && (parsed.projectId || parsed.authDomain)) {
+            return parsed;
+          }
+        }
       } catch (_) {}
       return DEFAULT_FIREBASE_CONFIG;
     }
@@ -89,7 +94,7 @@
      * Guarda la configuración de Firebase y reinicia el servicio
      */
     async saveConfig(config) {
-      if (!config || !config.apiKey || !config.projectId) {
+      if (!config || !config.apiKey || (!config.projectId && !config.authDomain)) {
         throw new Error('La configuración debe incluir al menos apiKey y projectId.');
       }
       localStorage.setItem(FIREBASE_CONFIG_KEY, JSON.stringify(config));
@@ -97,7 +102,7 @@
     }
 
     /**
-     * Elimina la configuración de Firebase
+     * Elimina la configuración personalizada de Firebase y restaura la oficial por defecto
      */
     async removeConfig() {
       await this.signOut();
@@ -107,12 +112,21 @@
       this.db = null;
       this.isInitialized = false;
       this._updateStatus('disconnected');
+      return this.initialize();
     }
 
     /**
      * Inicializa Firebase y activa la persistencia offline de Firestore
      */
     async initialize() {
+      if (typeof firebase === 'undefined') {
+        // En conexiones móviles, dar margen para que los scripts terminen de cargar
+        for (let i = 0; i < 15; i++) {
+          await new Promise(r => setTimeout(r, 150));
+          if (typeof firebase !== 'undefined') break;
+        }
+      }
+
       if (typeof firebase === 'undefined') {
         console.warn('[Firebase Sync] El SDK de Firebase no está cargado en el documento.');
         this._updateStatus('disconnected');

@@ -1,6 +1,6 @@
 {
   "name": "organizador-pastoral",
-  "version": "2.5.6",
+  "version": "2.5.7",
   "description": "Organizador de escritorio para la pastoral de un colegio católico con asistente de IA integrado",
   "main": "main.js",
   "author": "Manuel Guia",
@@ -53,5 +53,8 @@
       "renderer/**/*",
       "build/**/*"
     ]
+  },
+  "dependencies": {
+    "firebase": "^13.0.0"
   }
 }

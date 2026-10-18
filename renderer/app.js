@@ -7228,6 +7228,54 @@ Por favor incluye: Monición de entrada, sugerencia de lecturas y Evangelio, 5 p
       document.getElementById('card-cloud-sync-settings')?.scrollIntoView({ behavior: 'smooth' });
     });
 
+    // Función para parsear texto de configuración de Firebase sin eval ni new Function (100% compatible con CSP)
+    function parseFirebaseConfigText(raw) {
+      if (!raw || typeof raw !== 'string') return null;
+      const str = raw.trim();
+
+      // 1. Intentar JSON.parse directo
+      try {
+        const obj = JSON.parse(str);
+        if (obj && typeof obj === 'object' && obj.apiKey && (obj.projectId || obj.authDomain)) {
+          return obj;
+        }
+      } catch (_) {}
+
+      // 2. Extracción limpia de campos con regex segura sin eval
+      const knownKeys = ['apiKey', 'authDomain', 'projectId', 'storageBucket', 'messagingSenderId', 'appId', 'measurementId'];
+      const extracted = {};
+
+      for (const k of knownKeys) {
+        const pattern = new RegExp(`(?:['"]?${k}['"]?\\s*:\\s*['"\`]([^'"\`]+)['"\`])`, 'i');
+        const m = str.match(pattern);
+        if (m && m[1]) {
+          extracted[k] = m[1].trim();
+        }
+      }
+
+      if (extracted.apiKey && (extracted.projectId || extracted.authDomain)) {
+        return extracted;
+      }
+
+      // 3. Fallback: limpiar comentarios de JS y comas finales
+      try {
+        const braceMatch = str.match(/\{[\s\S]*\}/);
+        if (braceMatch) {
+          let cleaned = braceMatch[0]
+            .replace(/\/\/[^\r\n]*/g, '')
+            .replace(/\/\*[\s\S]*?\*\//g, '')
+            .replace(/,\s*([}\]])/g, '$1')
+            .replace(/([{,]\s*)([a-zA-Z0-9_$]+)\s*:/g, '$1"$2":');
+          const parsed = JSON.parse(cleaned);
+          if (parsed && typeof parsed === 'object' && parsed.apiKey) {
+            return parsed;
+          }
+        }
+      } catch (_) {}
+
+      return null;
+    }
+
     const handleGoogleLogin = async () => {
       try {
         showToast('Abriendo inicio de sesión con Google...', 'info');
@@ -7236,7 +7284,11 @@ Por favor incluye: Monición de entrada, sugerencia de lecturas y Evangelio, 5 p
         closeModal();
       } catch (err) {
         console.warn('Error en Google Sign-In:', err);
-        showToast('Aviso: ' + (err.message || 'No se pudo iniciar sesión con Google'), 'warning');
+        if (err && err.code === 'auth/unauthorized-domain') {
+          showToast('⚠️ Dominio no autorizado en Firebase. Añade el dominio en Firebase Console > Authentication > Settings > Authorized Domains.', 'error', 6500);
+        } else {
+          showToast('Aviso: ' + (err.message || 'No se pudo iniciar sesión con Google'), 'warning');
+        }
       }
     };
 
@@ -7284,29 +7336,16 @@ Por favor incluye: Monición de entrada, sugerencia de lecturas y Evangelio, 5 p
       const rawVal = configTextarea?.value.trim() || '';
       const statusMsg = document.getElementById('firebase-config-status-msg');
       if (!rawVal) {
-        showToast('Pega el objeto JSON de configuración de Firebase.', 'warning');
+        showToast('Pega el objeto JSON o fragmento de configuración de Firebase.', 'warning');
         return;
       }
       try {
-        let configObj;
-        if (rawVal.includes('{')) {
-          const jsonMatch = rawVal.match(/\{[\s\S]*\}/);
-          if (jsonMatch) {
-            const sanitized = jsonMatch[0]
-              .replace(/(['"])?([a-zA-Z0-9_]+)(['"])?:/g, '"$2":')
-              .replace(/'/g, '"')
-              .replace(/,\s*}/g, '}');
-            try {
-              configObj = JSON.parse(sanitized);
-            } catch (_) {
-              configObj = (new Function(`return ${jsonMatch[0]}`))();
-            }
-          }
-        }
+        const configObj = parseFirebaseConfigText(rawVal);
         if (!configObj || !configObj.apiKey) {
-          throw new Error('No se detectó un apiKey válido en la configuración.');
+          throw new Error('No se detectaron credenciales válidas (apiKey, projectId). Pega el código tal como lo entrega la consola de Firebase.');
         }
         await window.pastoralFirebase.saveConfig(configObj);
+        if (configTextarea) configTextarea.value = JSON.stringify(configObj, null, 2);
         showToast('Configuración de Firebase guardada e iniciada con éxito.', 'success');
         if (statusMsg) {
           statusMsg.textContent = '✅ Conectado a Firebase';
@@ -7323,10 +7362,11 @@ Por favor incluye: Monición de entrada, sugerencia de lecturas y Evangelio, 5 p
     });
 
     document.getElementById('btn-clear-firebase-config')?.addEventListener('click', async () => {
-      if (confirm('¿Deseas desvincular el proyecto de Firebase? La app continuará en modo local.')) {
+      if (confirm('¿Deseas restablecer la configuración de Firebase a la predeterminada del sistema?')) {
         await window.pastoralFirebase.removeConfig();
-        if (configTextarea) configTextarea.value = '';
-        showToast('Configuración de Firebase desvinculada', 'info');
+        const defConfig = window.pastoralFirebase.getConfig();
+        if (configTextarea) configTextarea.value = JSON.stringify(defConfig, null, 2);
+        showToast('Configuración restablecida a la predeterminada del sistema.', 'info');
       }
     });
 
