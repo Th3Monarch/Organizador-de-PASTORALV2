@@ -2517,14 +2517,15 @@ Encargado de Pastoral                Representante de Profesores`,
         );
       }
 
-      const eventsHtml = dayEvents.slice(0, 3).map(e => `
+      const maxPills = 2;
+      const eventsHtml = dayEvents.slice(0, maxPills).map(e => `
         <div class="cal-event-pill cat-${(e.category || 'otro').toLowerCase()}" title="${escapeHtml(e.title)} ${e.time ? '(' + e.time + ')' : ''}">
           ${e.time ? e.time + ' ' : ''}${escapeHtml(e.title)}
         </div>
       `).join('');
 
-      const moreCount = dayEvents.length - 3;
-      const moreHtml = moreCount > 0 ? `<div style="font-size:0.68rem; color:var(--text-muted); font-weight:700;">+${moreCount} más</div>` : '';
+      const moreCount = dayEvents.length - maxPills;
+      const moreHtml = moreCount > 0 ? `<div class="cal-more-events">+${moreCount} más</div>` : '';
 
       cell.innerHTML = `
         <div class="cal-day-header">
