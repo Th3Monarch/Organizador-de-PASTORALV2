@@ -2170,6 +2170,26 @@ body.theme-dark .priority-baja { background: rgba(71, 85, 105, 0.2); color: #94a
   font-size: 0.9rem;
   font-family: inherit;
   transition: all var(--transition-fast);
+  box-sizing: border-box;
+}
+
+.form-group input[type="date"],
+.form-group input[type="time"],
+.form-group input[type="datetime-local"] {
+  min-height: 42px;
+  box-sizing: border-box;
+}
+
+body.theme-dark .form-group input[type="date"],
+body.theme-dark .form-group input[type="time"],
+body.theme-dark .form-group input[type="datetime-local"] {
+  color-scheme: dark;
+}
+
+body.theme-light .form-group input[type="date"],
+body.theme-light .form-group input[type="time"],
+body.theme-light .form-group input[type="datetime-local"] {
+  color-scheme: light;
 }
 
 .form-group select {
@@ -2770,7 +2790,7 @@ body.theme-light .form-group select {
 
 .form-row-2 {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 16px;
 }
 
@@ -2931,6 +2951,27 @@ body.theme-light .form-group select {
 .modal-title {
   font-size: 1.2rem;
   font-weight: 700;
+  color: var(--text-primary);
+}
+
+.modal-header .btn-icon {
+  background: var(--bg-surface-alt);
+  color: var(--text-secondary);
+  border: 1px solid var(--border-color);
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  font-size: 1.25rem;
+  line-height: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  padding: 0;
+}
+
+.modal-header .btn-icon:hover {
+  background: var(--bg-hover);
   color: var(--text-primary);
 }
 
@@ -5341,6 +5382,55 @@ body {
   .form-group textarea {
     box-sizing: border-box !important;
     max-width: 100% !important;
+  }
+
+  /* --- MODALES Y FORMULARIOS RESPONSIVOS EN MÓVIL --- */
+  .modal-backdrop {
+    padding: 12px !important;
+    align-items: center !important;
+  }
+
+  .modal-window {
+    width: 100% !important;
+    max-width: 100% !important;
+    max-height: 90vh !important;
+    border-radius: var(--radius-lg) !important;
+  }
+
+  .modal-header {
+    padding: 14px 18px !important;
+  }
+
+  .modal-title {
+    font-size: 1.1rem !important;
+  }
+
+  .modal-body {
+    padding: 16px 18px !important;
+  }
+
+  .modal-footer {
+    padding: 12px 18px !important;
+    flex-wrap: wrap !important;
+    gap: 8px !important;
+  }
+
+  .modal-footer .btn {
+    flex: 1 1 auto !important;
+    min-width: 110px !important;
+    padding: 10px 14px !important;
+  }
+
+  .form-row-2 {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 0 !important;
+    width: 100% !important;
+  }
+
+  .form-row-2 .form-group {
+    width: 100% !important;
+    margin-bottom: 16px !important;
   }
 
   .ios-pwa-install-banner {

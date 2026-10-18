@@ -1,6 +1,6 @@
 {
   "name": "organizador-pastoral",
-  "version": "2.5.5",
+  "version": "2.5.6",
   "description": "Organizador de escritorio para la pastoral de un colegio católico con asistente de IA integrado",
   "main": "main.js",
   "author": "Manuel Guia",
