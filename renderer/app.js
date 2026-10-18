@@ -7256,12 +7256,18 @@ Por favor incluye: Monición de entrada, sugerencia de lecturas y Evangelio, 5 p
     document.getElementById('modal-btn-logout')?.addEventListener('click', handleGoogleLogout);
 
     const handleForceSync = async () => {
+      if (!window.pastoralFirebase.currentUser) {
+        showToast('⚠️ No se ha conectado ninguna cuenta para sincronizar.', 'warning');
+        return;
+      }
       showToast('Sincronizando datos con la nube...', 'info');
       const ok = await window.pastoralFirebase.pushState(state, true);
       if (ok) {
         showToast('¡Datos sincronizados exitosamente con la nube! ☁️✅', 'success');
       } else if (window.pastoralFirebase.lastError) {
-        showToast(window.pastoralFirebase.lastError, 'error');
+        showToast('⚠️ ' + window.pastoralFirebase.lastError, 'error');
+      } else {
+        showToast('⚠️ No se pudo completar la sincronización con la nube.', 'warning');
       }
     };
 
@@ -7324,8 +7330,16 @@ Por favor incluye: Monición de entrada, sugerencia de lecturas y Evangelio, 5 p
       }
     });
 
+    let prevCloudStatus = null;
     window.pastoralFirebase.onStatusChange((status, user, lastError) => {
       updateCloudSyncUI(status, user, lastError);
+      // Solo notificar si no se ha podido conectar o hubo un error de conexión
+      if (status === 'error' && prevCloudStatus !== 'error') {
+        showToast('⚠️ No se pudo conectar a la nube: ' + (lastError || 'Error de conexión'), 'error');
+      } else if (status === 'offline' && prevCloudStatus !== 'offline') {
+        showToast('📡 Sin conexión a internet: trabajando en modo local.', 'warning');
+      }
+      prevCloudStatus = status;
     });
 
     window.pastoralFirebase.onDataUpdate((remoteState) => {
@@ -7335,7 +7349,7 @@ Por favor incluye: Monición de entrada, sugerencia de lecturas y Evangelio, 5 p
       window.pastoral.saveData(state);
       renderCurrentView();
       updateTasksBadge();
-      showToast('Datos sincronizados desde tu otro dispositivo 📲💻', 'success');
+      // La sincronización en segundo plano es transparente y silenciosa cuando todo funciona
     });
 
     window.pastoralFirebase.initialize();
