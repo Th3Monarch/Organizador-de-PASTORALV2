@@ -2244,6 +2244,9 @@ body.theme-light .form-group select {
   font-size: 0.85rem;
   margin-top: 10px;
   font-weight: 500;
+  width: 100%;
+  line-height: 1.45;
+  word-break: break-word;
 }
 
 /* Chat Interactivo */

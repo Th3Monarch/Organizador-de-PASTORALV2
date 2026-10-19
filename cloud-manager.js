@@ -662,8 +662,16 @@ ${personsList.length ? personsList.map(p => `  * [ID: ${p.id}] "${p.name}" (Rol:
    */
   async testConnection({ provider = 'openrouter', apiKey, model }) {
     if (provider === 'gemini') {
+      const cleanKey = (apiKey || '').trim();
+      if (!cleanKey) {
+        throw new Error('Por favor ingresa tu Clave de API de Google AI Studio.');
+      }
+      if (cleanKey.startsWith('AQ.')) {
+        throw new Error('Has ingresado un token de acceso temporal de Google Cloud ("AQ..."). La API de Gemini requiere una Clave de API oficial ("AIza..."). Ve a https://aistudio.google.com/app/apikey, pulsa en "Create API key" > "Create API key in new project" y copia la clave generada.');
+      }
+
       const targetModel = this.normalizeGeminiModel(model);
-      const url = `${this.geminiBaseUrl}/models/${targetModel}:generateContent?key=${apiKey}`;
+      const url = `${this.geminiBaseUrl}/models/${targetModel}:generateContent?key=${encodeURIComponent(cleanKey)}`;
       const payload = {
         contents: [
           { role: 'user', parts: [{ text: 'Di exactamente: "Conexión exitosa con Google Gemini"' }] }
@@ -674,14 +682,14 @@ ${personsList.length ? personsList.map(p => `  * [ID: ${p.id}] "${p.name}" (Rol:
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'x-goog-api-key': apiKey
+          'x-goog-api-key': cleanKey
         },
         body: JSON.stringify(payload)
       });
 
       if (!res.ok) {
         const errText = await res.text().catch(() => '');
-        throw new Error(`Error Gemini (${res.status}): ${this.extractErrorMessage(errText)}`);
+        throw new Error(`Error Gemini (${res.status}): ${this.extractErrorMessage(errText, res.status)}`);
       }
 
       const data = await res.json();
@@ -1270,13 +1278,29 @@ Responde ÚNICAMENTE con el bloque JSON válido, sin explicaciones antes ni desp
     }
   }
 
-  extractErrorMessage(errText) {
+  extractErrorMessage(errText, status) {
+    if (!errText) return status ? `Error HTTP ${status}` : 'Error desconocido';
     try {
       const parsed = JSON.parse(errText);
-      if (parsed.error && parsed.error.message) return parsed.error.message;
+      if (parsed.error) {
+        const details = parsed.error.details;
+        const reason = Array.isArray(details) && details[0]?.reason;
+        const msg = parsed.error.message || '';
+        if (reason === 'ACCESS_TOKEN_TYPE_UNSUPPORTED' || parsed.error.status === 'UNAUTHENTICATED' || msg.toLowerCase().includes('api key not valid')) {
+          return 'Clave no válida para la API de Gemini. La clave oficial de Google AI Studio debe comenzar con "AIza...". Ve a https://aistudio.google.com/app/apikey, pulsa en "Create API key" > "Create API key in new project" y copia la clave generada.';
+        }
+        if (parsed.error.message) return parsed.error.message;
+      }
       if (parsed.message) return parsed.message;
     } catch (_) {}
-    return errText ? errText.slice(0, 160) : 'Error desconocido';
+
+    if (typeof errText === 'string') {
+      if (errText.includes('ACCESS_TOKEN_TYPE_UNSUPPORTED') || errText.toLowerCase().includes('api key not valid')) {
+        return 'Clave no válida para la API de Gemini. La clave oficial de Google AI Studio debe comenzar con "AIza...". Ve a https://aistudio.google.com/app/apikey, pulsa en "Create API key" > "Create API key in new project" y copia la clave generada.';
+      }
+      return errText.slice(0, 160);
+    }
+    return status ? `Error HTTP ${status}` : 'Error desconocido';
   }
 
   formatToolActionName(name) {

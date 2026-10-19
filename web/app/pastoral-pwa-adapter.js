@@ -656,13 +656,24 @@
         if (!apiKey) return { ok: false, success: false, error: 'Por favor ingresa una API Key válida' };
 
         try {
+          const cleanKey = apiKey.trim();
           if (provider === 'gemini') {
-            const cleanKey = apiKey.trim();
+            if (cleanKey.startsWith('AQ.')) {
+              return {
+                ok: false,
+                success: false,
+                error: 'Has ingresado un token de acceso temporal de Google Cloud ("AQ..."). La API de Gemini requiere una Clave de API oficial ("AIza..."). Ve a https://aistudio.google.com/app/apikey, pulsa en "Create API key" > "Create API key in new project" y copia la clave generada.'
+              };
+            }
             const url = `https://generativelanguage.googleapis.com/v1beta/models?key=${encodeURIComponent(cleanKey)}`;
             const res = await fetch(url);
             if (!res.ok) {
               const errJson = await res.json().catch(() => ({}));
-              const msg = errJson.error?.message || `Error HTTP ${res.status}`;
+              const reason = errJson.error?.details?.[0]?.reason;
+              let msg = errJson.error?.message || `Error HTTP ${res.status}`;
+              if (reason === 'ACCESS_TOKEN_TYPE_UNSUPPORTED' || errJson.error?.status === 'UNAUTHENTICATED' || msg.toLowerCase().includes('api key not valid')) {
+                msg = 'Clave no válida para la API de Gemini. La clave oficial de Google AI Studio debe comenzar con "AIza...". Ve a https://aistudio.google.com/app/apikey, pulsa en "Create API key" > "Create API key in new project" y copia la clave generada.';
+              }
               return { ok: false, success: false, error: msg };
             }
             return { ok: true, success: true, reply: 'Conexión verificada con Google Gemini AI', message: 'Conexión exitosa con Google Gemini AI' };
@@ -798,7 +809,12 @@
 
             if (!response.ok) {
               const errData = await response.json().catch(() => ({}));
-              throw new Error(errData.error?.message || `HTTP ${response.status}`);
+              const reason = errData.error?.details?.[0]?.reason;
+              let errMsg = errData.error?.message || `HTTP ${response.status}`;
+              if (reason === 'ACCESS_TOKEN_TYPE_UNSUPPORTED' || errData.error?.status === 'UNAUTHENTICATED' || errMsg.toLowerCase().includes('api key not valid')) {
+                errMsg = 'Clave no válida para la API de Gemini. La clave oficial de Google AI Studio debe comenzar con "AIza...". Ve a https://aistudio.google.com/app/apikey, pulsa en "Create API key" > "Create API key in new project" y copia la clave generada.';
+              }
+              throw new Error(errMsg);
             }
 
             emitStatus('streaming', 'Generando respuesta...');
