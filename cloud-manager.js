@@ -1119,9 +1119,11 @@ Responde ÚNICAMENTE con el bloque JSON válido, sin explicaciones antes ni desp
       return { ...msg, content: normalizedParts };
     });
 
+    const recentMessages = (normalizedMessages || []).slice(-8);
+
     const conversation = [
       { role: 'system', content: systemPrompt },
-      ...normalizedMessages
+      ...recentMessages
     ];
 
     const MAX_TOOL_STEPS = 6;

@@ -5592,7 +5592,21 @@ Por favor incluye: Monición de entrada, sugerencia de lecturas y Evangelio, 5 p
     renderChatHistory();
   }
 
+  function sanitizeChatHistory() {
+    if (!Array.isArray(state.chat)) return;
+    let modified = false;
+    state.chat.forEach(msg => {
+      if (!msg || typeof msg.content !== 'string') return;
+      if (msg.content.length > 800 && /(\*\[\[\|n\|\]\]\*|\[\[\|n\|\]\]|\*\[\[)+/.test(msg.content)) {
+        msg.content = msg.content.replace(/(\*\[\[\|n\|\]\]\*|\[\[\|n\|\]\]|\*\[\[)+/g, ' *[repetición de tokens colapsada]* ');
+        modified = true;
+      }
+    });
+    if (modified) persistData();
+  }
+
   function renderChatHistory() {
+    sanitizeChatHistory();
     const scrollArea = document.getElementById('chat-messages-area');
     if (!scrollArea) return;
 
@@ -5973,11 +5987,18 @@ Por favor incluye: Monición de entrada, sugerencia de lecturas y Evangelio, 5 p
 
     let accumulatedText = '';
 
-    // Suscribir eventos de streaming
+    // Suscribir eventos de streaming con render fluido optimizado (requestAnimationFrame)
+    let renderFramePending = false;
     const removeChunkListener = window.pastoral.ai.onStreamChunk((chunk) => {
       accumulatedText += chunk;
-      streamContentBox.innerHTML = renderMarkdown(accumulatedText);
-      scrollChatToBottom();
+      if (!renderFramePending) {
+        renderFramePending = true;
+        requestAnimationFrame(() => {
+          streamContentBox.innerHTML = renderMarkdown(accumulatedText);
+          scrollChatToBottom();
+          renderFramePending = false;
+        });
+      }
     });
 
     const removeStatusListener = window.pastoral.ai.onStreamStatus((status) => {
@@ -6019,32 +6040,29 @@ Por favor incluye: Monición de entrada, sugerencia de lecturas y Evangelio, 5 p
         songsCount: (state.songs || []).length,
         scriptsCount: (state.liturgicalScripts || []).length
       },
-      upcomingEvents: (state.events || []).slice(0, 10),
-      pendingTasks: (state.tasks || []).filter(t => !t.done).slice(0, 10),
-      notesList: (state.notes || []).slice(0, 25).map(n => ({ id: n.id, title: n.title, tags: n.tags })),
-      eventsList: (state.events || []).slice(0, 30).map(e => ({
+      upcomingEvents: (state.events || []).slice(0, 8),
+      pendingTasks: (state.tasks || []).filter(t => !t.done).slice(0, 8),
+      notesList: (state.notes || []).slice(0, 10).map(n => ({ id: n.id, title: n.title, tags: n.tags })),
+      eventsList: (state.events || []).slice(0, 12).map(e => ({
         id: e.id,
         title: e.title,
         date: e.date,
         time: e.time,
         category: e.category,
         location: e.location,
-        scriptId: e.scriptId || null,
-        attendees: e.attendees || '',
-        checklistSummary: Array.isArray(e.checklist) ? `${e.checklist.filter(c => c.done).length}/${e.checklist.length} listos (${e.checklist.map(c => (c.done ? '✓ ' : '□ ') + c.text).join('; ')})` : 'Sin checklist'
+        scriptId: e.scriptId || null
       })),
-      tasksList: (state.tasks || []).slice(0, 30).map(t => ({ id: t.id, title: t.title, due: t.due, priority: t.priority, done: t.done })),
-      groupsList: (state.groups || []).map(g => ({ id: g.id, name: g.name, leader: g.leader })),
-      personsList: (state.persons || []).map(p => ({ id: p.id, name: p.name, role: p.role, group: p.group })),
-      scriptsList: (state.liturgicalScripts || []).slice(0, 25).map(s => ({
+      tasksList: (state.tasks || []).slice(0, 12).map(t => ({ id: t.id, title: t.title, due: t.due, priority: t.priority, done: t.done })),
+      groupsList: (state.groups || []).slice(0, 6).map(g => ({ id: g.id, name: g.name, leader: g.leader })),
+      personsList: (state.persons || []).slice(0, 8).map(p => ({ id: p.id, name: p.name, role: p.role, group: p.group })),
+      scriptsList: (state.liturgicalScripts || []).slice(0, 8).map(s => ({
         id: s.id,
         title: s.title,
         type: s.type,
         date: s.date,
-        course: s.course,
-        celebrant: s.celebrant
+        course: s.course
       })),
-      songsList: (state.songs || []).slice(0, 40).map(s => ({
+      songsList: (state.songs || []).slice(0, 10).map(s => ({
         id: s.id,
         title: s.title,
         category: s.category,
@@ -6053,21 +6071,26 @@ Por favor incluye: Monición de entrada, sugerencia de lecturas y Evangelio, 5 p
       })),
       todayGospel: gospelSummary,
       todaySaint: saintSummary,
-      schoolTemplates: schoolEventTemplates.map(t => `${t.title} (${t.category})`),
-      liturgicalTemplates: liturgicalTemplatesCatalog.map(t => `${t.title} (${t.type})`)
+      schoolTemplates: schoolEventTemplates.slice(0, 6).map(t => `${t.title} (${t.category})`),
+      liturgicalTemplates: liturgicalTemplatesCatalog.slice(0, 6).map(t => `${t.title} (${t.type})`)
     };
 
     try {
+      // Enviar solo los últimos 8 mensajes para máxima velocidad y evitar desbordes de tokens
+      const recentChat = (state.chat || []).slice(-8);
+
       const res = await window.pastoral.ai.startChat({
         provider,
         apiKey,
         model,
-        messages: state.chat,
+        messages: recentChat,
         appContext
       });
 
       removeChunkListener();
       removeStatusListener();
+      streamContentBox.innerHTML = renderMarkdown(accumulatedText);
+      scrollChatToBottom();
 
       isGeneratingChat = false;
       chatStopBtn.style.display = 'none';
