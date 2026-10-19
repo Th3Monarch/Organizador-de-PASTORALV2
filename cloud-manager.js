@@ -666,9 +666,6 @@ ${personsList.length ? personsList.map(p => `  * [ID: ${p.id}] "${p.name}" (Rol:
       if (!cleanKey) {
         throw new Error('Por favor ingresa tu Clave de API de Google AI Studio.');
       }
-      if (cleanKey.startsWith('AQ.')) {
-        throw new Error('Has ingresado un token de acceso temporal de Google Cloud ("AQ..."). La API de Gemini requiere una Clave de API oficial ("AIza..."). Ve a https://aistudio.google.com/app/apikey, pulsa en "Create API key" > "Create API key in new project" y copia la clave generada.');
-      }
 
       const targetModel = this.normalizeGeminiModel(model);
       const url = `${this.geminiBaseUrl}/models/${targetModel}:generateContent?key=${encodeURIComponent(cleanKey)}`;
@@ -1287,7 +1284,7 @@ Responde ÚNICAMENTE con el bloque JSON válido, sin explicaciones antes ni desp
         const reason = Array.isArray(details) && details[0]?.reason;
         const msg = parsed.error.message || '';
         if (reason === 'ACCESS_TOKEN_TYPE_UNSUPPORTED' || parsed.error.status === 'UNAUTHENTICATED' || msg.toLowerCase().includes('api key not valid')) {
-          return 'Clave no válida para la API de Gemini. La clave oficial de Google AI Studio debe comenzar con "AIza...". Ve a https://aistudio.google.com/app/apikey, pulsa en "Create API key" > "Create API key in new project" y copia la clave generada.';
+          return 'Clave no autorizada para la API de Gemini (401: ACCESS_TOKEN_TYPE_UNSUPPORTED). Tu proyecto de Google Cloud debe tener habilitada la "Generative Language API". Actívala en console.cloud.google.com/apis/library/generativelanguage.googleapis.com o genera una clave en un proyecto limpio en Google AI Studio.';
         }
         if (parsed.error.message) return parsed.error.message;
       }
@@ -1296,7 +1293,7 @@ Responde ÚNICAMENTE con el bloque JSON válido, sin explicaciones antes ni desp
 
     if (typeof errText === 'string') {
       if (errText.includes('ACCESS_TOKEN_TYPE_UNSUPPORTED') || errText.toLowerCase().includes('api key not valid')) {
-        return 'Clave no válida para la API de Gemini. La clave oficial de Google AI Studio debe comenzar con "AIza...". Ve a https://aistudio.google.com/app/apikey, pulsa en "Create API key" > "Create API key in new project" y copia la clave generada.';
+        return 'Clave no autorizada para la API de Gemini (401: ACCESS_TOKEN_TYPE_UNSUPPORTED). Tu proyecto de Google Cloud debe tener habilitada la "Generative Language API". Actívala en console.cloud.google.com/apis/library/generativelanguage.googleapis.com o genera una clave en un proyecto limpio en Google AI Studio.';
       }
       return errText.slice(0, 160);
     }
