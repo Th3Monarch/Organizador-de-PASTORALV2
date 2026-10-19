@@ -1152,10 +1152,14 @@ Responde ÚNICAMENTE con el bloque JSON válido, sin explicaciones antes ni desp
       if (!Array.isArray(msg.content)) return msg;
       const normalizedParts = msg.content.map(part => {
         if (part.type === 'file_url' && part.file_url) {
-          if (part.file_url.extractedText && part.file_url.extractedText.trim()) {
+          let text = (part.file_url.extractedText || '').trim();
+          if (!text && part.file_url.url) {
+            text = this.extractTextFromDataUrl(part.file_url.url);
+          }
+          if (text) {
             return {
               type: 'text',
-              text: `\n\n📄 **[DOCUMENTO ADJUNTO: ${part.file_url.name || 'documento'}]**\n\`\`\`\n${part.file_url.extractedText.trim()}\n\`\`\`\n`
+              text: `\n\n📄 **[DOCUMENTO ADJUNTO: ${part.file_url.name || 'documento'}]**\n\`\`\`\n${text}\n\`\`\`\n`
             };
           }
           if (part.file_url.url) {
@@ -1330,6 +1334,49 @@ Responde ÚNICAMENTE con el bloque JSON válido, sin explicaciones antes ni desp
   }
 
   // Utilidades de apoyo
+  extractTextFromDataUrl(dataUrl) {
+    if (!dataUrl || typeof dataUrl !== 'string') return '';
+    const match = dataUrl.match(/^data:([^;]+);base64,([\s\S]+)$/);
+    if (!match) return '';
+    const mime = match[1].toLowerCase().trim();
+    try {
+      const buf = Buffer.from(match[2].replace(/\s/g, ''), 'base64');
+      if (mime.startsWith('text/') || mime === 'application/json' || mime === 'application/csv') {
+        return buf.toString('utf8');
+      }
+      if (mime === 'application/pdf') {
+        const zlib = require('zlib');
+        const str = buf.toString('binary');
+        let extracted = '';
+        const streamRegex = /stream\r?\n([\s\S]*?)\r?\nendstream/g;
+        let m;
+        while ((m = streamRegex.exec(str)) !== null) {
+          const raw = Buffer.from(m[1], 'binary');
+          let decompressed = '';
+          try {
+            decompressed = zlib.inflateSync(raw).toString('utf8');
+          } catch (_) {
+            try { decompressed = zlib.inflateRawSync(raw).toString('utf8'); } catch (__) { decompressed = raw.toString('utf8'); }
+          }
+          const tjRegex = /\(([^)]+)\)\s*Tj/g;
+          let tj;
+          while ((tj = tjRegex.exec(decompressed)) !== null) {
+            extracted += tj[1] + ' ';
+          }
+          const tjArrRegex = /\[([\s\S]*?)\]\s*TJ/g;
+          while ((tj = tjArrRegex.exec(decompressed)) !== null) {
+            const parts = tj[1].match(/\(([^)]+)\)/g);
+            if (parts) extracted += parts.map(p => p.slice(1, -1)).join('') + ' ';
+          }
+        }
+        return extracted.trim();
+      }
+    } catch (err) {
+      console.warn('[CloudManager] Error al extraer texto en Node:', err);
+    }
+    return '';
+  }
+
   parseDataUrl(dataUrl) {
     if (!dataUrl || typeof dataUrl !== 'string') return { mimeType: 'application/octet-stream', base64Data: '' };
     const match = dataUrl.match(/^data:([^;]+);base64,([\s\S]+)$/);

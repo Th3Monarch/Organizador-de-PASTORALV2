@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self' data: blob: https:; img-src 'self' data: blob: https: http:; style-src 'self' 'unsafe-inline' https:; font-src 'self' data: https:; script-src 'self' 'unsafe-inline' https://www.gstatic.com https://apis.google.com https://*.firebaseapp.com https://*.googleapis.com https://accounts.google.com; frame-src 'self' https: https://*.firebaseapp.com https://accounts.google.com; connect-src 'self' https: wss:;">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self' data: blob: https:; img-src 'self' data: blob: https: http:; style-src 'self' 'unsafe-inline' https:; font-src 'self' data: https:; script-src 'self' 'unsafe-inline' https://www.gstatic.com https://apis.google.com https://*.firebaseapp.com https://*.googleapis.com https://accounts.google.com https://cdnjs.cloudflare.com; worker-src 'self' blob:; frame-src 'self' https: https://*.firebaseapp.com https://accounts.google.com; connect-src 'self' https: wss:;">
   <title>Organizador Pastoral - Web & iOS PWA</title>
   
   <!-- PWA & iOS Safari Meta Tags -->
@@ -22,7 +22,7 @@
   <link rel="icon" type="image/png" sizes="512x512" href="icons/icon-512.png">
   <link rel="shortcut icon" href="icons/icon-192.png">
 
-  <link rel="stylesheet" href="styles.css?v=2.5.17">
+  <link rel="stylesheet" href="styles.css?v=2.5.18">
 </head>
 <body class="theme-light">
   <!-- Layout Principal de la Aplicación -->
@@ -1298,7 +1298,7 @@
               </div>
               <div class="about-info">
                 <h4>Organizador Pastoral Web & PWA</h4>
-                <p>Versión 2.5.17 &bull; Sincronización en la Nube con Google & Firebase &bull; Modo Offline-First</p>
+                <p>Versión 2.5.18 &bull; Sincronización en la Nube con Google & Firebase &bull; Modo Offline-First</p>
                 <p class="about-author">Desarrollado con dedicación pastoral por <strong>Manuel Guia</strong></p>
                 <p class="about-motto"><em>"Veritas" &bull; "Contemplari et contemplata aliis tradere"</em></p>
               </div>
@@ -2130,16 +2130,16 @@
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
 
-  <!-- PDF.js para extracción client-side de documentos PDF sin depender de parsers remotos de IA -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+  <!-- PDF.js local para extracción client-side de documentos PDF sin depender de parsers remotos de IA -->
+  <script src="pdf.min.js?v=2.5.18"></script>
 
   <!-- Scripts: Datos Litúrgicos, Adaptador PWA iOS, Firebase Sync y Lógica de la Aplicación -->
-  <script src="song-data.js?v=2.5.17"></script>
-  <script src="liturgical-templates.js?v=2.5.17"></script>
-  <script src="liturgical.js?v=2.5.17"></script>
-  <script src="markdown.js?v=2.5.17"></script>
-  <script src="pastoral-firebase.js?v=2.5.17"></script>
-  <script src="pastoral-pwa-adapter.js?v=2.5.17"></script>
-  <script src="app.js?v=2.5.17"></script>
+  <script src="song-data.js?v=2.5.18"></script>
+  <script src="liturgical-templates.js?v=2.5.18"></script>
+  <script src="liturgical.js?v=2.5.18"></script>
+  <script src="markdown.js?v=2.5.18"></script>
+  <script src="pastoral-firebase.js?v=2.5.18"></script>
+  <script src="pastoral-pwa-adapter.js?v=2.5.18"></script>
+  <script src="app.js?v=2.5.18"></script>
 </body>
 </html>

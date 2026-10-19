@@ -5900,9 +5900,12 @@ Por favor incluye: Monición de entrada, sugerencia de lecturas y Evangelio, 5 p
           try {
             if (window.pdfjsLib) {
               if (!window.pdfjsLib.GlobalWorkerOptions.workerSrc) {
-                window.pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+                window.pdfjsLib.GlobalWorkerOptions.workerSrc = 'pdf.worker.min.js';
               }
-              const loadingTask = window.pdfjsLib.getDocument({ data: new Uint8Array(e.target.result) });
+              const loadingTask = window.pdfjsLib.getDocument({
+                data: new Uint8Array(e.target.result),
+                isEvalSupported: false
+              });
               const pdf = await loadingTask.promise;
               let full = '';
               for (let i = 1; i <= pdf.numPages; i++) {
@@ -5912,9 +5915,10 @@ Por favor incluye: Monición de entrada, sugerencia de lecturas y Evangelio, 5 p
                 full += `[PÁGINA ${i}]\n${str}\n\n`;
               }
               extractedText = full.trim();
+              console.log('[Pastoral PDF] Texto extraído con éxito:', extractedText.length, 'caracteres de', pdf.numPages, 'páginas');
             }
           } catch (err) {
-            console.warn('PDF.js text extraction fallback to raw dataUrl:', err);
+            console.warn('[Pastoral PDF] Error al extraer con PDF.js:', err);
           }
           const dataUrlReader = new FileReader();
           dataUrlReader.onload = (ev) => {
