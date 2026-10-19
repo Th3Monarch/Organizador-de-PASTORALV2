@@ -1177,19 +1177,23 @@ Responde ÚNICAMENTE con el bloque JSON válido, sin explicaciones antes ni desp
 
       onStatus?.(stepCount === 1 ? 'Pensando...' : 'Procesando resultado...');
 
-      // Fallbacks automáticos en caso de saturación/429
-      const fallbackModels = [
-        targetModel,
+      // Fallbacks automáticos en caso de saturación/429 (OpenRouter permite un máximo estricto de 3 modelos)
+      const primaryModel = targetModel || 'openrouter/free';
+      const fallbackPool = [
+        primaryModel,
         'openrouter/free',
         'google/gemma-4-26b-a4b-it:free',
         'minimax/minimax-m3.1-flash:free',
         'google/gemma-4-31b-it:free'
-      ].filter((m, i, arr) => m && arr.indexOf(m) === i);
+      ];
+      const fallbackModels = fallbackPool
+        .filter((m, i, arr) => m && arr.indexOf(m) === i)
+        .slice(0, 3);
 
       const useTools = this.hasActionIntent(recentMessages);
 
       const payload = {
-        model: targetModel,
+        model: primaryModel,
         models: fallbackModels,
         messages: conversation,
         stream: true,

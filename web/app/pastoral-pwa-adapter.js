@@ -892,13 +892,17 @@
               return { ...msg, content: normalizedParts };
             });
 
-            const fallbackModels = [
-              model || 'openrouter/free',
+            const primaryModel = model || 'openrouter/free';
+            const fallbackPool = [
+              primaryModel,
               'openrouter/free',
               'google/gemma-4-26b-a4b-it:free',
               'minimax/minimax-m3.1-flash:free',
               'google/gemma-4-31b-it:free'
-            ].filter((m, i, arr) => m && arr.indexOf(m) === i);
+            ];
+            const fallbackModels = fallbackPool
+              .filter((m, i, arr) => m && arr.indexOf(m) === i)
+              .slice(0, 3);
 
             const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
               method: 'POST',
@@ -909,7 +913,7 @@
                 'X-Title': 'Organizador Pastoral PWA'
               },
               body: JSON.stringify({
-                model: model || 'openrouter/free',
+                model: primaryModel,
                 models: fallbackModels,
                 messages: [
                   ...(systemText ? [{ role: 'system', content: systemText }] : []),
