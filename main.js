@@ -113,7 +113,7 @@ const DEFAULT_DATA = {
     cloud: {
       provider: 'gemini', // 'gemini' | 'openrouter'
       apiKey: '',
-      model: 'gemini-flash-latest'
+      model: 'gemini-2.5-flash'
     }
   }
 };
@@ -146,10 +146,11 @@ function shallowMerge(defaults, target) {
     if (c.apiKey && (c.apiKey.startsWith('AQ.') || c.apiKey.startsWith('AIza'))) {
       c.provider = 'gemini';
     }
-    // Normalizar modelos retirados de Gemini
-    const deprecated = ['gemini-2.0-flash', 'gemini-1.5-flash', 'gemini-2.5-flash', 'gemini-2.5-flash-lite'];
-    if (c.provider === 'gemini' && (!c.model || deprecated.includes(c.model) || c.model.includes('llama') || c.model.includes('nemotron'))) {
-      c.model = 'gemini-flash-latest';
+    // Normalizar modelos de Gemini a gemini-2.5-flash si no es válido o es antiguo/hallucinado
+    if (c.provider === 'gemini') {
+      if (!c.model || c.model === 'gemini-3.8-flash' || c.model === 'gemini-flash-latest' || c.model.includes('llama') || c.model.includes('nemotron')) {
+        c.model = 'gemini-2.5-flash';
+      }
     }
   }
   ['notes', 'events', 'tasks', 'groups', 'persons', 'chat'].forEach(key => {

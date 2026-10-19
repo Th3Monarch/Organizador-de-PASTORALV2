@@ -542,7 +542,7 @@ class CloudManager {
   constructor() {
     this.openRouterBaseUrl = 'https://openrouter.ai/api/v1';
     this.geminiBaseUrl = 'https://generativelanguage.googleapis.com/v1beta';
-    this.defaultGeminiModel = 'gemini-3.8-flash';
+    this.defaultGeminiModel = 'gemini-2.5-flash';
     this.defaultOpenRouterModel = 'google/gemma-4-31b-it:free';
   }
 
@@ -552,8 +552,7 @@ class CloudManager {
   normalizeGeminiModel(model) {
     if (!model || typeof model !== 'string') return this.defaultGeminiModel;
     const clean = model.trim().replace(/^models\//, '');
-    const deprecated = ['gemini-2.0-flash', 'gemini-1.5-flash', 'gemini-2.5-flash', 'gemini-2.5-flash-lite', 'gemini-1.5-pro', 'gemini-flash-latest'];
-    if (deprecated.includes(clean) || clean.includes('gemma') || clean.includes('nemotron') || clean.includes('llama') || clean.includes('2.5') || clean.includes('1.5') || clean.includes('2.0')) {
+    if (clean === 'gemini-3.8-flash' || clean === 'gemini-flash-latest' || clean.includes('gemma') || clean.includes('nemotron') || clean.includes('llama')) {
       return this.defaultGeminiModel;
     }
     return clean;
@@ -958,10 +957,21 @@ Responde ÚNICAMENTE con el bloque JSON válido, sin explicaciones antes ni desp
         parts.push({ text: msg.content });
       } else if (Array.isArray(msg.content)) {
         for (const item of msg.content) {
-          if (item.type === 'text') parts.push({ text: item.text });
+          if (item.type === 'text' && item.text) {
+            parts.push({ text: item.text });
+          }
           if (item.type === 'image_url' && item.image_url?.url) {
             const { mimeType, base64Data } = this.parseDataUrl(item.image_url.url);
             parts.push({ inlineData: { mimeType, data: base64Data } });
+          }
+          if (item.type === 'file_url' && item.file_url?.url) {
+            const { mimeType, base64Data } = this.parseDataUrl(item.file_url.url);
+            parts.push({
+              inlineData: {
+                mimeType: item.file_url.mimeType || mimeType || 'application/pdf',
+                data: base64Data
+              }
+            });
           }
         }
       }
@@ -1228,11 +1238,12 @@ Responde ÚNICAMENTE con el bloque JSON válido, sin explicaciones antes ni desp
 
   // Utilidades de apoyo
   parseDataUrl(dataUrl) {
-    const match = dataUrl.match(/^data:([^;]+);base64,(.+)$/);
+    if (!dataUrl || typeof dataUrl !== 'string') return { mimeType: 'application/octet-stream', base64Data: '' };
+    const match = dataUrl.match(/^data:([^;]+);base64,([\s\S]+)$/);
     if (match) {
-      return { mimeType: match[1], base64Data: match[2] };
+      return { mimeType: match[1].trim(), base64Data: match[2].replace(/\s/g, '') };
     }
-    return { mimeType: 'image/jpeg', base64Data: dataUrl };
+    return { mimeType: 'application/octet-stream', base64Data: dataUrl.replace(/\s/g, '') };
   }
 
   parseNoteJson(rawContent) {

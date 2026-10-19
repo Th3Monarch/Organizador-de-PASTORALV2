@@ -28,11 +28,12 @@
 ### 🤖 2. Chatbot de Google Gemini Oficial
 - Integración nativa directa con la API oficial de **Google AI Studio** (`generativelanguage.googleapis.com`).
 - **Modelos de última generación:**
-  - `gemini-flash-latest` / `gemini-3.8-flash` (por defecto, ultrarrápido y potente con visión)
-  - `gemini-3.1-flash-lite`
-  - `gemini-pro-latest`
+  - `gemini-2.5-flash` (por defecto, ultrarrápido y potente con visión multimodal y análisis de PDFs)
+  - `gemini-2.0-flash`
+  - `gemini-1.5-flash`
+  - `gemini-1.5-pro`
 - **Streaming SSE oficial** de Google con indicador de estado en tiempo real.
-- **Visión por computadora nativa:** analiza fotos de afiches, pizarrones o listas y las convierte en notas estructuradas.
+- **Capacidad Multimodal nativa:** analiza imágenes (JPG, PNG, WebP) y documentos (PDFs, guías litúrgicas, TXT, MD, CSV) directamente en el chat.
 - **Function Calling nativo:** el modelo de Gemini puede registrar directamente notas, eventos de calendario, tareas, grupos comunitarios y fichas de personas.
 - **Selector de Proveedor Dual:** elige fácilmente entre **Google Gemini Oficial** (con clave gratuita de Google AI Studio) o **OpenRouter Cloud** (con modelos Gemma, Claude o Llama).
 

@@ -2741,6 +2741,47 @@ body.theme-light .form-group select {
   border-radius: var(--radius-md);
   overflow: hidden;
   border: 1px solid var(--border-color);
+  background: var(--bg-surface);
+}
+
+.preview-thumb-box.file-thumb-box {
+  width: auto;
+  min-width: 140px;
+  max-width: 220px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 28px 6px 10px;
+}
+
+.file-thumb-icon {
+  font-size: 1.6rem;
+  line-height: 1;
+  flex-shrink: 0;
+}
+
+.file-thumb-meta {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  min-width: 0;
+}
+
+.file-thumb-name {
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.file-thumb-badge {
+  font-size: 0.65rem;
+  font-weight: 700;
+  color: #ef4444;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
 }
 
 .preview-thumb-box img {
@@ -2764,6 +2805,50 @@ body.theme-light .form-group select {
   display: flex;
   align-items: center;
   justify-content: center;
+  z-index: 2;
+}
+
+/* Chips de archivos adjuntos dentro de la burbuja del chat */
+.chat-attached-file-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--bg-surface);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  padding: 6px 12px;
+  margin-top: 8px;
+  margin-right: 8px;
+  box-shadow: var(--shadow-sm);
+  max-width: 100%;
+}
+
+.chat-attached-file-pill .chat-file-icon {
+  font-size: 1.3rem;
+  line-height: 1;
+}
+
+.chat-attached-file-pill .chat-file-info {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  min-width: 0;
+}
+
+.chat-attached-file-pill .chat-file-name {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.chat-attached-file-pill .chat-file-badge {
+  font-size: 0.65rem;
+  font-weight: 700;
+  color: #ef4444;
+  letter-spacing: 0.5px;
 }
 
 .chat-input-bar {

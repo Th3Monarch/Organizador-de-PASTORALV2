@@ -91,7 +91,7 @@
       schoolName: 'Pastoral Educativa',
       aiProvider: 'gemini',
       geminiApiKey: '',
-      geminiModel: 'gemini-3.8-flash',
+      geminiModel: 'gemini-2.5-flash',
       openRouterApiKey: '',
       openRouterModel: 'google/gemma-3-27b-it:free'
     },
@@ -683,8 +683,10 @@
         return {
           success: true,
           models: [
-            { id: 'gemini-3.8-flash', name: 'Gemini 3.8 Flash (Recomendado - Rápido, Oficial y con Visión)' },
-            { id: 'gemini-3.5-flash', name: 'Gemini 3.5 Flash (Versión Estable)' }
+            { id: 'gemini-2.5-flash', name: 'Gemini 2.5 Flash (Recomendado - Multimodal con Visión y Documentos PDF)' },
+            { id: 'gemini-2.0-flash', name: 'Gemini 2.0 Flash (Ultrarrápido y oficial)' },
+            { id: 'gemini-1.5-flash', name: 'Gemini 1.5 Flash (Alta estabilidad)' },
+            { id: 'gemini-1.5-pro', name: 'Gemini 1.5 Pro (Razonamiento profundo)' }
           ]
         };
       },
@@ -719,13 +721,12 @@
         try {
           if (provider === 'gemini') {
             // Normalizar modelo para Gemini REST v1beta
-            let targetModel = model ? model.trim().replace(/^models\//, '') : 'gemini-3.8-flash';
-            const deprecated = ['gemini-flash-latest', 'gemini-2.5-flash', 'gemini-2.5-flash-lite', 'gemini-2.0-flash', 'gemini-1.5-flash', 'gemini-1.5-pro'];
-            if (!targetModel || deprecated.includes(targetModel) || targetModel.includes('2.5') || targetModel.includes('1.5') || targetModel.includes('2.0') || targetModel.includes('flash-latest')) {
-              targetModel = 'gemini-3.8-flash';
+            let targetModel = model ? model.trim().replace(/^models\//, '') : 'gemini-2.5-flash';
+            if (!targetModel || targetModel === 'gemini-3.8-flash' || targetModel === 'gemini-flash-latest') {
+              targetModel = 'gemini-2.5-flash';
             }
 
-            // Normalizar mensajes y contenidos multi-modal
+            // Normalizar mensajes y contenidos multi-modal (imágenes y documentos PDF/texto)
             const contents = [];
             for (const m of messages) {
               if (m.role === 'system') continue;
@@ -740,12 +741,23 @@
                     parts.push({ text: part.text });
                   } else if (part.type === 'image_url' && part.image_url?.url) {
                     const dataUrl = part.image_url.url;
-                    const match = dataUrl.match(/^data:(image\/[a-zA-Z+]+);base64,(.+)$/);
+                    const match = dataUrl.match(/^data:([^;]+);base64,([\s\S]+)$/);
                     if (match) {
                       parts.push({
                         inlineData: {
-                          mimeType: match[1],
-                          data: match[2]
+                          mimeType: match[1].trim(),
+                          data: match[2].replace(/\s/g, '')
+                        }
+                      });
+                    }
+                  } else if (part.type === 'file_url' && part.file_url?.url) {
+                    const dataUrl = part.file_url.url;
+                    const match = dataUrl.match(/^data:([^;]+);base64,([\s\S]+)$/);
+                    if (match) {
+                      parts.push({
+                        inlineData: {
+                          mimeType: part.file_url.mimeType || match[1].trim() || 'application/pdf',
+                          data: match[2].replace(/\s/g, '')
                         }
                       });
                     }
@@ -771,11 +783,15 @@
               }
             };
 
-            const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(targetModel)}:streamGenerateContent?alt=sse&key=${encodeURIComponent(apiKey.trim())}`;
+            const cleanKey = apiKey.trim();
+            const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(targetModel)}:streamGenerateContent?alt=sse&key=${encodeURIComponent(cleanKey)}`;
             
             const response = await fetch(endpoint, {
               method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
+              headers: {
+                'Content-Type': 'application/json',
+                'x-goog-api-key': cleanKey
+              },
               body: JSON.stringify(reqBody),
               signal: currentAbortController.signal
             });

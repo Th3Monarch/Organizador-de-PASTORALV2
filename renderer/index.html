@@ -816,7 +816,7 @@
             <div class="form-group">
               <label for="setup-model">Modelo de IA:</label>
               <div class="input-with-button">
-                <input type="text" id="setup-model" value="gemini-flash-latest" placeholder="gemini-flash-latest">
+                <input type="text" id="setup-model" value="gemini-2.5-flash" placeholder="gemini-2.5-flash">
                 <button type="button" class="btn btn-secondary btn-sm" id="btn-browse-models-setup">Ver modelos</button>
               </div>
             </div>
@@ -875,10 +875,12 @@
 
           <!-- Barra de Entrada y Envío -->
           <div class="chat-input-bar">
-            <!-- Botón de Adjuntar Imagen -->
-            <label class="btn btn-icon btn-ghost file-attach-btn" title="Adjuntar hasta 4 imágenes (o pégalas con Ctrl+V)">
-              <svg viewBox="0 0 24 24" width="20" height="20"><path d="M21 19V5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2zM8.5 13.5l2.5 3.01L14.5 12l4.5 6H5l3.5-4.5z"/></svg>
-              <input type="file" id="chat-image-input" accept="image/*" multiple style="display:none;">
+            <!-- Botón de Adjuntar Archivos (PDF, TXT, MD, Imágenes) -->
+            <label class="btn btn-icon btn-ghost file-attach-btn" title="Adjuntar documentos (PDF, TXT, MD) o imágenes (JPG, PNG)">
+              <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"/>
+              </svg>
+              <input type="file" id="chat-image-input" accept="application/pdf,.pdf,text/plain,.txt,text/markdown,.md,text/csv,.csv,image/*,.jpg,.jpeg,.png,.webp,.gif,.heic" multiple style="display:none;">
             </label>
 
             <!-- Textarea de Entrada -->
@@ -1095,7 +1097,7 @@
             <div class="form-group">
               <label for="settings-cloud-model">Modelo de Lenguaje:</label>
               <div class="input-with-button">
-                <input type="text" id="settings-cloud-model" placeholder="gemini-flash-latest">
+                <input type="text" id="settings-cloud-model" placeholder="gemini-2.5-flash">
                 <button type="button" class="btn btn-secondary btn-sm" id="btn-browse-models-settings">Ver modelos disponibles</button>
               </div>
             </div>
@@ -1212,7 +1214,7 @@
               </div>
               <div class="about-info">
                 <h4>Organizador Pastoral Desktop</h4>
-                <p>Versión 2.5.8 &bull; Sincronización en la Nube &bull; Modo seguro ContextBridge</p>
+                <p>Versión 2.5.9 &bull; Sincronización en la Nube &bull; Modo seguro ContextBridge</p>
                 <p class="about-author">Desarrollado con dedicación pastoral por <strong>Manuel Guia</strong></p>
                 <p class="about-motto"><em>"Veritas" &bull; "Contemplari et contemplata aliis tradere"</em></p>
               </div>

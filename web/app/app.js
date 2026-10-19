@@ -91,11 +91,13 @@ document.addEventListener('DOMContentLoaded', async () => {
 
       // Asegurar valores por defecto de IA
       if (!state.settings.cloud.provider) state.settings.cloud.provider = 'gemini';
-      if (!state.settings.cloud.model) state.settings.cloud.model = 'gemini-3.8-flash';
-      const deprecatedGemini = ['gemini-2.0-flash', 'gemini-1.5-flash', 'gemini-2.5-flash', 'gemini-2.5-flash-lite', 'gemini-flash-latest'];
-      if (state.settings.cloud.provider === 'gemini' && (deprecatedGemini.includes(state.settings.cloud.model) || state.settings.cloud.model.includes('llama') || state.settings.cloud.model.includes('nemotron') || state.settings.cloud.model.includes('flash-latest') || state.settings.cloud.model.includes('2.5') || state.settings.cloud.model.includes('1.5') || state.settings.cloud.model.includes('2.0'))) {
-        state.settings.cloud.model = 'gemini-3.8-flash';
-        persistData();
+      if (state.settings.cloud.provider === 'gemini') {
+        if (!state.settings.cloud.model || state.settings.cloud.model === 'gemini-3.8-flash' || state.settings.cloud.model === 'gemini-flash-latest' || state.settings.cloud.model.includes('llama') || state.settings.cloud.model.includes('nemotron')) {
+          state.settings.cloud.model = 'gemini-2.5-flash';
+          persistData();
+        }
+      } else if (!state.settings.cloud.model) {
+        state.settings.cloud.model = 'google/gemma-4-31b-it:free';
       }
       if (state.settings.cloud.apiKey && (state.settings.cloud.apiKey.startsWith('AQ.') || state.settings.cloud.apiKey.startsWith('AIza'))) {
         state.settings.cloud.provider = 'gemini';
@@ -5713,7 +5715,7 @@ Por favor incluye: Monición de entrada, sugerencia de lecturas y Evangelio, 5 p
     const isGemini = provider === 'gemini';
 
     if (activeModelLabel) {
-      activeModelLabel.textContent = state.settings.cloud.model || (isGemini ? 'gemini-3.8-flash' : 'google/gemma-4-31b-it:free');
+      activeModelLabel.textContent = state.settings.cloud.model || (isGemini ? 'gemini-2.5-flash' : 'google/gemma-4-31b-it:free');
     }
     if (providerBadge) {
       providerBadge.textContent = isGemini ? 'Google Gemini Oficial' : 'OpenRouter Cloud';
@@ -5744,17 +5746,34 @@ Por favor incluye: Monición de entrada, sugerencia de lecturas y Evangelio, 5 p
       const isUser = m.role === 'user';
       let contentHtml = '';
 
-      // Si el contenido contiene imágenes
+      // Si el contenido contiene imágenes o archivos adjuntos
       if (Array.isArray(m.content)) {
         let textPart = '';
-        let imgsHtml = '';
+        let attachmentsHtml = '';
         m.content.forEach(part => {
-          if (part.type === 'text') textPart += part.text;
-          if (part.type === 'image_url') {
-            imgsHtml += `<img src="${part.image_url.url}" style="max-height:140px; border-radius:6px; margin-top:6px; display:block;">`;
+          if (part.type === 'text') {
+            textPart += part.text;
+          } else if (part.type === 'image_url') {
+            const url = part.image_url?.url || '';
+            attachmentsHtml += `<img src="${url}" style="max-height:140px; border-radius:6px; margin-top:6px; display:block;">`;
+          } else if (part.type === 'file_url') {
+            const f = part.file_url || {};
+            const name = f.name || 'Documento adjunto';
+            const isPdf = (f.mimeType === 'application/pdf') || name.toLowerCase().endsWith('.pdf');
+            const icon = isPdf ? '📄' : '📝';
+            const badge = isPdf ? 'PDF' : 'DOC';
+            attachmentsHtml += `
+              <div class="chat-attached-file-pill" title="${escapeHtml(name)}">
+                <span class="chat-file-icon">${icon}</span>
+                <div class="chat-file-info">
+                  <span class="chat-file-name">${escapeHtml(name)}</span>
+                  <span class="chat-file-badge">${badge}</span>
+                </div>
+              </div>
+            `;
           }
         });
-        contentHtml = renderMarkdown(textPart) + imgsHtml;
+        contentHtml = renderMarkdown(textPart) + attachmentsHtml;
       } else {
         contentHtml = renderMarkdown(m.content || '');
       }
@@ -5867,13 +5886,14 @@ Por favor incluye: Monición de entrada, sugerencia de lecturas y Evangelio, 5 p
       }
     });
 
-    // Soporte para pegar imágenes directamente (Ctrl+V)
+    // Soporte para pegar imágenes o documentos directamente (Ctrl+V)
     chatTextarea.addEventListener('paste', (e) => {
-      const items = (e.clipboardData || e.originalEvent.clipboardData).items;
+      const items = (e.clipboardData || e.originalEvent?.clipboardData)?.items;
+      if (!items) return;
       for (const item of items) {
-        if (item.type.indexOf('image') !== -1) {
+        if (item.kind === 'file') {
           const file = item.getAsFile();
-          if (file) addImageToChatAttachments(file);
+          if (file) addFileToChatAttachments(file);
         }
       }
     });
@@ -5895,22 +5915,66 @@ Por favor incluye: Monición de entrada, sugerencia de lecturas y Evangelio, 5 p
   if (chatImageInput) {
     chatImageInput.addEventListener('change', (e) => {
       if (e.target.files) {
-        Array.from(e.target.files).forEach(f => addImageToChatAttachments(f));
+        Array.from(e.target.files).forEach(f => addFileToChatAttachments(f));
         chatImageInput.value = '';
       }
     });
   }
 
-  function addImageToChatAttachments(file) {
+  function addFileToChatAttachments(file) {
+    if (!file) return;
     if (currentChatImages.length >= 4) {
-      showToast('Puedes adjuntar un máximo de 4 imágenes por mensaje.', 'warning');
+      showToast('Puedes adjuntar un máximo de 4 archivos o imágenes por mensaje.', 'warning');
       return;
     }
 
-    resizeImageToDataUrl(file, 1536, (dataUrl) => {
-      currentChatImages.push(dataUrl);
-      renderChatAttachmentPreviews();
-    });
+    // Límite de tamaño: 20MB (compatible con Gemini API)
+    if (file.size > 20 * 1024 * 1024) {
+      showToast(`"${file.name}" supera el límite de 20MB permitido por la API de Gemini.`, 'warning');
+      return;
+    }
+
+    const isImage = file.type && file.type.startsWith('image/');
+
+    if (isImage) {
+      resizeImageToDataUrl(file, 1536, (dataUrl) => {
+        currentChatImages.push({
+          url: dataUrl,
+          name: file.name || 'imagen.jpg',
+          mimeType: file.type || 'image/jpeg',
+          isFile: false
+        });
+        renderChatAttachmentPreviews();
+      });
+    } else {
+      // Documentos (PDF, TXT, MD, CSV, etc.)
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        let mimeType = file.type;
+        const ext = (file.name || '').split('.').pop().toLowerCase();
+        if (!mimeType) {
+          if (ext === 'pdf') mimeType = 'application/pdf';
+          else if (ext === 'txt') mimeType = 'text/plain';
+          else if (ext === 'md') mimeType = 'text/markdown';
+          else if (ext === 'csv') mimeType = 'text/csv';
+          else mimeType = 'application/octet-stream';
+        }
+        const isPdf = mimeType === 'application/pdf' || ext === 'pdf';
+        currentChatImages.push({
+          url: e.target.result,
+          name: file.name || (isPdf ? 'documento.pdf' : 'archivo.txt'),
+          mimeType: mimeType,
+          isFile: true,
+          isPdf: isPdf,
+          size: file.size
+        });
+        renderChatAttachmentPreviews();
+      };
+      reader.onerror = () => {
+        showToast(`Error al leer el archivo ${file.name}`, 'danger');
+      };
+      reader.readAsDataURL(file);
+    }
   }
 
   function renderChatAttachmentPreviews() {
@@ -5923,15 +5987,39 @@ Por favor incluye: Monición de entrada, sugerencia de lecturas y Evangelio, 5 p
     }
 
     chatImagePreviews.style.display = 'flex';
-    chatImagePreviews.innerHTML = currentChatImages.map((src, idx) => `
-      <div class="preview-thumb-box">
-        <img src="${src}">
-        <button class="preview-thumb-remove" data-img-idx="${idx}">&times;</button>
-      </div>
-    `).join('');
+    chatImagePreviews.innerHTML = currentChatImages.map((item, idx) => {
+      const isObj = item && typeof item === 'object';
+      const isFile = isObj && item.isFile;
+      const src = isObj ? item.url : item;
+      const name = isObj ? (item.name || 'Archivo') : 'Imagen';
+      const isPdf = isObj && (item.isPdf || item.mimeType === 'application/pdf');
+
+      if (isFile) {
+        const icon = isPdf ? '📄' : '📝';
+        const badge = isPdf ? 'PDF' : 'DOC';
+        return `
+          <div class="preview-thumb-box file-thumb-box" title="${escapeHtml(name)}">
+            <span class="file-thumb-icon">${icon}</span>
+            <div class="file-thumb-meta">
+              <span class="file-thumb-name">${escapeHtml(name)}</span>
+              <span class="file-thumb-badge">${badge}</span>
+            </div>
+            <button class="preview-thumb-remove" data-img-idx="${idx}" title="Eliminar">&times;</button>
+          </div>
+        `;
+      }
+
+      return `
+        <div class="preview-thumb-box" title="${escapeHtml(name)}">
+          <img src="${src}" alt="${escapeHtml(name)}">
+          <button class="preview-thumb-remove" data-img-idx="${idx}" title="Eliminar">&times;</button>
+        </div>
+      `;
+    }).join('');
 
     chatImagePreviews.querySelectorAll('.preview-thumb-remove').forEach(b => {
-      b.addEventListener('click', () => {
+      b.addEventListener('click', (e) => {
+        e.stopPropagation();
         const idx = parseInt(b.dataset.imgIdx, 10);
         currentChatImages.splice(idx, 1);
         renderChatAttachmentPreviews();
@@ -5946,20 +6034,36 @@ Por favor incluye: Monición de entrada, sugerencia de lecturas y Evangelio, 5 p
 
     const apiKey = state.settings.cloud?.apiKey;
     const provider = state.settings.cloud?.provider || 'gemini';
-    const model = state.settings.cloud?.model || (provider === 'gemini' ? 'gemini-3.8-flash' : 'google/gemma-4-31b-it:free');
+    const model = state.settings.cloud?.model || (provider === 'gemini' ? 'gemini-2.5-flash' : 'google/gemma-4-31b-it:free');
 
     if (!apiKey) {
       showToast('Configura tu clave de API para usar el asistente.', 'warning');
       return;
     }
 
-    // Estructurar contenido del usuario
+    // Estructurar contenido del usuario (texto + imágenes + documentos)
     let userMsgContent;
     if (currentChatImages.length > 0) {
       userMsgContent = [];
       if (text) userMsgContent.push({ type: 'text', text });
-      currentChatImages.forEach(url => {
-        userMsgContent.push({ type: 'image_url', image_url: { url } });
+      currentChatImages.forEach(item => {
+        const isObj = item && typeof item === 'object';
+        const url = isObj ? item.url : item;
+        const isFile = isObj && item.isFile;
+        const name = isObj ? (item.name || '') : '';
+        const mimeType = isObj ? item.mimeType : undefined;
+
+        if (isFile) {
+          userMsgContent.push({
+            type: 'file_url',
+            file_url: { url, name, mimeType }
+          });
+        } else {
+          userMsgContent.push({
+            type: 'image_url',
+            image_url: { url }
+          });
+        }
       });
     } else {
       userMsgContent = text;
@@ -6203,7 +6307,7 @@ Por favor incluye: Monición de entrada, sugerencia de lecturas y Evangelio, 5 p
         cardOpenRouter.classList.remove('active');
         keyLabel.textContent = 'Clave de API de Google AI Studio:';
         keyHint.innerHTML = 'Obtén tu clave de API gratuita en <a href="https://aistudio.google.com/app/apikey" target="_blank" rel="noopener noreferrer" id="link-get-gemini-key">aistudio.google.com</a>.';
-        modelInput.value = 'gemini-3.8-flash';
+        modelInput.value = 'gemini-2.5-flash';
         attachGeminiLinkListeners();
       } else {
         cardOpenRouter.classList.add('active');
@@ -6268,7 +6372,7 @@ Por favor incluye: Monición de entrada, sugerencia de lecturas y Evangelio, 5 p
 
     state.settings.cloud.provider = selectedProvider;
     state.settings.cloud.apiKey = key;
-    state.settings.cloud.model = model || (selectedProvider === 'gemini' ? 'gemini-3.8-flash' : 'google/gemma-4-31b-it:free');
+    state.settings.cloud.model = model || (selectedProvider === 'gemini' ? 'gemini-2.5-flash' : 'google/gemma-4-31b-it:free');
 
     persistData();
     updateAiStatusIndicator();
@@ -6440,7 +6544,7 @@ Por favor incluye: Monición de entrada, sugerencia de lecturas y Evangelio, 5 p
     updateSettingsProviderUI(provider);
 
     if (cloudModelInput) {
-      cloudModelInput.value = state.settings.cloud?.model || (provider === 'gemini' ? 'gemini-3.8-flash' : 'google/gemma-4-31b-it:free');
+      cloudModelInput.value = state.settings.cloud?.model || (provider === 'gemini' ? 'gemini-2.5-flash' : 'google/gemma-4-31b-it:free');
     }
 
     updateSettingsAppearanceUI();
@@ -6459,8 +6563,8 @@ Por favor incluye: Monición de entrada, sugerencia de lecturas y Evangelio, 5 p
       cardOpenRouter?.classList.remove('active');
       if (keyLabel) keyLabel.textContent = 'Clave de API de Google AI Studio:';
       if (keyHint) keyHint.innerHTML = 'Consigue tu clave gratuita en <a href="https://aistudio.google.com/app/apikey" target="_blank" rel="noopener noreferrer" id="link-get-gemini-key-settings">aistudio.google.com</a>.';
-      if (modelInput && (!modelInput.value || modelInput.value.includes('gemma') || modelInput.value.includes('gemini-flash') || modelInput.value.includes('2.5'))) {
-        modelInput.value = 'gemini-3.8-flash';
+      if (modelInput && (!modelInput.value || modelInput.value.includes('gemma') || modelInput.value === 'gemini-3.8-flash' || modelInput.value === 'gemini-flash-latest')) {
+        modelInput.value = 'gemini-2.5-flash';
       }
       attachGeminiLinkListeners();
     } else {
@@ -6650,7 +6754,7 @@ Por favor incluye: Monición de entrada, sugerencia de lecturas y Evangelio, 5 p
     
     const selectedProvider = document.querySelector('input[name="settings-ai-provider"]:checked')?.value || 'gemini';
     state.settings.cloud.provider = selectedProvider;
-    state.settings.cloud.model = document.getElementById('settings-cloud-model').value.trim() || (selectedProvider === 'gemini' ? 'gemini-3.8-flash' : 'google/gemma-4-31b-it:free');
+    state.settings.cloud.model = document.getElementById('settings-cloud-model').value.trim() || (selectedProvider === 'gemini' ? 'gemini-2.5-flash' : 'google/gemma-4-31b-it:free');
 
     persistData();
     updateHeaderIdentity();
@@ -7165,30 +7269,42 @@ Por favor incluye: Monición de entrada, sugerencia de lecturas y Evangelio, 5 p
   function resizeImageToDataUrl(file, maxDimension, callback) {
     const reader = new FileReader();
     reader.onload = (e) => {
+      const rawDataUrl = e.target.result;
       const img = new Image();
       img.onload = () => {
-        let width = img.width;
-        let height = img.height;
+        try {
+          let width = img.width;
+          let height = img.height;
 
-        if (width > maxDimension || height > maxDimension) {
-          if (width > height) {
-            height = Math.round((height * maxDimension) / width);
-            width = maxDimension;
-          } else {
-            width = Math.round((width * maxDimension) / height);
-            height = maxDimension;
+          if (width > maxDimension || height > maxDimension) {
+            if (width > height) {
+              height = Math.round((height * maxDimension) / width);
+              width = maxDimension;
+            } else {
+              width = Math.round((width * maxDimension) / height);
+              height = maxDimension;
+            }
           }
-        }
 
-        const canvas = document.createElement('canvas');
-        canvas.width = width;
-        canvas.height = height;
-        const ctx = canvas.getContext('2d');
-        ctx.drawImage(img, 0, 0, width, height);
-        const dataUrl = canvas.toDataURL('image/jpeg', 0.85);
-        callback(dataUrl);
+          const canvas = document.createElement('canvas');
+          canvas.width = width;
+          canvas.height = height;
+          const ctx = canvas.getContext('2d');
+          ctx.drawImage(img, 0, 0, width, height);
+          const dataUrl = canvas.toDataURL('image/jpeg', 0.85);
+          callback(dataUrl);
+        } catch (_) {
+          callback(rawDataUrl);
+        }
       };
-      img.src = e.target.result;
+      img.onerror = () => {
+        // Fallback si el navegador no puede decodificar la imagen en Canvas
+        callback(rawDataUrl);
+      };
+      img.src = rawDataUrl;
+    };
+    reader.onerror = () => {
+      showToast('Error al leer el archivo de imagen', 'danger');
     };
     reader.readAsDataURL(file);
   }
