@@ -543,7 +543,43 @@ class CloudManager {
     this.openRouterBaseUrl = 'https://openrouter.ai/api/v1';
     this.geminiBaseUrl = 'https://generativelanguage.googleapis.com/v1beta';
     this.defaultGeminiModel = 'gemini-2.5-flash';
-    this.defaultOpenRouterModel = 'google/gemma-4-31b-it:free';
+    this.defaultOpenRouterModel = 'openrouter/free';
+  }
+
+  /**
+   * Determina si el mensaje del usuario requiere herramientas de modificación
+   * de la base de datos local (evita sobrecargar el prompt con 20 esquemas si solo pide una oración/reflexión).
+   */
+  hasActionIntent(messages) {
+    if (!Array.isArray(messages) || messages.length === 0) return true;
+    const lastUserMsg = [...messages].reverse().find(m => m.role === 'user');
+    if (!lastUserMsg) return false;
+
+    // Si contiene archivos o imágenes adjuntas, SIEMPRE activar tools para procesar
+    if (Array.isArray(lastUserMsg.content) && lastUserMsg.content.some(p => p.type === 'file' || p.type === 'file_url' || p.type === 'image_url')) {
+      return true;
+    }
+
+    let text = '';
+    if (typeof lastUserMsg.content === 'string') {
+      text = lastUserMsg.content.toLowerCase();
+    } else if (Array.isArray(lastUserMsg.content)) {
+      text = lastUserMsg.content
+        .filter(p => p.type === 'text')
+        .map(p => p.text)
+        .join(' ')
+        .toLowerCase();
+    }
+
+    const actionKeywords = [
+      'crea', 'crear', 'créame', 'creame', 'agrega', 'agregar', 'agregame', 'añade', 'añadir',
+      'guarda', 'guardar', 'guardame', 'registra', 'registrar', 'registrame', 'agenda', 'agendar',
+      'programa', 'programar', 'elimina', 'eliminar', 'borra', 'borrar', 'edita', 'editar',
+      'modifica', 'modificar', 'actualiza', 'actualizar', 'marca', 'marcar', 'completa', 'completar',
+      'anota', 'anotar', 'calendario', 'tarea', 'checklist', 'directorio'
+    ];
+
+    return actionKeywords.some(kw => text.includes(kw));
   }
 
   /**
@@ -985,13 +1021,19 @@ Responde ÚNICAMENTE con el bloque JSON válido, sin explicaciones antes ni desp
       stepCount++;
       if (signal?.aborted) throw new Error('Operación cancelada por el usuario.');
 
-      onStatus?.(stepCount === 1 ? 'Gemini está pensando...' : 'Gemini procesando acciones...');
-
+      const useTools = this.hasActionIntent(messages);
       const payload = {
         systemInstruction: { parts: [{ text: systemPrompt }] },
         contents,
-        tools: [{ functionDeclarations: GEMINI_FUNCTION_DECLARATIONS }]
+        generationConfig: {
+          temperature: 0.7,
+          maxOutputTokens: 2500
+        }
       };
+
+      if (useTools) {
+        payload.tools = [{ functionDeclarations: GEMINI_FUNCTION_DECLARATIONS }];
+      }
 
       const res = await fetch(endpoint, {
         method: 'POST',
@@ -1138,19 +1180,27 @@ Responde ÚNICAMENTE con el bloque JSON válido, sin explicaciones antes ni desp
       // Fallbacks automáticos en caso de saturación/429
       const fallbackModels = [
         targetModel,
-        'google/gemma-4-31b-it:free',
+        'openrouter/free',
         'google/gemma-4-26b-a4b-it:free',
-        'nvidia/nemotron-3.5-lightning:free'
+        'minimax/minimax-m3.1-flash:free',
+        'google/gemma-4-31b-it:free'
       ].filter((m, i, arr) => m && arr.indexOf(m) === i);
+
+      const useTools = this.hasActionIntent(recentMessages);
 
       const payload = {
         model: targetModel,
         models: fallbackModels,
         messages: conversation,
-        tools: TOOLS_DEFINITIONS,
-        tool_choice: 'auto',
-        stream: true
+        stream: true,
+        temperature: 0.7,
+        max_tokens: 2500
       };
+
+      if (useTools) {
+        payload.tools = TOOLS_DEFINITIONS;
+        payload.tool_choice = 'auto';
+      }
 
       const res = await fetch(endpoint, {
         method: 'POST',

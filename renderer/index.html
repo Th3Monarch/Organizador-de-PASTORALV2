@@ -839,7 +839,7 @@
                 </svg>
               </div>
               <div class="model-meta">
-                <span class="model-name-label" id="chat-active-model">google/gemma-4-31b-it:free</span>
+                <span class="model-name-label" id="chat-active-model">openrouter/free</span>
                 <span class="model-provider-badge">OpenRouter Cloud</span>
               </div>
             </div>
@@ -1097,8 +1097,14 @@
             <div class="form-group">
               <label for="settings-cloud-model">Modelo de Lenguaje:</label>
               <div class="input-with-button">
-                <input type="text" id="settings-cloud-model" placeholder="gemini-2.5-flash">
+                <input type="text" id="settings-cloud-model" placeholder="openrouter/free">
                 <button type="button" class="btn btn-secondary btn-sm" id="btn-browse-models-settings">Ver modelos disponibles</button>
+              </div>
+              <div class="model-quick-pills" id="settings-model-quick-pills" style="display:flex; gap:6px; flex-wrap:wrap; margin-top:8px;">
+                <button type="button" class="btn btn-ghost btn-sm quick-model-pill" data-model="openrouter/free" title="Enrutador inteligente: elige automáticamente el modelo gratuito más rápido">⚡ openrouter/free (Más Rápido)</button>
+                <button type="button" class="btn btn-ghost btn-sm quick-model-pill" data-model="google/gemma-4-26b-a4b-it:free" title="Google Gemma 4 MoE (4B activos): ultra veloz">⚡ Gemma 4 26B (Rápido)</button>
+                <button type="button" class="btn btn-ghost btn-sm quick-model-pill" data-model="minimax/minimax-m3.1-flash:free" title="MiniMax Flash: 1 millón de tokens para procesar muchos documentos">📄 MiniMax Flash 1M</button>
+                <button type="button" class="btn btn-ghost btn-sm quick-model-pill" data-model="google/gemma-4-31b-it:free" title="Google Gemma 4 31B: máxima calidad de redacción">🧠 Gemma 4 31B</button>
               </div>
             </div>
 
@@ -1214,7 +1220,7 @@
               </div>
               <div class="about-info">
                 <h4>Organizador Pastoral Desktop</h4>
-                <p>Versión 2.5.13 &bull; Sincronización en la Nube &bull; Modo seguro ContextBridge</p>
+                <p>Versión 2.5.14 &bull; Sincronización en la Nube &bull; Modo seguro ContextBridge</p>
                 <p class="about-author">Desarrollado con dedicación pastoral por <strong>Manuel Guia</strong></p>
                 <p class="about-motto"><em>"Veritas" &bull; "Contemplari et contemplata aliis tradere"</em></p>
               </div>

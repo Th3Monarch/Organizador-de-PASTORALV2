@@ -29,7 +29,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       notifications: true,
       cloud: {
         apiKey: '',
-        model: 'google/gemma-4-31b-it:free'
+        model: 'openrouter/free'
       }
     }
   };
@@ -99,7 +99,7 @@ document.addEventListener('DOMContentLoaded', async () => {
           persistData();
         }
       } else if (!state.settings.cloud.model) {
-        state.settings.cloud.model = 'google/gemma-4-31b-it:free';
+        state.settings.cloud.model = 'openrouter/free';
       }
       if (state.settings.cloud.apiKey && (state.settings.cloud.apiKey.startsWith('AQ.') || state.settings.cloud.apiKey.startsWith('AIza'))) {
         state.settings.cloud.provider = 'gemini';
@@ -5717,7 +5717,7 @@ Por favor incluye: Monición de entrada, sugerencia de lecturas y Evangelio, 5 p
     const isGemini = provider === 'gemini';
 
     if (activeModelLabel) {
-      activeModelLabel.textContent = state.settings.cloud.model || (isGemini ? 'gemini-2.5-flash' : 'google/gemma-4-31b-it:free');
+      activeModelLabel.textContent = state.settings.cloud.model || (isGemini ? 'gemini-2.5-flash' : 'openrouter/free');
     }
     if (providerBadge) {
       providerBadge.textContent = isGemini ? 'Google Gemini Oficial' : 'OpenRouter Cloud';
@@ -6078,7 +6078,7 @@ Por favor incluye: Monición de entrada, sugerencia de lecturas y Evangelio, 5 p
 
     const apiKey = state.settings.cloud?.apiKey;
     const provider = state.settings.cloud?.provider || 'gemini';
-    const model = state.settings.cloud?.model || (provider === 'gemini' ? 'gemini-2.5-flash' : 'google/gemma-4-31b-it:free');
+    const model = state.settings.cloud?.model || (provider === 'gemini' ? 'gemini-2.5-flash' : 'openrouter/free');
 
     if (!apiKey) {
       showToast('Configura tu clave de API para usar el asistente.', 'warning');
@@ -6187,10 +6187,10 @@ Por favor incluye: Monición de entrada, sugerencia de lecturas y Evangelio, 5 p
         songsCount: (state.songs || []).length,
         scriptsCount: (state.liturgicalScripts || []).length
       },
-      upcomingEvents: (state.events || []).slice(0, 8),
-      pendingTasks: (state.tasks || []).filter(t => !t.done).slice(0, 8),
-      notesList: (state.notes || []).slice(0, 10).map(n => ({ id: n.id, title: n.title, tags: n.tags })),
-      eventsList: (state.events || []).slice(0, 12).map(e => ({
+      upcomingEvents: (state.events || []).slice(0, 5),
+      pendingTasks: (state.tasks || []).filter(t => !t.done).slice(0, 5),
+      notesList: (state.notes || []).slice(0, 5).map(n => ({ id: n.id, title: n.title, tags: n.tags })),
+      eventsList: (state.events || []).slice(0, 6).map(e => ({
         id: e.id,
         title: e.title,
         date: e.date,
@@ -6199,17 +6199,17 @@ Por favor incluye: Monición de entrada, sugerencia de lecturas y Evangelio, 5 p
         location: e.location,
         scriptId: e.scriptId || null
       })),
-      tasksList: (state.tasks || []).slice(0, 12).map(t => ({ id: t.id, title: t.title, due: t.due, priority: t.priority, done: t.done })),
-      groupsList: (state.groups || []).slice(0, 6).map(g => ({ id: g.id, name: g.name, leader: g.leader })),
-      personsList: (state.persons || []).slice(0, 8).map(p => ({ id: p.id, name: p.name, role: p.role, group: p.group })),
-      scriptsList: (state.liturgicalScripts || []).slice(0, 8).map(s => ({
+      tasksList: (state.tasks || []).slice(0, 6).map(t => ({ id: t.id, title: t.title, due: t.due, priority: t.priority, done: t.done })),
+      groupsList: (state.groups || []).slice(0, 4).map(g => ({ id: g.id, name: g.name, leader: g.leader })),
+      personsList: (state.persons || []).slice(0, 5).map(p => ({ id: p.id, name: p.name, role: p.role, group: p.group })),
+      scriptsList: (state.liturgicalScripts || []).slice(0, 4).map(s => ({
         id: s.id,
         title: s.title,
         type: s.type,
         date: s.date,
         course: s.course
       })),
-      songsList: (state.songs || []).slice(0, 10).map(s => ({
+      songsList: (state.songs || []).slice(0, 6).map(s => ({
         id: s.id,
         title: s.title,
         category: s.category,
@@ -6218,8 +6218,8 @@ Por favor incluye: Monición de entrada, sugerencia de lecturas y Evangelio, 5 p
       })),
       todayGospel: gospelSummary,
       todaySaint: saintSummary,
-      schoolTemplates: schoolEventTemplates.slice(0, 6).map(t => `${t.title} (${t.category})`),
-      liturgicalTemplates: liturgicalTemplatesCatalog.slice(0, 6).map(t => `${t.title} (${t.type})`)
+      schoolTemplates: schoolEventTemplates.slice(0, 4).map(t => `${t.title} (${t.category})`),
+      liturgicalTemplates: liturgicalTemplatesCatalog.slice(0, 4).map(t => `${t.title} (${t.type})`)
     };
 
     try {
@@ -6365,7 +6365,7 @@ Por favor incluye: Monición de entrada, sugerencia de lecturas y Evangelio, 5 p
         cardGemini.classList.remove('active');
         keyLabel.textContent = 'Clave de API de OpenRouter:';
         keyHint.innerHTML = 'Obtén tu clave en <a href="https://openrouter.ai/keys" target="_blank" rel="noopener noreferrer" id="link-openrouter">openrouter.ai</a>.';
-        modelInput.value = 'google/gemma-4-31b-it:free';
+        modelInput.value = 'openrouter/free';
         attachOpenRouterLinkListeners();
       }
     });
@@ -6595,7 +6595,7 @@ Por favor incluye: Monición de entrada, sugerencia de lecturas y Evangelio, 5 p
     updateSettingsProviderUI(provider);
 
     if (cloudModelInput) {
-      cloudModelInput.value = state.settings.cloud?.model || (provider === 'gemini' ? 'gemini-2.5-flash' : 'google/gemma-4-31b-it:free');
+      cloudModelInput.value = state.settings.cloud?.model || (provider === 'gemini' ? 'gemini-2.5-flash' : 'openrouter/free');
     }
 
     updateSettingsAppearanceUI();
@@ -6608,13 +6608,18 @@ Por favor incluye: Monición de entrada, sugerencia de lecturas y Evangelio, 5 p
     const modelInput = document.getElementById('settings-cloud-model');
     const cardGemini = document.getElementById('settings-provider-gemini');
     const cardOpenRouter = document.getElementById('settings-provider-openrouter');
+    const quickPillsBox = document.getElementById('settings-model-quick-pills');
+
+    if (quickPillsBox) {
+      quickPillsBox.style.display = provider === 'openrouter' ? 'flex' : 'none';
+    }
 
     if (provider === 'gemini') {
       cardGemini?.classList.add('active');
       cardOpenRouter?.classList.remove('active');
       if (keyLabel) keyLabel.textContent = 'Clave de API de Google AI Studio:';
       if (keyHint) keyHint.innerHTML = 'Consigue tu clave gratuita en <a href="https://aistudio.google.com/app/apikey" target="_blank" rel="noopener noreferrer" id="link-get-gemini-key-settings">aistudio.google.com</a>.';
-      if (modelInput && (!modelInput.value || modelInput.value.includes('gemma') || modelInput.value === 'gemini-3.8-flash' || modelInput.value === 'gemini-flash-latest')) {
+      if (modelInput && (!modelInput.value || modelInput.value.includes('gemma') || modelInput.value === 'gemini-3.8-flash' || modelInput.value === 'gemini-flash-latest' || modelInput.value.includes('openrouter'))) {
         modelInput.value = 'gemini-2.5-flash';
       }
       attachGeminiLinkListeners();
@@ -6624,7 +6629,7 @@ Por favor incluye: Monición de entrada, sugerencia de lecturas y Evangelio, 5 p
       if (keyLabel) keyLabel.textContent = 'Clave de API de OpenRouter:';
       if (keyHint) keyHint.innerHTML = 'Obtén tu clave en <a href="https://openrouter.ai/keys" target="_blank" rel="noopener noreferrer" id="link-openrouter">openrouter.ai</a>.';
       if (modelInput && (!modelInput.value || modelInput.value.includes('gemini'))) {
-        modelInput.value = 'google/gemma-4-31b-it:free';
+        modelInput.value = 'openrouter/free';
       }
       attachOpenRouterLinkListeners();
     }
@@ -6805,13 +6810,30 @@ Por favor incluye: Monición de entrada, sugerencia de lecturas y Evangelio, 5 p
     
     const selectedProvider = document.querySelector('input[name="settings-ai-provider"]:checked')?.value || 'gemini';
     state.settings.cloud.provider = selectedProvider;
-    state.settings.cloud.model = document.getElementById('settings-cloud-model').value.trim() || (selectedProvider === 'gemini' ? 'gemini-2.5-flash' : 'google/gemma-4-31b-it:free');
+    state.settings.cloud.model = document.getElementById('settings-cloud-model').value.trim() || (selectedProvider === 'gemini' ? 'gemini-2.5-flash' : 'openrouter/free');
 
     persistData();
     updateHeaderIdentity();
     updateAiStatusIndicator();
     renderDashboard();
     showToast('Ajustes guardados correctamente', 'success');
+  });
+
+  // Selector rápido de modelos de IA recomendados (píldoras)
+  document.querySelectorAll('.quick-model-pill').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const model = btn.dataset.model;
+      const modelInput = document.getElementById('settings-cloud-model');
+      if (modelInput && model) {
+        modelInput.value = model;
+        if (!state.settings.cloud) state.settings.cloud = {};
+        state.settings.cloud.model = model;
+        persistData();
+        const activeModelLabel = document.getElementById('chat-active-model');
+        if (activeModelLabel) activeModelLabel.textContent = model;
+        showToast(`Modelo de IA cambiado a: ${model}`, 'success');
+      }
+    });
   });
 
   // Mostrar / Ocultar API Key

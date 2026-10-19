@@ -893,10 +893,11 @@
             });
 
             const fallbackModels = [
-              model || 'google/gemma-4-31b-it:free',
-              'google/gemma-4-31b-it:free',
+              model || 'openrouter/free',
+              'openrouter/free',
               'google/gemma-4-26b-a4b-it:free',
-              'nvidia/nemotron-3.5-lightning:free'
+              'minimax/minimax-m3.1-flash:free',
+              'google/gemma-4-31b-it:free'
             ].filter((m, i, arr) => m && arr.indexOf(m) === i);
 
             const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
@@ -908,13 +909,15 @@
                 'X-Title': 'Organizador Pastoral PWA'
               },
               body: JSON.stringify({
-                model: model || 'google/gemma-4-31b-it:free',
+                model: model || 'openrouter/free',
                 models: fallbackModels,
                 messages: [
                   ...(systemText ? [{ role: 'system', content: systemText }] : []),
                   ...openRouterMessages
                 ],
-                stream: true
+                stream: true,
+                temperature: 0.7,
+                max_tokens: 2500
               }),
               signal: currentAbortController.signal
             });
