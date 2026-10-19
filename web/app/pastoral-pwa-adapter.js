@@ -892,6 +892,13 @@
               return { ...msg, content: normalizedParts };
             });
 
+            const fallbackModels = [
+              model || 'google/gemma-4-31b-it:free',
+              'google/gemma-4-31b-it:free',
+              'google/gemma-4-26b-a4b-it:free',
+              'nvidia/nemotron-3.5-lightning:free'
+            ].filter((m, i, arr) => m && arr.indexOf(m) === i);
+
             const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
               method: 'POST',
               headers: {
@@ -902,6 +909,7 @@
               },
               body: JSON.stringify({
                 model: model || 'google/gemma-4-31b-it:free',
+                models: fallbackModels,
                 messages: [
                   ...(systemText ? [{ role: 'system', content: systemText }] : []),
                   ...openRouterMessages

@@ -694,34 +694,26 @@ ${personsList.length ? personsList.map(p => `  * [ID: ${p.id}] "${p.name}" (Rol:
       return { ok: true, reply };
     }
 
-    // Proveedor OpenRouter / OpenAI
-    const url = `${this.openRouterBaseUrl}/chat/completions`;
-    const targetModel = model || this.defaultOpenRouterModel;
-    const payload = {
-      model: targetModel,
-      messages: [{ role: 'user', content: 'Di "Conexión exitosa con OpenRouter" en una sola frase breve.' }],
-      max_tokens: 30
-    };
-
-    const res = await fetch(url, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${apiKey}`,
-        'HTTP-Referer': 'https://github.com/pastoral-organizer',
-        'X-Title': 'Organizador Pastoral Desktop'
-      },
-      body: JSON.stringify(payload)
-    });
-
-    if (!res.ok) {
-      const errText = await res.text().catch(() => '');
-      throw new Error(`Error OpenRouter (${res.status}): ${this.extractErrorMessage(errText)}`);
+    // Proveedor OpenRouter: verificar clave mediante endpoint oficial de autenticación
+    const cleanKey = (apiKey || '').trim();
+    if (!cleanKey) {
+      throw new Error('Por favor ingresa tu Clave de API de OpenRouter.');
     }
 
-    const data = await res.json();
-    const reply = data.choices?.[0]?.message?.content || 'Conexión verificada.';
-    return { ok: true, reply };
+    const authRes = await fetch(`${this.openRouterBaseUrl}/auth/key`, {
+      headers: {
+        'Authorization': `Bearer ${cleanKey}`
+      }
+    });
+
+    if (!authRes.ok) {
+      const errText = await authRes.text().catch(() => '');
+      throw new Error(`Error OpenRouter (${authRes.status}): ${this.extractErrorMessage(errText, authRes.status)}`);
+    }
+
+    const keyData = await authRes.json().catch(() => ({}));
+    const label = keyData.data?.label ? ` (${keyData.data.label})` : '';
+    return { ok: true, reply: `Conexión verificada con OpenRouter${label}.` };
   }
 
   /**
@@ -1141,8 +1133,17 @@ Responde ÚNICAMENTE con el bloque JSON válido, sin explicaciones antes ni desp
 
       onStatus?.(stepCount === 1 ? 'Pensando...' : 'Procesando resultado...');
 
+      // Fallbacks automáticos en caso de saturación/429
+      const fallbackModels = [
+        targetModel,
+        'google/gemma-4-31b-it:free',
+        'google/gemma-4-26b-a4b-it:free',
+        'nvidia/nemotron-3.5-lightning:free'
+      ].filter((m, i, arr) => m && arr.indexOf(m) === i);
+
       const payload = {
         model: targetModel,
+        models: fallbackModels,
         messages: conversation,
         tools: TOOLS_DEFINITIONS,
         tool_choice: 'auto',
@@ -1309,6 +1310,10 @@ Responde ÚNICAMENTE con el bloque JSON válido, sin explicaciones antes ni desp
       }
       if (parsed.message) return parsed.message;
     } catch (_) {}
+
+    if (status === 429 || (typeof errText === 'string' && (errText.includes('429') || errText.toLowerCase().includes('rate limit')))) {
+      return 'Límite de solicitudes temporal (429 Rate Limit). El servidor gratuito de este modelo está congestionado en este instante. Espera unos segundos o el sistema usará un modelo de respaldo.';
+    }
 
     if (typeof errText === 'string') {
       if (errText.includes('ACCESS_TOKEN_TYPE_UNSUPPORTED') || errText.toLowerCase().includes('api key not valid')) {
