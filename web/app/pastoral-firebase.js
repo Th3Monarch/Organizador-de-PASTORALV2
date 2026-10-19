@@ -44,6 +44,8 @@
       this.saveTimeout = null;
       this.isInitialized = false;
       this.isOnline = typeof navigator !== 'undefined' ? navigator.onLine : true;
+      this.clientId = 'client_' + Math.random().toString(36).substring(2, 11) + '_' + Date.now();
+      this._syncingTimeout = null;
 
       this._initNetworkListeners();
     }
@@ -268,15 +270,27 @@
         this.lastError = null;
         if (hasPendingWrites) {
           this._updateStatus('syncing');
+          if (this._syncingTimeout) clearTimeout(this._syncingTimeout);
+          this._syncingTimeout = setTimeout(() => {
+            if (this.syncStatus === 'syncing' && this.isOnline) {
+              this._updateStatus('synced');
+            }
+          }, 4000);
         } else if (!this.isOnline) {
+          if (this._syncingTimeout) clearTimeout(this._syncingTimeout);
           this._updateStatus('offline');
         } else {
+          if (this._syncingTimeout) clearTimeout(this._syncingTimeout);
           this._updateStatus('synced');
         }
 
         if (docSnapshot.exists) {
           const remoteData = docSnapshot.data();
           if (remoteData && remoteData.state) {
+            // Si la actualización proviene de esta misma sesión, no re-procesar para evitar bucles
+            if (remoteData.writerClientId && remoteData.writerClientId === this.clientId) {
+              return;
+            }
             // Notificar a la app para fusionar cambios si vinieron de otro dispositivo
             if (!hasPendingWrites) {
               this._notifyDataUpdate(remoteData.state, remoteData.updatedAt);
@@ -357,8 +371,9 @@
           await docRef.set({
             state: stateToSync,
             updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
+            writerClientId: this.clientId,
             lastDevice: navigator.userAgent.slice(0, 80),
-            version: '2.5.5'
+            version: '2.5.9'
           }, { merge: true });
 
           this.lastError = null;

@@ -1034,7 +1034,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       const res = await window.pastoral.saints.getSaintOfTheDay({ force });
       if (res && res.success && res.saint) {
         state.saintOfTheDay = res.saint;
-        persistData();
+        window.pastoral.saveData(state, false);
         renderSaintCard(res.saint, res.cached);
       } else if (cached) {
         renderSaintCard(cached, true);
@@ -1318,7 +1318,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       const res = await window.pastoral.readings.getDailyReadings({ force });
       if (res && res.success && res.readings) {
         state.dailyReadings = res.readings;
-        persistData();
+        window.pastoral.saveData(state, false);
         renderGospelCard(res.readings, res.cached);
       } else if (cached) {
         renderGospelCard(cached, true);

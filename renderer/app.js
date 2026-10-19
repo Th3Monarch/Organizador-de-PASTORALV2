@@ -165,10 +165,12 @@ document.addEventListener('DOMContentLoaded', async () => {
     state.deletedIds[String(id)] = Date.now();
   }
 
+  let isProcessingRemoteUpdate = false;
+
   async function persistData() {
     try {
       const res = await window.pastoral.saveData(state);
-      if (window.pastoralFirebase && typeof window.pastoralFirebase.pushState === 'function') {
+      if (!isProcessingRemoteUpdate && window.pastoralFirebase && typeof window.pastoralFirebase.pushState === 'function') {
         window.pastoralFirebase.pushState(state);
       }
       if (!res.success) {
@@ -920,10 +922,8 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   function isSaintCacheValid(cache) {
     if (!cache || !cache.dateKey || !cache.name || !cache.history) return false;
-    // Si la caché guardada carece de imageUrl o tiene URL remota http no convertida a base64,
-    // o contiene entidades sin decodificar (como &iquest;) o supera 1800 caracteres,
-    // invalidar para cargar de inmediato la nueva versión abreviada, limpia y con arte sacro en base64
-    if (cache.imageUrl === undefined || (cache.imageUrl && cache.imageUrl.startsWith('http')) || cache.history.includes('&iquest;') || cache.martirology?.includes('&iquest;') || cache.history.length > 1800) {
+    if (!cache.imageUrl) return false;
+    if (cache.history.includes('&iquest;') || cache.martirology?.includes('&iquest;')) {
       return false;
     }
     const todayKey = getTodayDateKey();
@@ -956,7 +956,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       const res = await window.pastoral.saints.getSaintOfTheDay({ force });
       if (res && res.success && res.saint) {
         state.saintOfTheDay = res.saint;
-        persistData();
+        await window.pastoral.saveData(state);
         renderSaintCard(res.saint, res.cached);
       } else if (cached) {
         renderSaintCard(cached, true);
@@ -1232,7 +1232,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       const res = await window.pastoral.readings.getDailyReadings({ force });
       if (res && res.success && res.readings) {
         state.dailyReadings = res.readings;
-        persistData();
+        await window.pastoral.saveData(state);
         renderGospelCard(res.readings, res.cached);
       } else if (cached) {
         renderGospelCard(cached, true);
@@ -7502,10 +7502,16 @@ Por favor incluye: Monición de entrada, sugerencia de lecturas y Evangelio, 5 p
       console.log('[Cloud Sync] Recibida actualización remota desde otro dispositivo.');
       const merged = window.pastoralFirebase.mergeStates(state, remoteState);
       state = { ...state, ...merged };
-      window.pastoral.saveData(state);
-      renderCurrentView();
-      updateTasksBadge();
-      // La sincronización en segundo plano es transparente y silenciosa cuando todo funciona
+      isProcessingRemoteUpdate = true;
+      try {
+        window.pastoral.saveData(state);
+        renderCurrentView();
+        updateTasksBadge();
+      } finally {
+        setTimeout(() => {
+          isProcessingRemoteUpdate = false;
+        }, 1000);
+      }
     });
 
     window.pastoralFirebase.initialize();
