@@ -684,6 +684,33 @@
       },
 
       async getModels(params) {
+        const provider = params?.provider || 'gemini';
+        if (provider === 'openrouter') {
+          try {
+            const res = await fetch('https://openrouter.ai/api/v1/models');
+            if (res.ok) {
+              const data = await res.json();
+              const list = Array.isArray(data.data) ? data.data : [];
+              return {
+                success: true,
+                models: list.map(m => ({
+                  id: m.id,
+                  name: m.name || m.id,
+                  description: m.description || '',
+                  context_length: m.context_length || 0
+                }))
+              };
+            }
+          } catch (_) {}
+          return {
+            success: true,
+            models: [
+              { id: 'google/gemini-2.0-flash-exp:free', name: 'Gemini 2.0 Flash Experimental (Gratis)' },
+              { id: 'meta-llama/llama-3.3-70b-instruct:free', name: 'Llama 3.3 70B Instruct (Gratis)' },
+              { id: 'google/gemma-2-9b-it:free', name: 'Gemma 2 9B (Gratis)' }
+            ]
+          };
+        }
         return {
           success: true,
           models: [
