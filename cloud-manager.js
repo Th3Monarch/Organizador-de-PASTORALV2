@@ -1108,9 +1108,28 @@ Responde ÚNICAMENTE con el bloque JSON válido, sin explicaciones antes ni desp
     const endpoint = (baseUrl || this.openRouterBaseUrl).replace(/\/$/, '') + '/chat/completions';
     const targetModel = model || this.defaultOpenRouterModel;
     const systemPrompt = this.buildSystemPrompt(appContext);
+
+    // Normalizar mensajes para OpenRouter (incluyendo soporte de archivos/PDFs)
+    const normalizedMessages = (messages || []).map(msg => {
+      if (!Array.isArray(msg.content)) return msg;
+      const normalizedParts = msg.content.map(part => {
+        if (part.type === 'file_url' && part.file_url?.url) {
+          return {
+            type: 'file',
+            file: {
+              filename: part.file_url.name || 'documento.pdf',
+              file_data: part.file_url.url
+            }
+          };
+        }
+        return part;
+      });
+      return { ...msg, content: normalizedParts };
+    });
+
     const conversation = [
       { role: 'system', content: systemPrompt },
-      ...messages
+      ...normalizedMessages
     ];
 
     const MAX_TOOL_STEPS = 6;
