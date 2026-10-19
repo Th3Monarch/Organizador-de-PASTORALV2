@@ -2865,6 +2865,32 @@ body.theme-light .form-group select {
 
 .file-attach-btn {
   cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 38px;
+  height: 38px;
+  min-width: 38px;
+  min-height: 38px;
+  flex-shrink: 0;
+  border-radius: var(--radius-md);
+  color: var(--text-secondary);
+  transition: all var(--transition-fast);
+  margin-bottom: 2px;
+}
+
+.file-attach-btn:hover {
+  color: var(--primary);
+  background: var(--bg-surface-alt);
+}
+
+.file-attach-btn svg {
+  fill: none !important;
+  stroke: currentColor !important;
+  stroke-width: 2 !important;
+  stroke-linecap: round !important;
+  stroke-linejoin: round !important;
+  display: block;
 }
 
 .textarea-wrap {
@@ -5740,6 +5766,15 @@ body {
     align-items: center !important;
     justify-content: center !important;
     border-radius: var(--radius-md) !important;
+  }
+
+  .file-attach-btn svg {
+    fill: none !important;
+    stroke: currentColor !important;
+    stroke-width: 2 !important;
+    stroke-linecap: round !important;
+    stroke-linejoin: round !important;
+    display: block !important;
   }
 
   /* ========================================================
