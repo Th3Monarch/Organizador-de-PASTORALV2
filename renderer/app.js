@@ -5860,32 +5860,76 @@ Por favor incluye: Monición de entrada, sugerencia de lecturas y Evangelio, 5 p
       });
     } else {
       // Documentos (PDF, TXT, MD, CSV, etc.)
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        let mimeType = file.type;
-        const ext = (file.name || '').split('.').pop().toLowerCase();
-        if (!mimeType) {
-          if (ext === 'pdf') mimeType = 'application/pdf';
-          else if (ext === 'txt') mimeType = 'text/plain';
-          else if (ext === 'md') mimeType = 'text/markdown';
-          else if (ext === 'csv') mimeType = 'text/csv';
-          else mimeType = 'application/octet-stream';
-        }
-        const isPdf = mimeType === 'application/pdf' || ext === 'pdf';
+      const ext = (file.name || '').split('.').pop().toLowerCase();
+      let mimeType = file.type;
+      if (!mimeType) {
+        if (ext === 'pdf') mimeType = 'application/pdf';
+        else if (ext === 'txt') mimeType = 'text/plain';
+        else if (ext === 'md') mimeType = 'text/markdown';
+        else if (ext === 'csv') mimeType = 'text/csv';
+        else mimeType = 'application/octet-stream';
+      }
+      const isPdf = mimeType === 'application/pdf' || ext === 'pdf';
+      const isText = ['txt', 'md', 'csv', 'json', 'log', 'rtf'].includes(ext) || (mimeType && mimeType.startsWith('text/'));
+
+      const pushAttachment = (dataUrl, extractedText = '') => {
         currentChatImages.push({
-          url: e.target.result,
+          url: dataUrl,
           name: file.name || (isPdf ? 'documento.pdf' : 'archivo.txt'),
           mimeType: mimeType,
           isFile: true,
           isPdf: isPdf,
-          size: file.size
+          size: file.size,
+          extractedText: extractedText
         });
         renderChatAttachmentPreviews();
       };
-      reader.onerror = () => {
-        showToast(`Error al leer el archivo ${file.name}`, 'danger');
-      };
-      reader.readAsDataURL(file);
+
+      if (isText) {
+        const textReader = new FileReader();
+        textReader.onload = (e) => {
+          const content = e.target.result || '';
+          pushAttachment('data:' + mimeType + ';charset=utf-8,' + encodeURIComponent(content), content);
+        };
+        textReader.onerror = () => showToast(`Error al leer el archivo ${file.name}`, 'danger');
+        textReader.readAsText(file);
+      } else if (isPdf) {
+        const arrayReader = new FileReader();
+        arrayReader.onload = async (e) => {
+          let extractedText = '';
+          try {
+            if (window.pdfjsLib) {
+              if (!window.pdfjsLib.GlobalWorkerOptions.workerSrc) {
+                window.pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+              }
+              const loadingTask = window.pdfjsLib.getDocument({ data: new Uint8Array(e.target.result) });
+              const pdf = await loadingTask.promise;
+              let full = '';
+              for (let i = 1; i <= pdf.numPages; i++) {
+                const page = await pdf.getPage(i);
+                const tc = await page.getTextContent();
+                const str = tc.items.map(it => it.str).filter(s => s && s.trim()).join(' ');
+                full += `[PÁGINA ${i}]\n${str}\n\n`;
+              }
+              extractedText = full.trim();
+            }
+          } catch (err) {
+            console.warn('PDF.js text extraction fallback to raw dataUrl:', err);
+          }
+          const dataUrlReader = new FileReader();
+          dataUrlReader.onload = (ev) => {
+            pushAttachment(ev.target.result, extractedText);
+          };
+          dataUrlReader.readAsDataURL(file);
+        };
+        arrayReader.onerror = () => showToast(`Error al leer el archivo ${file.name}`, 'danger');
+        arrayReader.readAsArrayBuffer(file);
+      } else {
+        const reader = new FileReader();
+        reader.onload = (e) => pushAttachment(e.target.result, '');
+        reader.onerror = () => showToast(`Error al leer el archivo ${file.name}`, 'danger');
+        reader.readAsDataURL(file);
+      }
     }
   }
 
@@ -5909,12 +5953,13 @@ Por favor incluye: Monición de entrada, sugerencia de lecturas y Evangelio, 5 p
       if (isFile) {
         const icon = isPdf ? '📄' : '📝';
         const badge = isPdf ? 'PDF' : 'DOC';
+        const hasText = item && item.extractedText && item.extractedText.trim().length > 0;
         return `
           <div class="preview-thumb-box file-thumb-box" title="${escapeHtml(name)}">
             <span class="file-thumb-icon">${icon}</span>
             <div class="file-thumb-meta">
               <span class="file-thumb-name">${escapeHtml(name)}</span>
-              <span class="file-thumb-badge">${badge}</span>
+              <span class="file-thumb-badge">${badge}${hasText ? ' ✓' : ''}</span>
             </div>
             <button class="preview-thumb-remove" data-img-idx="${idx}" title="Eliminar">&times;</button>
           </div>
@@ -5968,7 +6013,12 @@ Por favor incluye: Monición de entrada, sugerencia de lecturas y Evangelio, 5 p
         if (isFile) {
           userMsgContent.push({
             type: 'file_url',
-            file_url: { url, name, mimeType }
+            file_url: {
+              url,
+              name,
+              mimeType,
+              extractedText: isObj ? item.extractedText : undefined
+            }
           });
         } else {
           userMsgContent.push({

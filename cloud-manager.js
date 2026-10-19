@@ -997,14 +997,18 @@ Responde ÚNICAMENTE con el bloque JSON válido, sin explicaciones antes ni desp
             const { mimeType, base64Data } = this.parseDataUrl(item.image_url.url);
             parts.push({ inlineData: { mimeType, data: base64Data } });
           }
-          if (item.type === 'file_url' && item.file_url?.url) {
-            const { mimeType, base64Data } = this.parseDataUrl(item.file_url.url);
-            parts.push({
-              inlineData: {
-                mimeType: item.file_url.mimeType || mimeType || 'application/pdf',
-                data: base64Data
-              }
-            });
+          if (item.type === 'file_url') {
+            if (item.file_url?.extractedText && item.file_url.extractedText.trim()) {
+              parts.push({ text: `\n\n📄 [DOCUMENTO ADJUNTO: ${item.file_url.name || 'documento'}]\n${item.file_url.extractedText.trim()}\n` });
+            } else if (item.file_url?.url) {
+              const { mimeType, base64Data } = this.parseDataUrl(item.file_url.url);
+              parts.push({
+                inlineData: {
+                  mimeType: item.file_url.mimeType || mimeType || 'application/pdf',
+                  data: base64Data
+                }
+              });
+            }
           }
         }
       }
@@ -1147,14 +1151,22 @@ Responde ÚNICAMENTE con el bloque JSON válido, sin explicaciones antes ni desp
     const normalizedMessages = (messages || []).map(msg => {
       if (!Array.isArray(msg.content)) return msg;
       const normalizedParts = msg.content.map(part => {
-        if (part.type === 'file_url' && part.file_url?.url) {
-          return {
-            type: 'file',
-            file: {
-              filename: part.file_url.name || 'documento.pdf',
-              file_data: part.file_url.url
-            }
-          };
+        if (part.type === 'file_url' && part.file_url) {
+          if (part.file_url.extractedText && part.file_url.extractedText.trim()) {
+            return {
+              type: 'text',
+              text: `\n\n📄 **[DOCUMENTO ADJUNTO: ${part.file_url.name || 'documento'}]**\n\`\`\`\n${part.file_url.extractedText.trim()}\n\`\`\`\n`
+            };
+          }
+          if (part.file_url.url) {
+            return {
+              type: 'file',
+              file: {
+                filename: part.file_url.name || 'documento.pdf',
+                file_data: part.file_url.url
+              }
+            };
+          }
         }
         return part;
       });
