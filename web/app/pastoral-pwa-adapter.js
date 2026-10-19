@@ -963,7 +963,7 @@
         } catch (err) {
           if (err.name === 'AbortError') {
             emitStatus('cancelled', 'Cancelado por el usuario');
-            return { success: false, cancelled: true };
+            return { success: false, cancelled: true, aborted: true };
           }
           const errorMsg = err.message || 'Error en la conexión con la IA';
           emitStatus('error', errorMsg);

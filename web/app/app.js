@@ -44,6 +44,8 @@ document.addEventListener('DOMContentLoaded', async () => {
   let activeEventCategoryFilter = 'all'; // 'all' o nombre de categoría
   let currentChatImages = []; // Array de dataURLs (máx 4)
   let isGeneratingChat = false;
+  let currentStreamAccumulatedText = '';
+  let currentStreamStatusText = 'Pensando...';
   let omnisearchIndex = 0;
   let omnisearchFilteredResults = [];
   let availableModelsCache = [];
@@ -5721,6 +5723,10 @@ Por favor incluye: Monición de entrada, sugerencia de lecturas y Evangelio, 5 p
       providerBadge.textContent = isGemini ? 'Google Gemini Oficial' : 'OpenRouter Cloud';
     }
 
+    if (chatStopBtn) {
+      chatStopBtn.style.display = isGeneratingChat ? 'inline-flex' : 'none';
+    }
+
     renderChatHistory();
   }
 
@@ -5737,26 +5743,44 @@ Por favor incluye: Monición de entrada, sugerencia de lecturas y Evangelio, 5 p
     if (modified) persistData();
   }
 
+  function getStreamingBubbleHtml() {
+    const hasText = !!(currentStreamAccumulatedText && currentStreamAccumulatedText.trim());
+    return `
+      <div class="chat-msg assistant chat-msg-streaming" id="current-streaming-bubble">
+        <div class="chat-msg-avatar">OP</div>
+        <div class="chat-msg-bubble">
+          <div class="chat-msg-status" id="stream-status-box" style="display: flex;">
+            <span class="pulse-dot"></span>
+            <span id="stream-status-text">${escapeHtml(currentStreamStatusText || 'Pensando...')}</span>
+          </div>
+          <div id="stream-content-box" class="chat-msg-content">${hasText ? renderMarkdown(currentStreamAccumulatedText) : ''}</div>
+        </div>
+      </div>
+    `;
+  }
+
   function renderChatHistory() {
     sanitizeChatHistory();
     const scrollArea = document.getElementById('chat-messages-area');
     if (!scrollArea) return;
 
     if (!state.chat || state.chat.length === 0) {
-      scrollArea.innerHTML = `
-        <div style="text-align: center; margin: auto; max-width: 500px; color: var(--text-secondary);">
-          <div style="font-size: 2.5rem; margin-bottom: 12px;">✝️</div>
-          <h3 style="color: var(--text-primary); margin-bottom: 8px;">¡Paz y bien! Soy tu Asistente Pastoral</h3>
-          <p style="font-size: 0.9rem; line-height: 1.5;">
-            Puedo ayudarte a preparar oraciones solemnes, redactar esquemas litúrgicos, organizar dinámicas juveniles,
-            analizar documentos o registrar notas, eventos y tareas directamente en tu calendario.
-          </p>
-        </div>
-      `;
-      return;
+      if (!isGeneratingChat) {
+        scrollArea.innerHTML = `
+          <div style="text-align: center; margin: auto; max-width: 500px; color: var(--text-secondary);">
+            <div style="font-size: 2.5rem; margin-bottom: 12px;">✝️</div>
+            <h3 style="color: var(--text-primary); margin-bottom: 8px;">¡Paz y bien! Soy tu Asistente Pastoral</h3>
+            <p style="font-size: 0.9rem; line-height: 1.5;">
+              Puedo ayudarte a preparar oraciones solemnes, redactar esquemas litúrgicos, organizar dinámicas juveniles,
+              analizar documentos o registrar notas, eventos y tareas directamente en tu calendario.
+            </p>
+          </div>
+        `;
+        return;
+      }
     }
 
-    scrollArea.innerHTML = state.chat.map((m, idx) => {
+    let historyHtml = (state.chat || []).map((m, idx) => {
       const isUser = m.role === 'user';
       let contentHtml = '';
 
@@ -5814,6 +5838,11 @@ Por favor incluye: Monición de entrada, sugerencia de lecturas y Evangelio, 5 p
       `;
     }).join('');
 
+    if (isGeneratingChat) {
+      historyHtml += getStreamingBubbleHtml();
+    }
+
+    scrollArea.innerHTML = historyHtml;
     scrollChatToBottom();
   }
 
@@ -5919,10 +5948,11 @@ Por favor incluye: Monición de entrada, sugerencia de lecturas y Evangelio, 5 p
 
   if (chatStopBtn) {
     chatStopBtn.addEventListener('click', async () => {
-      await window.pastoral.ai.cancelChat();
+      try {
+        await window.pastoral.ai.cancelChat();
+      } catch (_) {}
       chatStopBtn.style.display = 'none';
-      isGeneratingChat = false;
-      showToast('Generación detenida', 'info');
+      showToast('Deteniendo generación...', 'info');
     });
   }
 
@@ -6083,7 +6113,7 @@ Por favor incluye: Monición de entrada, sugerencia de lecturas y Evangelio, 5 p
       userMsgContent = text;
     }
 
-    // Agregar a estado y renderizar mensaje del usuario
+    // Agregar a estado y activar streaming
     const userMsg = { role: 'user', content: userMsgContent };
     state.chat.push(userMsg);
 
@@ -6091,58 +6121,43 @@ Por favor incluye: Monición de entrada, sugerencia de lecturas y Evangelio, 5 p
     currentChatImages = [];
     renderChatAttachmentPreviews();
 
-    renderChatHistory();
-
-    // Crear burbuja de asistente para streaming
-    const scrollArea = document.getElementById('chat-messages-area');
-    const assistantBubbleWrapper = document.createElement('div');
-    assistantBubbleWrapper.className = 'chat-msg assistant';
-    assistantBubbleWrapper.innerHTML = `
-      <div class="chat-msg-avatar">OP</div>
-      <div class="chat-msg-bubble">
-        <div class="chat-msg-status" id="stream-status-box">
-          <span class="pulse-dot"></span>
-          <span id="stream-status-text">Pensando...</span>
-        </div>
-        <div id="stream-content-box" class="chat-msg-content"></div>
-      </div>
-    `;
-    scrollArea.appendChild(assistantBubbleWrapper);
-    scrollChatToBottom();
-
-    const streamStatusBox = assistantBubbleWrapper.querySelector('#stream-status-box');
-    const streamStatusText = assistantBubbleWrapper.querySelector('#stream-status-text');
-    const streamContentBox = assistantBubbleWrapper.querySelector('#stream-content-box');
-
     isGeneratingChat = true;
-    chatStopBtn.style.display = 'inline-flex';
+    currentStreamAccumulatedText = '';
+    currentStreamStatusText = 'Pensando...';
+    if (chatStopBtn) chatStopBtn.style.display = 'inline-flex';
 
-    let accumulatedText = '';
+    renderChatHistory();
 
     // Suscribir eventos de streaming con render fluido optimizado (requestAnimationFrame)
     let renderFramePending = false;
     const removeChunkListener = window.pastoral.ai.onStreamChunk((chunk) => {
-      accumulatedText += chunk;
+      currentStreamAccumulatedText += chunk;
       if (!renderFramePending) {
         renderFramePending = true;
         requestAnimationFrame(() => {
-          streamContentBox.innerHTML = renderMarkdown(accumulatedText);
-          scrollChatToBottom();
+          const contentBox = document.getElementById('stream-content-box');
+          if (contentBox) {
+            contentBox.innerHTML = renderMarkdown(currentStreamAccumulatedText);
+            scrollChatToBottom();
+          }
           renderFramePending = false;
         });
       }
     });
 
     const removeStatusListener = window.pastoral.ai.onStreamStatus((status) => {
-      if (streamStatusBox && streamStatusText) {
-        streamStatusBox.style.display = 'flex';
-        let msg = 'Pensando...';
-        if (typeof status === 'string' && status.trim()) {
-          msg = status.trim();
-        } else if (typeof status === 'object' && status !== null) {
-          msg = status.text || status.status || status.message || 'Pensando...';
-        }
-        streamStatusText.textContent = msg;
+      let msg = 'Pensando...';
+      if (typeof status === 'string' && status.trim()) {
+        msg = status.trim();
+      } else if (typeof status === 'object' && status !== null) {
+        msg = status.text || status.status || status.message || 'Pensando...';
+      }
+      currentStreamStatusText = msg;
+      const statusBox = document.getElementById('stream-status-box');
+      const statusText = document.getElementById('stream-status-text');
+      if (statusBox && statusText) {
+        statusBox.style.display = 'flex';
+        statusText.textContent = msg;
       }
     });
 
@@ -6221,31 +6236,32 @@ Por favor incluye: Monición de entrada, sugerencia de lecturas y Evangelio, 5 p
 
       removeChunkListener();
       removeStatusListener();
-      streamContentBox.innerHTML = renderMarkdown(accumulatedText);
-      scrollChatToBottom();
 
       isGeneratingChat = false;
-      chatStopBtn.style.display = 'none';
+      if (chatStopBtn) chatStopBtn.style.display = 'none';
 
       if (res.success) {
-        const assistantMsg = res.response || { role: 'assistant', content: accumulatedText };
+        const assistantMsg = res.response || { role: 'assistant', content: currentStreamAccumulatedText };
         state.chat.push(assistantMsg);
         persistData();
-      } else if (res.aborted) {
-        if (accumulatedText) {
-          state.chat.push({ role: 'assistant', content: accumulatedText + ' *(Generación detenida)*' });
+      } else if (res.aborted || res.cancelled) {
+        if (currentStreamAccumulatedText) {
+          state.chat.push({ role: 'assistant', content: currentStreamAccumulatedText + ' *(Generación detenida)*' });
           persistData();
         }
       } else {
-        if (accumulatedText) {
-          state.chat.push({ role: 'assistant', content: accumulatedText });
-          persistData();
+        const errorMsg = res.error || 'Fallo de conexión';
+        if (currentStreamAccumulatedText) {
+          state.chat.push({ role: 'assistant', content: currentStreamAccumulatedText + `\n\n*(Error al completar: ${errorMsg})*` });
         } else {
-          streamContentBox.innerHTML = `<span style="color:var(--danger);">⚠️ Error: ${escapeHtml(res.error || 'Fallo de conexión')}</span>`;
+          state.chat.push({ role: 'assistant', content: `⚠️ **Error:** ${errorMsg}` });
         }
+        persistData();
+        showToast(`Error de IA: ${errorMsg}`, 'danger');
       }
 
-      if (streamStatusBox) streamStatusBox.style.display = 'none';
+      currentStreamAccumulatedText = '';
+      currentStreamStatusText = 'Pensando...';
       renderChatHistory();
       if (chatTextarea) setTimeout(() => chatTextarea.focus(), 50);
 
@@ -6253,9 +6269,18 @@ Por favor incluye: Monición de entrada, sugerencia de lecturas y Evangelio, 5 p
       removeChunkListener();
       removeStatusListener();
       isGeneratingChat = false;
-      chatStopBtn.style.display = 'none';
-      if (streamStatusBox) streamStatusBox.style.display = 'none';
-      streamContentBox.innerHTML = `<span style="color:var(--danger);">⚠️ Error de comunicación: ${escapeHtml(err.message)}</span>`;
+      if (chatStopBtn) chatStopBtn.style.display = 'none';
+      const errMsg = err?.message || 'Error inesperado';
+      if (currentStreamAccumulatedText) {
+        state.chat.push({ role: 'assistant', content: currentStreamAccumulatedText + `\n\n*(Error inesperado: ${errMsg})*` });
+      } else {
+        state.chat.push({ role: 'assistant', content: `⚠️ **Error de comunicación:** ${errMsg}` });
+      }
+      persistData();
+      currentStreamAccumulatedText = '';
+      currentStreamStatusText = 'Pensando...';
+      renderChatHistory();
+      showToast(`Error: ${errMsg}`, 'danger');
       if (chatTextarea) setTimeout(() => chatTextarea.focus(), 50);
     }
   }
@@ -6271,6 +6296,7 @@ Por favor incluye: Monición de entrada, sugerencia de lecturas y Evangelio, 5 p
 
   // Botón Rehacer
   document.getElementById('chat-btn-redo')?.addEventListener('click', () => {
+    if (isGeneratingChat) return;
     if (state.chat.length === 0) return;
     // Si el último mensaje es del asistente, removerlo y reenviar el último del usuario
     if (state.chat[state.chat.length - 1].role === 'assistant') {
@@ -6299,6 +6325,8 @@ Por favor incluye: Monición de entrada, sugerencia de lecturas y Evangelio, 5 p
           } catch (_) {}
         }
         isGeneratingChat = false;
+        currentStreamAccumulatedText = '';
+        currentStreamStatusText = 'Pensando...';
         state.chat = [];
         persistData();
         renderChatHistory();
