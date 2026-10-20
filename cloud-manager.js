@@ -1204,6 +1204,7 @@ Responde ÚNICAMENTE con el bloque JSON válido, sin explicaciones antes ni desp
 
     const MAX_TOOL_STEPS = 6;
     let stepCount = 0;
+    let lastAccumulatedText = '';
 
     while (stepCount < MAX_TOOL_STEPS) {
       stepCount++;
