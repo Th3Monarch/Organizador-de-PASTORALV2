@@ -584,35 +584,9 @@ class CloudManager {
    * de la base de datos local (evita sobrecargar el prompt con 20 esquemas si solo pide una oración/reflexión).
    */
   hasActionIntent(messages) {
-    if (!Array.isArray(messages) || messages.length === 0) return true;
-    const lastUserMsg = [...messages].reverse().find(m => m.role === 'user');
-    if (!lastUserMsg) return false;
-
-    // Si contiene archivos o imágenes adjuntas, SIEMPRE activar tools para procesar
-    if (Array.isArray(lastUserMsg.content) && lastUserMsg.content.some(p => p.type === 'file' || p.type === 'file_url' || p.type === 'image_url')) {
-      return true;
-    }
-
-    let text = '';
-    if (typeof lastUserMsg.content === 'string') {
-      text = lastUserMsg.content.toLowerCase();
-    } else if (Array.isArray(lastUserMsg.content)) {
-      text = lastUserMsg.content
-        .filter(p => p.type === 'text')
-        .map(p => p.text)
-        .join(' ')
-        .toLowerCase();
-    }
-
-    const actionKeywords = [
-      'crea', 'crear', 'créame', 'creame', 'agrega', 'agregar', 'agregame', 'añade', 'añadir',
-      'guarda', 'guardar', 'guardame', 'registra', 'registrar', 'registrame', 'agenda', 'agendar',
-      'programa', 'programar', 'elimina', 'eliminar', 'borra', 'borrar', 'edita', 'editar',
-      'modifica', 'modificar', 'actualiza', 'actualizar', 'marca', 'marcar', 'completa', 'completar',
-      'anota', 'anotar', 'calendario', 'tarea', 'checklist', 'directorio'
-    ];
-
-    return actionKeywords.some(kw => text.includes(kw));
+    // Las herramientas deben estar SIEMPRE disponibles en el asistente pastoral
+    // para que el modelo pueda actuar inmediatamente ante cualquier petición, confirmación o seguimiento.
+    return true;
   }
 
   /**
@@ -1337,7 +1311,7 @@ Responde ÚNICAMENTE con el bloque JSON válido, sin explicaciones antes ni desp
       }
 
       if (toolCallsMap.size === 0) {
-        const reply = accumulatedText.trim() || 'He revisado el documento. Puedes indicarme si deseas agregar las actividades a tu agenda pastoral.';
+        const reply = accumulatedText.trim() || lastAccumulatedText.trim() || 'He procesado tu consulta. ¿En qué más puedo apoyarte?';
         return { role: 'assistant', content: reply };
       }
 
