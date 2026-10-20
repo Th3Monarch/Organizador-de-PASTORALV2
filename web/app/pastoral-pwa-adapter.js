@@ -932,7 +932,7 @@
                 ],
                 stream: true,
                 temperature: 0.7,
-                max_tokens: 2500
+                max_tokens: 5000
               }),
               signal: currentAbortController.signal
             });

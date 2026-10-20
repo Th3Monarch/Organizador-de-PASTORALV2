@@ -960,6 +960,40 @@ ipcMain.handle('pastoral:ai-chat-start', async (event, { provider, apiKey, model
         }
 
         // --- EVENTOS ---
+        if (toolName === 'batch_create_events') {
+          const list = Array.isArray(toolArgs.events) ? toolArgs.events : [];
+          if (list.length === 0) {
+            return 'No se recibieron eventos válidos para registrar.';
+          }
+          let added = 0;
+          for (let i = 0; i < list.length; i++) {
+            const ev = list[i];
+            if (!ev || !ev.date || !ev.title) continue;
+            const eventId = 'ev_' + Date.now() + '_' + i + '_' + Math.random().toString(36).substr(2, 4);
+            const newEv = {
+              id: eventId,
+              title: ev.title.trim(),
+              date: ev.date.trim(),
+              time: ev.time || '',
+              location: ev.location || '',
+              category: ev.category || 'Otro',
+              repeat: 'none',
+              repeatUntil: '',
+              description: ev.description || '',
+              attendees: '',
+              scriptId: null,
+              checklist: []
+            };
+            currentData.events.push(newEv);
+            added++;
+          }
+          saveDataAtomic(currentData);
+          if (!mainWindow?.isDestroyed()) {
+            mainWindow.webContents.send('pastoral:data-updated', { type: 'event', action: 'batch_created', count: added });
+          }
+          return `Se registraron exitosamente ${added} eventos en el calendario pastoral.`;
+        }
+
         if (toolName === 'create_event') {
           if (!toolArgs.date) {
             throw new Error('La fecha del evento es obligatoria.');

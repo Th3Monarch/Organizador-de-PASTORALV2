@@ -70,6 +70,39 @@ const TOOLS_DEFINITIONS = [
   {
     type: 'function',
     function: {
+      name: 'batch_create_events',
+      description: 'Registra de una sola vez una lista completa de múltiples eventos en el calendario pastoral. OBLIGATORIA para importar cronogramas o calendarios de varios meses sin agotar tokens.',
+      parameters: {
+        type: 'object',
+        properties: {
+          events: {
+            type: 'array',
+            description: 'Lista de eventos a registrar',
+            items: {
+              type: 'object',
+              properties: {
+                title: { type: 'string', description: 'Nombre o título del evento' },
+                date: { type: 'string', description: 'Fecha en formato YYYY-MM-DD' },
+                time: { type: 'string', description: 'Hora en formato HH:MM (opcional)' },
+                location: { type: 'string', description: 'Lugar del evento (opcional)' },
+                category: {
+                  type: 'string',
+                  enum: ['Misa', 'Retiro', 'Reunión', 'Campaña', 'Formación', 'Convivencia', 'Otro'],
+                  description: 'Categoría litúrgica o pastoral'
+                },
+                description: { type: 'string', description: 'Detalles o notas' }
+              },
+              required: ['title', 'date', 'category']
+            }
+          }
+        },
+        required: ['events']
+      }
+    }
+  },
+  {
+    type: 'function',
+    function: {
       name: 'create_event',
       description: 'Registra un evento en el calendario pastoral. La fecha (YYYY-MM-DD) es imprescindible. Si no la tienes, pídela.',
       parameters: {
@@ -654,6 +687,11 @@ REGLAS DE IDENTIDAD Y ESTILO:
    * NO te limites a decir "Procedo a crear estos eventos..." ni pidas confirmaciones previas si ya tienes los datos.
    * EJECUTA DIRECTAMENTE las funciones \`create_event\`, \`create_task\` o \`create_note\` correspondientes para registrar cada actividad en la base de datos de inmediato.
    * Tras registrarlas, presenta un resumen limpio y fraterno confirmando las fechas agregadas.
+8. IMPORTACIÓN DE CRONOGRAMAS MASIVOS (batch_create_events):
+   Cuando el usuario te entregue un cronograma, calendario, lista de fechas o archivo con múltiples actividades para agregar a la agenda:
+   * NUNCA pienses en voz alta en inglés ni transcribas el documento antes de actuar.
+   * Invoca directamente la herramienta \`batch_create_events\` enviando la lista completa de eventos estructurados con su fecha (YYYY-MM-DD), título y categoría litúrgica ("Misa", "Retiro", "Reunión", "Campaña", "Formación", "Convivencia", "Otro").
+   * Hazlo en un único llamado para registrar todas las actividades a la vez de forma limpia y veloz.
 
 CONTEXTO ACTUAL DE LA APLICACIÓN:
 - Fecha de hoy: ${todayStr}
@@ -1037,7 +1075,7 @@ Responde ÚNICAMENTE con el bloque JSON válido, sin explicaciones antes ni desp
         contents,
         generationConfig: {
           temperature: 0.7,
-          maxOutputTokens: 2500
+          maxOutputTokens: 5000
         }
       };
 
@@ -1225,7 +1263,7 @@ Responde ÚNICAMENTE con el bloque JSON válido, sin explicaciones antes ni desp
         messages: conversation,
         stream: true,
         temperature: 0.7,
-        max_tokens: 2500
+        max_tokens: 5000
       };
 
       if (useTools) {
@@ -1460,6 +1498,7 @@ Responde ÚNICAMENTE con el bloque JSON válido, sin explicaciones antes ni desp
       create_note: 'Crear nota pastoral',
       edit_note: 'Modificar nota pastoral',
       delete_note: 'Eliminar nota pastoral',
+      batch_create_events: 'Registrar lote de eventos en calendario',
       create_event: 'Registrar evento en calendario',
       edit_event: 'Modificar evento del calendario',
       delete_event: 'Eliminar evento del calendario',
