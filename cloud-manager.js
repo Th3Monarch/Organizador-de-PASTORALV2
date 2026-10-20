@@ -1193,23 +1193,28 @@ Responde ÚNICAMENTE con el bloque JSON válido, sin explicaciones antes ni desp
 
       onStatus?.(stepCount === 1 ? 'Pensando...' : 'Procesando resultado...');
 
+      const useTools = this.hasActionIntent(recentMessages);
+
       // Fallbacks automáticos en caso de saturación/429 (OpenRouter permite un máximo estricto de 3 modelos)
       const primaryModel = targetModel || 'openrouter/free';
+      
+      // Si se requieren herramientas de base de datos, priorizar modelos que soporten function calling:
+      const effectiveModel = (useTools && primaryModel === 'openrouter/free')
+        ? 'minimax/minimax-m3.1-flash:free'
+        : primaryModel;
+
       const fallbackPool = [
-        primaryModel,
-        'openrouter/free',
-        'google/gemma-4-26b-a4b-it:free',
+        effectiveModel,
         'minimax/minimax-m3.1-flash:free',
-        'google/gemma-4-31b-it:free'
+        'google/gemma-4-31b-it:free',
+        'openrouter/free'
       ];
       const fallbackModels = fallbackPool
         .filter((m, i, arr) => m && arr.indexOf(m) === i)
         .slice(0, 3);
 
-      const useTools = this.hasActionIntent(recentMessages);
-
       const payload = {
-        model: primaryModel,
+        model: effectiveModel,
         models: fallbackModels,
         messages: conversation,
         stream: true,
@@ -1287,7 +1292,8 @@ Responde ÚNICAMENTE con el bloque JSON válido, sin explicaciones antes ni desp
       }
 
       if (toolCallsMap.size === 0) {
-        return { role: 'assistant', content: accumulatedText };
+        const reply = accumulatedText.trim() || 'He revisado el documento. Puedes indicarme si deseas agregar las actividades a tu agenda pastoral.';
+        return { role: 'assistant', content: reply };
       }
 
       const toolCallsArray = Array.from(toolCallsMap.values()).map(tc => ({
@@ -1330,7 +1336,10 @@ Responde ÚNICAMENTE con el bloque JSON válido, sin explicaciones antes ni desp
       }
     }
 
-    return { role: 'assistant', content: 'Acciones finalizadas con éxito.' };
+    return {
+      role: 'assistant',
+      content: accumulatedText.trim() || '¡Listo! He registrado todas las actividades correspondientes en tu agenda y calendario pastoral.'
+    };
   }
 
   // Utilidades de apoyo

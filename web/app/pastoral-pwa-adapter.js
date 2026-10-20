@@ -907,10 +907,9 @@
             const primaryModel = model || 'openrouter/free';
             const fallbackPool = [
               primaryModel,
-              'openrouter/free',
-              'google/gemma-4-26b-a4b-it:free',
               'minimax/minimax-m3.1-flash:free',
-              'google/gemma-4-31b-it:free'
+              'google/gemma-4-31b-it:free',
+              'openrouter/free'
             ];
             const fallbackModels = fallbackPool
               .filter((m, i, arr) => m && arr.indexOf(m) === i)
