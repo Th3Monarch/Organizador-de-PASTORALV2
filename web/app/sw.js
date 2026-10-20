@@ -2,20 +2,20 @@
  * sw.js - Service Worker para Organizador de Pastoral 2.0 (PWA en iOS y Web)
  */
 
-const CACHE_NAME = 'pastoral-pwa-v2.5.22';
+const CACHE_NAME = 'pastoral-pwa-v2.5.23';
 const ASSETS_TO_CACHE = [
   './',
   './index.html',
-  './styles.css?v=2.5.22',
-  './app.js?v=2.5.22',
-  './pastoral-firebase.js?v=2.5.22',
-  './pastoral-pwa-adapter.js?v=2.5.22',
-  './markdown.js?v=2.5.22',
-  './liturgical.js?v=2.5.22',
-  './song-data.js?v=2.5.22',
-  './liturgical-templates.js?v=2.5.22',
-  './pdf.min.js?v=2.5.22',
-  './pdf.worker.min.js?v=2.5.22',
+  './styles.css?v=2.5.23',
+  './app.js?v=2.5.23',
+  './pastoral-firebase.js?v=2.5.23',
+  './pastoral-pwa-adapter.js?v=2.5.23',
+  './markdown.js?v=2.5.23',
+  './liturgical.js?v=2.5.23',
+  './song-data.js?v=2.5.23',
+  './liturgical-templates.js?v=2.5.23',
+  './pdf.min.js?v=2.5.23',
+  './pdf.worker.min.js?v=2.5.23',
   './manifest.webmanifest',
   './icons/icon-192.png',
   './icons/icon-512.png',

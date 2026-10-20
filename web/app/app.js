@@ -6597,7 +6597,12 @@ Por favor incluye: Monición de entrada, sugerencia de lecturas y Evangelio, 5 p
   function handleAiDataUpdated(info) {
     const labels = {
       note: { created: 'Nota creada', updated: 'Nota modificada', deleted: 'Nota eliminada' },
-      event: { created: 'Evento agendado', updated: 'Evento modificado', deleted: 'Evento cancelado/eliminado' },
+      event: {
+        created: 'Evento agendado',
+        batch_created: (info.count ? `${info.count} eventos agendados en lote` : 'Lote de eventos agendado'),
+        updated: 'Evento modificado',
+        deleted: 'Evento cancelado/eliminado'
+      },
       task: { created: 'Tarea creada', updated: 'Tarea actualizada', deleted: 'Tarea eliminada' },
       group: { created: 'Grupo registrado', updated: 'Grupo modificado', deleted: 'Grupo eliminado' },
       person: { created: 'Persona añadida', updated: 'Ficha actualizada', deleted: 'Persona eliminada' },

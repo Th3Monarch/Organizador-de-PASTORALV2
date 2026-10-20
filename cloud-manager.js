@@ -666,6 +666,7 @@ REGLAS DE IDENTIDAD Y ESTILO:
    * NUNCA pienses en voz alta en inglés ni transcribas el documento antes de actuar.
    * Invoca directamente la herramienta \`batch_create_events\` enviando la lista completa de eventos estructurados con su fecha (YYYY-MM-DD), título y categoría litúrgica ("Misa", "Retiro", "Reunión", "Campaña", "Formación", "Convivencia", "Otro").
    * Hazlo en un único llamado para registrar todas las actividades a la vez de forma limpia y veloz.
+   * ASIGNACIÓN DE AÑO EN CRONOGRAMAS ESCOLARES: En un año escolar (ej: 2026-2027), los meses de Septiembre a Diciembre corresponden al inicio del ciclo (2026), y Enero en adelante a 2027. NO traslades Septiembre ni Octubre al año siguiente.
 
 CONTEXTO ACTUAL DE LA APLICACIÓN:
 - Fecha de hoy: ${todayStr}
@@ -1298,13 +1299,22 @@ Responde ÚNICAMENTE con el bloque JSON válido, sin explicaciones antes ni desp
                   toolCallsMap.set(idx, {
                     id: tc.id || `call_${Date.now()}_${idx}`,
                     name: tc.function?.name || '',
-                    arguments: ''
+                    arguments: tc.function?.arguments || ''
                   });
+                } else {
+                  const existing = toolCallsMap.get(idx);
+                  if (tc.id) existing.id = tc.id;
+                  if (tc.function?.name) {
+                    if (!existing.name) {
+                      existing.name = tc.function.name;
+                    } else if (existing.name !== tc.function.name && !existing.name.endsWith(tc.function.name)) {
+                      existing.name += tc.function.name;
+                    }
+                  }
+                  if (tc.function?.arguments) {
+                    existing.arguments += tc.function.arguments;
+                  }
                 }
-                const existing = toolCallsMap.get(idx);
-                if (tc.id) existing.id = tc.id;
-                if (tc.function?.name) existing.name += tc.function.name;
-                if (tc.function?.arguments) existing.arguments += tc.function.arguments;
               }
             }
           } catch (_) {}
@@ -1329,9 +1339,15 @@ Responde ÚNICAMENTE con el bloque JSON válido, sin explicaciones antes ni desp
       });
 
       for (const tc of toolCallsArray) {
-        const fnName = tc.function.name;
+        let fnName = (tc.function?.name || '').trim();
         let fnArgs = {};
         try { fnArgs = JSON.parse(tc.function.arguments); } catch (e) { fnArgs = {}; }
+
+        // Normalizar nombre de herramienta por si el proveedor lo envía con repeticiones o prefijos
+        const matchedTool = TOOLS_DEFINITIONS.find(t => fnName === t.function.name || fnName.startsWith(t.function.name) || fnName.includes(t.function.name));
+        if (matchedTool) {
+          fnName = matchedTool.function.name;
+        }
 
         onStatus?.(`Ejecutando: ${this.formatToolActionName(fnName)}...`);
 

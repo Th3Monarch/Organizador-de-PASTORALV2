@@ -890,7 +890,23 @@ ipcMain.handle('pastoral:ai-chat-start', async (event, { provider, apiKey, model
           mainWindow.webContents.send('pastoral:ai-stream-chunk', chunk);
         }
       },
-      onToolExecute: async (toolName, toolArgs) => {
+      onToolExecute: async (rawToolName, toolArgs) => {
+        const KNOWN_TOOLS = [
+          'create_note', 'edit_note', 'delete_note',
+          'batch_create_events', 'create_event', 'edit_event', 'reschedule_event', 'cancel_event',
+          'create_task', 'edit_task', 'delete_task',
+          'create_group', 'edit_group', 'delete_group',
+          'create_person', 'edit_person', 'delete_person',
+          'create_song', 'edit_song', 'delete_song',
+          'create_liturgical_script', 'edit_liturgical_script', 'delete_liturgical_script',
+          'get_daily_gospel_and_saint'
+        ];
+        let toolName = (rawToolName || '').trim();
+        const matched = KNOWN_TOOLS.find(t => toolName === t || toolName.startsWith(t) || toolName.includes(t));
+        if (matched) {
+          toolName = matched;
+        }
+
         const currentData = loadData();
         const id = 'id_' + Date.now() + '_' + Math.random().toString(36).substr(2, 5);
 
@@ -1450,7 +1466,8 @@ ipcMain.handle('pastoral:ai-chat-start', async (event, { provider, apiKey, model
           return result || 'Lecturas y santoral no disponibles en este momento.';
         }
 
-        return `Herramienta ${toolName} ejecutada.`;
+        console.warn(`[AI Tools] Herramienta desconocida solicitada: "${rawToolName}" -> "${toolName}"`);
+        return `Error: La herramienta "${rawToolName}" no está implementada en el sistema.`;
       }
     });
 
