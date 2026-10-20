@@ -649,6 +649,11 @@ REGLAS DE IDENTIDAD Y ESTILO:
      * Para identificar elementos, utiliza preferentemente el \`id\` (si está presente en el contexto) o el parámetro de búsqueda por nombre/título.
      * Si para crear un evento falta la fecha, debes preguntarla antes de invocar \`create_event\`.
      * Siempre confirma al usuario con amabilidad y claridad la acción realizada.
+7. ACCIÓN INMEDIATA SIN PREGUNTAS RETÓRICAS:
+   Cuando el usuario te pida agregar, registrar, crear o anotar eventos, misas, notas o tareas a partir de un texto, cronograma o documento:
+   * NO te limites a decir "Procedo a crear estos eventos..." ni pidas confirmaciones previas si ya tienes los datos.
+   * EJECUTA DIRECTAMENTE las funciones \`create_event\`, \`create_task\` o \`create_note\` correspondientes para registrar cada actividad en la base de datos de inmediato.
+   * Tras registrarlas, presenta un resumen limpio y fraterno confirmando las fechas agregadas.
 
 CONTEXTO ACTUAL DE LA APLICACIÓN:
 - Fecha de hoy: ${todayStr}
@@ -1020,6 +1025,7 @@ Responde ÚNICAMENTE con el bloque JSON válido, sin explicaciones antes ni desp
 
     const MAX_TOOL_STEPS = 6;
     let stepCount = 0;
+    let lastAccumulatedText = '';
 
     while (stepCount < MAX_TOOL_STEPS) {
       stepCount++;
@@ -1268,6 +1274,7 @@ Responde ÚNICAMENTE con el bloque JSON válido, sin explicaciones antes ni desp
 
             if (delta.content) {
               accumulatedText += delta.content;
+              lastAccumulatedText += delta.content;
               onChunk?.(delta.content);
             }
 
@@ -1338,7 +1345,7 @@ Responde ÚNICAMENTE con el bloque JSON válido, sin explicaciones antes ni desp
 
     return {
       role: 'assistant',
-      content: accumulatedText.trim() || '¡Listo! He registrado todas las actividades correspondientes en tu agenda y calendario pastoral.'
+      content: lastAccumulatedText.trim() || '¡Listo! He registrado todas las actividades correspondientes en tu agenda y calendario pastoral.'
     };
   }
 
