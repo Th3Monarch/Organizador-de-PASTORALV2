@@ -486,11 +486,13 @@ window.setDemoPrompt = function(type) {
       • <strong>12:00:</strong> Adoración al Santísimo Sacramento con confesiones.<br>
       • <strong>15:00:</strong> Compartir fraterno y Misa de clausura con los padres.</p>
     `;
-  } else if (type === 'homilia') {
-    userBubble.textContent = '"Dinámica pastoral sobre la parábola del Sembrador para alumnos de 7° básico."';
+  } else if (type === 'cronograma') {
+    userBubble.textContent = '"Adjunto el PDF del cronograma del colegio (Septiembre-Diciembre). Por favor regístralo todo en mi calendario."';
     assistantBubble.innerHTML = `
-      <p><strong>Dinámica: "Los Cuatro Tipos de Tierra"</strong></p>
-      <p>Se divide el curso en cuatro estaciones prácticas: Tierra del Camino (distracciones del celular), Pedregal (entusiasmo sin raíces), Espinos (presión social) y Buena Tierra (escucha activa y solidaridad). Cada grupo elabora un compromiso para regar su propia tierra.</p>
+      <p>🤖 <strong>Lector de Cronogramas Activo (PDF.js):</strong></p>
+      <p>📄 Documento procesado: <em>CRONOGRAMA-PRIMER-MOMENTO.pdf</em> (50 actividades detectadas).</p>
+      <p>✅ <strong>batch_create_events ejecutado:</strong> Se registraron exitosamente 50 eventos en tu calendario pastoral respetando el ciclo escolar 2026-2027.</p>
+      <p><em>Notificación en pantalla: "🤖 Asistente: 50 eventos agendados en lote automáticamente".</em></p>
     `;
   }
 };

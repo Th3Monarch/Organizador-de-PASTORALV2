@@ -284,6 +284,193 @@
     }
   }
 
+  function emitDataUpdated(info) {
+    for (const listener of dataUpdatedListeners) {
+      try { listener(info); } catch (e) { console.error('[PWA Adapter] Error en dataUpdated listener:', e); }
+    }
+  }
+
+  const PWA_TOOLS = [
+    {
+      type: 'function',
+      function: {
+        name: 'batch_create_events',
+        description: 'Registra de una sola vez una lista completa de múltiples eventos en el calendario pastoral. OBLIGATORIA para importar cronogramas o calendarios de varios meses.',
+        parameters: {
+          type: 'object',
+          properties: {
+            events: {
+              type: 'array',
+              description: 'Lista de eventos a registrar',
+              items: {
+                type: 'object',
+                properties: {
+                  title: { type: 'string', description: 'Nombre o título del evento' },
+                  date: { type: 'string', description: 'Fecha en formato YYYY-MM-DD' },
+                  time: { type: 'string', description: 'Hora en formato HH:MM (opcional)' },
+                  location: { type: 'string', description: 'Lugar del evento (opcional)' },
+                  category: {
+                    type: 'string',
+                    enum: ['Misa', 'Retiro', 'Reunión', 'Campaña', 'Formación', 'Convivencia', 'Otro'],
+                    description: 'Categoría litúrgica o pastoral'
+                  },
+                  description: { type: 'string', description: 'Detalles o notas' }
+                },
+                required: ['title', 'date', 'category']
+              }
+            }
+          },
+          required: ['events']
+        }
+      }
+    },
+    {
+      type: 'function',
+      function: {
+        name: 'create_event',
+        description: 'Registra un evento en el calendario pastoral. La fecha (YYYY-MM-DD) es obligatoria.',
+        parameters: {
+          type: 'object',
+          properties: {
+            title: { type: 'string', description: 'Título del evento' },
+            date: { type: 'string', description: 'Fecha YYYY-MM-DD' },
+            time: { type: 'string', description: 'Hora HH:MM (opcional)' },
+            location: { type: 'string', description: 'Lugar (opcional)' },
+            category: { type: 'string', enum: ['Misa', 'Retiro', 'Reunión', 'Campaña', 'Formación', 'Convivencia', 'Otro'] },
+            description: { type: 'string', description: 'Detalles' }
+          },
+          required: ['title', 'date', 'category']
+        }
+      }
+    },
+    {
+      type: 'function',
+      function: {
+        name: 'create_note',
+        description: 'Crea una nueva nota o idea pastoral en el Organizador.',
+        parameters: {
+          type: 'object',
+          properties: {
+            title: { type: 'string', description: 'Título de la nota' },
+            body: { type: 'string', description: 'Contenido completo' },
+            tags: { type: 'array', items: { type: 'string' } }
+          },
+          required: ['title', 'body']
+        }
+      }
+    },
+    {
+      type: 'function',
+      function: {
+        name: 'create_task',
+        description: 'Crea una nueva tarea o compromiso pastoral.',
+        parameters: {
+          type: 'object',
+          properties: {
+            title: { type: 'string', description: 'Título de la tarea' },
+            dueDate: { type: 'string', description: 'Fecha límite (YYYY-MM-DD)' },
+            priority: { type: 'string', enum: ['baja', 'media', 'alta'] }
+          },
+          required: ['title']
+        }
+      }
+    }
+  ];
+
+  async function executePwaTool(rawToolName, toolArgs) {
+    let toolName = (rawToolName || '').trim();
+    const KNOWN_TOOLS = ['batch_create_events', 'create_event', 'create_note', 'create_task'];
+    const matched = KNOWN_TOOLS.find(t => toolName === t || toolName.startsWith(t) || toolName.includes(t));
+    if (matched) toolName = matched;
+
+    const data = await PastoralWebAdapter.getData();
+    const id = 'id_' + Date.now() + '_' + Math.random().toString(36).substr(2, 5);
+
+    if (toolName === 'batch_create_events') {
+      const list = Array.isArray(toolArgs.events) ? toolArgs.events : [];
+      if (!Array.isArray(data.events)) data.events = [];
+      let added = 0;
+      for (let i = 0; i < list.length; i++) {
+        const ev = list[i];
+        if (!ev || !ev.date || !ev.title) continue;
+        data.events.push({
+          id: 'ev_' + Date.now() + '_' + i + '_' + Math.random().toString(36).substr(2, 4),
+          title: ev.title.trim(),
+          date: ev.date.trim(),
+          time: ev.time || '',
+          location: ev.location || '',
+          category: ev.category || 'Otro',
+          repeat: 'none',
+          repeatUntil: '',
+          description: ev.description || '',
+          attendees: '',
+          scriptId: null,
+          checklist: []
+        });
+        added++;
+      }
+      await PastoralWebAdapter.saveData(data);
+      emitDataUpdated({ type: 'event', action: 'batch_created', count: added });
+      return `Se registraron exitosamente ${added} eventos en el calendario pastoral.`;
+    }
+
+    if (toolName === 'create_event') {
+      if (!Array.isArray(data.events)) data.events = [];
+      const newEvent = {
+        id,
+        title: toolArgs.title || 'Nuevo Evento',
+        date: toolArgs.date,
+        time: toolArgs.time || '',
+        location: toolArgs.location || '',
+        category: toolArgs.category || 'Otro',
+        repeat: toolArgs.repeat || 'none',
+        repeatUntil: toolArgs.repeatUntil || '',
+        description: toolArgs.description || '',
+        attendees: toolArgs.attendees || '',
+        scriptId: null,
+        checklist: []
+      };
+      data.events.push(newEvent);
+      await PastoralWebAdapter.saveData(data);
+      emitDataUpdated({ type: 'event', action: 'created', item: newEvent });
+      return `Evento "${newEvent.title}" registrado con éxito para el ${newEvent.date}.`;
+    }
+
+    if (toolName === 'create_note') {
+      if (!Array.isArray(data.notes)) data.notes = [];
+      const newNote = {
+        id,
+        title: toolArgs.title || 'Nueva Nota Pastoral',
+        body: toolArgs.body || '',
+        tags: Array.isArray(toolArgs.tags) ? toolArgs.tags : ['IA'],
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString()
+      };
+      data.notes.unshift(newNote);
+      await PastoralWebAdapter.saveData(data);
+      emitDataUpdated({ type: 'note', action: 'created', item: newNote });
+      return `Nota creada exitosamente: "${newNote.title}".`;
+    }
+
+    if (toolName === 'create_task') {
+      if (!Array.isArray(data.tasks)) data.tasks = [];
+      const newTask = {
+        id,
+        title: toolArgs.title || 'Nueva Tarea',
+        done: false,
+        priority: toolArgs.priority || 'media',
+        dueDate: toolArgs.dueDate || '',
+        createdAt: new Date().toISOString()
+      };
+      data.tasks.unshift(newTask);
+      await PastoralWebAdapter.saveData(data);
+      emitDataUpdated({ type: 'task', action: 'created', item: newTask });
+      return `Tarea "${newTask.title}" registrada exitosamente.`;
+    }
+
+    return `Herramienta ${toolName} completada.`;
+  }
+
   /** Objeto API de Pastoral para el navegador e iOS */
   const PastoralWebAdapter = {
     async getData() {
@@ -915,67 +1102,155 @@
               .filter((m, i, arr) => m && arr.indexOf(m) === i)
               .slice(0, 3);
 
-            const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
-              method: 'POST',
-              headers: {
-                'Authorization': `Bearer ${apiKey.trim()}`,
-                'Content-Type': 'application/json',
-                'HTTP-Referer': window.location.origin,
-                'X-Title': 'Organizador Pastoral PWA'
-              },
-              body: JSON.stringify({
+            const conversation = [
+              ...(systemText ? [{ role: 'system', content: systemText }] : []),
+              ...openRouterMessages
+            ];
+
+            const MAX_STEPS = 5;
+            let step = 0;
+            let lastAccumulatedText = '';
+
+            while (step < MAX_STEPS) {
+              step++;
+              if (currentAbortController?.signal?.aborted) throw new Error('Operación cancelada');
+
+              emitStatus('streaming', step === 1 ? 'Generando respuesta...' : 'Procesando acción pastoral...');
+
+              const payload = {
                 model: primaryModel,
                 models: fallbackModels,
-                messages: [
-                  ...(systemText ? [{ role: 'system', content: systemText }] : []),
-                  ...openRouterMessages
-                ],
+                messages: conversation,
                 stream: true,
                 temperature: 0.7,
-                max_tokens: 5000
-              }),
-              signal: currentAbortController.signal
-            });
+                max_tokens: 5000,
+                tools: PWA_TOOLS,
+                tool_choice: 'auto'
+              };
 
-            if (!response.ok) {
-              throw new Error(`OpenRouter HTTP ${response.status}`);
-            }
+              const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
+                method: 'POST',
+                headers: {
+                  'Authorization': `Bearer ${apiKey.trim()}`,
+                  'Content-Type': 'application/json',
+                  'HTTP-Referer': window.location.origin,
+                  'X-Title': 'Organizador Pastoral PWA'
+                },
+                body: JSON.stringify(payload),
+                signal: currentAbortController.signal
+              });
 
-            emitStatus('streaming', 'Generando respuesta...');
+              if (!response.ok) {
+                throw new Error(`OpenRouter HTTP ${response.status}`);
+              }
 
-            const reader = response.body.getReader();
-            const decoder = new TextDecoder('utf-8');
-            let buffer = '';
+              const reader = response.body.getReader();
+              const decoder = new TextDecoder('utf-8');
+              let buffer = '';
+              let accumulatedText = '';
+              const toolCallsMap = new Map();
 
-            while (true) {
-              const { done, value } = await reader.read();
-              if (done) break;
+              while (true) {
+                const { done, value } = await reader.read();
+                if (done) break;
 
-              buffer += decoder.decode(value, { stream: true });
-              const lines = buffer.split('\n');
-              buffer = lines.pop();
+                buffer += decoder.decode(value, { stream: true });
+                const lines = buffer.split('\n');
+                buffer = lines.pop();
 
-              for (const line of lines) {
-                const trimmed = line.trim();
-                if (trimmed.startsWith('data: ')) {
-                  const dataStr = trimmed.slice(6);
-                  if (dataStr === '[DONE]') break;
+                for (const line of lines) {
+                  const trimmed = line.trim();
+                  if (!trimmed || trimmed === 'data: [DONE]' || !trimmed.startsWith('data: ')) continue;
                   try {
-                    const parsed = JSON.parse(dataStr);
-                    const chunk = parsed.choices?.[0]?.delta?.content;
-                    if (chunk) {
-                      accumulatedResponse += chunk;
-                      emitChunk(chunk);
+                    const parsed = JSON.parse(trimmed.slice(6));
+                    const delta = parsed.choices?.[0]?.delta;
+                    if (!delta) continue;
+
+                    if (delta.content) {
+                      accumulatedText += delta.content;
+                      lastAccumulatedText += delta.content;
+                      emitChunk(delta.content);
+                    }
+
+                    if (delta.tool_calls && Array.isArray(delta.tool_calls)) {
+                      for (const tc of delta.tool_calls) {
+                        const idx = tc.index ?? 0;
+                        if (!toolCallsMap.has(idx)) {
+                          toolCallsMap.set(idx, {
+                            id: tc.id || `call_${Date.now()}_${idx}`,
+                            name: tc.function?.name || '',
+                            arguments: tc.function?.arguments || ''
+                          });
+                        } else {
+                          const existing = toolCallsMap.get(idx);
+                          if (tc.id) existing.id = tc.id;
+                          if (tc.function?.name) {
+                            if (!existing.name) {
+                              existing.name = tc.function.name;
+                            } else if (existing.name !== tc.function.name && !existing.name.endsWith(tc.function.name)) {
+                              existing.name += tc.function.name;
+                            }
+                          }
+                          if (tc.function?.arguments) {
+                            existing.arguments += tc.function.arguments;
+                          }
+                        }
+                      }
                     }
                   } catch (_) {}
                 }
+              }
+
+              if (toolCallsMap.size === 0) {
+                const reply = accumulatedText.trim() || lastAccumulatedText.trim() || 'He procesado tu consulta.';
+                emitStatus('done', 'Listo');
+                return {
+                  success: true,
+                  response: { role: 'assistant', content: reply }
+                };
+              }
+
+              const toolCallsArray = Array.from(toolCallsMap.values()).map(tc => ({
+                id: tc.id,
+                type: 'function',
+                function: { name: tc.name, arguments: tc.arguments }
+              }));
+
+              conversation.push({
+                role: 'assistant',
+                content: accumulatedText || null,
+                tool_calls: toolCallsArray
+              });
+
+              for (const tc of toolCallsArray) {
+                let fnName = (tc.function?.name || '').trim();
+                let fnArgs = {};
+                try { fnArgs = JSON.parse(tc.function.arguments); } catch (e) { fnArgs = {}; }
+
+                const matched = PWA_TOOLS.find(t => fnName === t.function.name || fnName.startsWith(t.function.name) || fnName.includes(t.function.name));
+                if (matched) fnName = matched.function.name;
+
+                emitStatus('streaming', `Ejecutando: ${fnName}...`);
+                let resultMessage = '';
+                try {
+                  resultMessage = await executePwaTool(fnName, fnArgs);
+                } catch (e) {
+                  resultMessage = JSON.stringify({ error: e.message });
+                }
+
+                conversation.push({
+                  role: 'tool',
+                  tool_call_id: tc.id,
+                  name: fnName,
+                  content: resultMessage
+                });
               }
             }
 
             emitStatus('done', 'Listo');
             return {
               success: true,
-              response: { role: 'assistant', content: accumulatedResponse }
+              response: { role: 'assistant', content: lastAccumulatedText.trim() || 'Acciones registradas correctamente.' }
             };
           }
         } catch (err) {
